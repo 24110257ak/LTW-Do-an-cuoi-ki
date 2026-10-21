@@ -47,3 +47,4 @@ public class OtpToken {
         return !Boolean.TRUE.equals(isUsed) && LocalDateTime.now().isBefore(expiredAt);
     }
 }
+

@@ -27,3 +27,4 @@ public class ProductImage {
     @Builder.Default
     private Integer displayOrder = 0;
 }
+

@@ -35,3 +35,4 @@ public class Brand {
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 }
+

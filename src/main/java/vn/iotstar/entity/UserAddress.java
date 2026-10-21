@@ -55,3 +55,4 @@ public class UserAddress {
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 }
+

@@ -71,3 +71,4 @@ public class ProductVariant {
         return sb.toString();
     }
 }
+

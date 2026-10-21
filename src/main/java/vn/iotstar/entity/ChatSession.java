@@ -41,3 +41,4 @@ public class ChatSession {
     @Column(name = "closed_at")
     private LocalDateTime closedAt;
 }
+
