@@ -54,3 +54,9 @@ Thumbs.db
 # Sensitive local configs
 application-local.properties
 .env
+
+# Python scripts & local tools
+*.py
+*.pyc
+__pycache__/
+*.ipynb
