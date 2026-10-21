@@ -14,3 +14,4 @@ public class OrderCodeUtils {
         return String.format("ESC-%s-%05d", datePart, nextVal);
     }
 }
+

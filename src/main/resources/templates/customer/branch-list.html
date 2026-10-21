@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header-head}">
+    <title>Hệ Thống Chi Nhánh - Chuỗi Cửa Hàng ESC</title>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header-nav}"></div>
+
+<div class="container my-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Hệ thống chi nhánh cửa hàng</li>
+        </ol>
+    </nav>
+
+    <div class="text-center mb-5">
+        <h3 class="fw-extrabold text-dark mb-2">HỆ THỐNG 4 CHI NHÁNH CHUỖI CỬA HÀNG ESC</h3>
+        <p class="text-muted">Trải nghiệm mua sắm thiết bị điện tử, dùng thử trực tiếp và nhận hàng ngay trong ngày tại TP.HCM</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6" th:each="br : ${branches}">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary-subtle text-primary p-3 rounded-4 me-3">
+                        <i class="fa-solid fa-store fs-3"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1 text-dark" th:text="${br.branchName}">Chi nhánh Q.1</h5>
+                        <span class="badge bg-success-subtle text-success border border-success"><i class="fa-solid fa-clock me-1"></i>Đang mở cửa (08:00 - 21:30)</span>
+                    </div>
+                </div>
+
+                <ul class="list-unstyled small text-secondary mb-4">
+                    <li class="mb-2 d-flex align-items-start">
+                        <i class="fa-solid fa-location-dot text-danger me-2 mt-1"></i>
+                        <div><strong class="text-dark">Địa chỉ:</strong> <span th:text="${br.address + ', ' + br.district + ', ' + br.province}">123 Lê Lợi, Q.1</span></div>
+                    </li>
+                    <li class="mb-2 d-flex align-items-center">
+                        <i class="fa-solid fa-phone text-success me-2"></i>
+                        <div><strong class="text-dark">Hotline hỗ trợ:</strong> <a th:href="'tel:' + ${br.phone}" class="text-decoration-none" th:text="${br.phone}">(028) 3822 1234</a></div>
+                    </li>
+                    <li class="d-flex align-items-center">
+                        <i class="fa-solid fa-envelope text-info me-2"></i>
+                        <div><strong class="text-dark">Email liên hệ:</strong> <span th:text="${br.email}">q1@esc.vn</span></div>
+                    </li>
+                </ul>
+
+                <div class="d-flex gap-2 mt-auto">
+                    <a th:href="@{/products}" class="btn btn-outline-primary btn-sm rounded-pill w-100 py-2">
+                        <i class="fa-solid fa-boxes-stacked me-1"></i> Xem tồn kho chi nhánh
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

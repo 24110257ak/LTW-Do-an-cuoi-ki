@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header-head}">
+    <title>Trang Chủ - Chuỗi Cửa Hàng Thiết Bị Điện Tử ESC</title>
+</head>
+<body>
+<!-- Navbar Header -->
+<div th:replace="~{fragments/header :: header-nav}"></div>
+
+<div class="container my-4">
+
+    <!-- Flash Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i><span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- 1. Banner Carousel -->
+    <div id="homeBannerCarousel" class="carousel slide rounded-4 overflow-hidden shadow-sm mb-5" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            <div class="carousel-item active" style="height: 380px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);">
+                <div class="d-flex flex-column justify-content-center align-items-center h-100 text-white text-center px-4">
+                    <span class="badge bg-warning text-dark px-3 py-2 fs-6 mb-3 rounded-pill fw-bold">🔥 SIÊU PHẨM MỚI 2026</span>
+                    <h1 class="display-5 fw-extrabold mb-3">iPhone 16 Pro Max & Galaxy S25 Ultra</h1>
+                    <p class="lead mb-4 max-w-600">Trải nghiệm đỉnh cao công nghệ với chip A18 Pro và Galaxy AI. Sẵn hàng tại tất cả 4 chi nhánh TP.HCM.</p>
+                    <a th:href="@{/products}" class="btn btn-warning btn-lg px-5 py-3 fw-bold rounded-pill shadow">Khám Phá Ngay <i class="fa-solid fa-arrow-right ms-2"></i></a>
+                </div>
+            </div>
+            <div class="carousel-item" style="height: 380px; background: linear-gradient(135deg, #065f46 0%, #10b981 100%);">
+                <div class="d-flex flex-column justify-content-center align-items-center h-100 text-white text-center px-4">
+                    <span class="badge bg-light text-success px-3 py-2 fs-6 mb-3 rounded-pill fw-bold">💻 LAPTOP GAMING & ĐỒ HỌA</span>
+                    <h1 class="display-5 fw-extrabold mb-3">MacBook Pro M4 & Asus ROG Zephyrus</h1>
+                    <p class="lead mb-4">Mạnh mẽ vượt trội, giảm ngay 15% khi thanh toán trực tuyến hoặc mua tại cửa hàng.</p>
+                    <a th:href="@{/products(categoryId=2)}" class="btn btn-light text-success btn-lg px-5 py-3 fw-bold rounded-pill shadow">Xem Laptop <i class="fa-solid fa-laptop ms-2"></i></a>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#homeBannerCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#homeBannerCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
+
+    <!-- 2. Danh mục nổi bật -->
+    <div class="mb-5">
+        <h4 class="fw-bold mb-4 d-flex align-items-center">
+            <i class="fa-solid fa-layer-group text-primary me-2"></i>Danh Mục Thiết Bị Công Nghệ
+        </h4>
+        <div class="row g-3">
+            <div class="col-6 col-md-4 col-lg-2" th:each="cat : ${rootCategories}">
+                <a th:href="@{/products(categoryId=${cat.categoryId})}" class="text-decoration-none">
+                    <div class="card card-product text-center p-3 h-100 border">
+                        <div class="fs-1 text-primary mb-2">
+                            <i th:if="${cat.slug == 'dien-thoai'}" class="fa-solid fa-mobile-screen-button"></i>
+                            <i th:if="${cat.slug == 'laptop'}" class="fa-solid fa-laptop"></i>
+                            <i th:if="${cat.slug == 'may-tinh-bang'}" class="fa-solid fa-tablet-screen-button"></i>
+                            <i th:if="${cat.slug == 'phu-kien'}" class="fa-solid fa-headphones"></i>
+                            <i th:if="${cat.slug == 'smartwatch'}" class="fa-solid fa-clock"></i>
+                            <i th:if="${cat.slug == 'tai-nghe'}" class="fa-solid fa-ear-listen"></i>
+                            <i th:if="${cat.slug == 'may-tinh-de-ban'}" class="fa-solid fa-desktop"></i>
+                        </div>
+                        <h6 class="fw-bold text-dark mb-0 small" th:text="${cat.categoryName}">Danh mục</h6>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Top Sản phẩm BÁN CHẠY NHẤT (>10 sản phẩm theo yêu cầu đề bài) -->
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h4 class="fw-bold mb-0 text-danger d-flex align-items-center">
+                    <i class="fa-solid fa-fire me-2"></i>Top Sản Phẩm Bán Chạy Nhất
+                </h4>
+                <small class="text-muted">Các sản phẩm dẫn đầu doanh số tại chuỗi cửa hàng ESC</small>
+            </div>
+            <a th:href="@{/products(sortBy='totalSold',direction='desc')}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                Xem tất cả <i class="fa-solid fa-chevron-right ms-1"></i>
+            </a>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-6 col-md-4 col-lg-3" th:each="product : ${bestSellerProducts}">
+                <div class="card card-product h-100 p-3 position-relative d-flex flex-column justify-content-between">
+                    <!-- Sold badge -->
+                    <span class="position-absolute top-0 end-0 m-2 badge bg-danger rounded-pill">
+                        <i class="fa-solid fa-fire me-1"></i>Đã bán <span th:text="${product.totalSold}">0</span>
+                    </span>
+
+                    <div>
+                        <!-- Image -->
+                        <div class="text-center py-3 bg-light rounded-3 mb-3" style="height: 180px;">
+                            <img th:if="${product.thumbnailUrl != null}" th:src="${product.thumbnailUrl}"
+                                 class="img-fluid h-100 object-fit-contain" alt="Product Image">
+                            <i th:unless="${product.thumbnailUrl != null}" class="fa-solid fa-mobile-screen fs-1 text-secondary h-100 d-flex align-items-center justify-content-center"></i>
+                        </div>
+                        <!-- Brand & Name -->
+                        <span class="badge bg-light text-secondary border mb-1" th:text="${product.brand != null ? product.brand.brandName : 'ESC'}">Brand</span>
+                        <h6 class="fw-bold mb-2">
+                            <a th:href="@{'/products/' + ${product.slug}}" class="text-dark text-decoration-none text-truncate-2" th:text="${product.productName}">Tên sản phẩm</a>
+                        </h6>
+                        <!-- Rating -->
+                        <div class="small text-warning mb-2">
+                            <i class="fa-solid fa-star"></i>
+                            <span class="text-dark fw-bold ms-1" th:text="${product.avgRating}">5.0</span>
+                            <span class="text-muted" th:text="'(' + ${product.reviewCount} + ')'">(0)</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <!-- Price -->
+                        <div class="mb-3">
+                            <div class="price-current" th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">30.000.000 đ</div>
+                        </div>
+                        <!-- Action button -->
+                        <a th:href="@{'/products/' + ${product.slug}}" class="btn btn-esc btn-sm w-100 py-2">
+                            <i class="fa-solid fa-cart-plus me-1"></i> Chọn Mua
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Top Sản phẩm Nổi bật -->
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0 text-primary d-flex align-items-center">
+                <i class="fa-solid fa-award me-2"></i>Sản Phẩm Đang Được Quan Tâm
+            </h4>
+            <a th:href="@{/products}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                Xem thêm <i class="fa-solid fa-chevron-right ms-1"></i>
+            </a>
+        </div>
+        <div class="row g-4">
+            <div class="col-6 col-md-4 col-lg-3" th:each="product : ${featuredProducts}">
+                <div class="card card-product h-100 p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="text-center py-3 bg-light rounded-3 mb-3" style="height: 180px;">
+                            <img th:if="${product.thumbnailUrl != null}" th:src="${product.thumbnailUrl}"
+                                 class="img-fluid h-100 object-fit-contain" alt="Product Image">
+                            <i th:unless="${product.thumbnailUrl != null}" class="fa-solid fa-laptop fs-1 text-secondary h-100 d-flex align-items-center justify-content-center"></i>
+                        </div>
+                        <span class="badge bg-light text-secondary border mb-1" th:text="${product.brand != null ? product.brand.brandName : 'ESC'}">Brand</span>
+                        <h6 class="fw-bold mb-2">
+                            <a th:href="@{'/products/' + ${product.slug}}" class="text-dark text-decoration-none" th:text="${product.productName}">Tên sản phẩm</a>
+                        </h6>
+                    </div>
+                    <div>
+                        <div class="price-current mb-3" th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                        <a th:href="@{'/products/' + ${product.slug}}" class="btn btn-outline-primary btn-sm w-100 py-2">
+                            Xem chi tiết
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Hệ thống 4 Chi nhánh chuỗi ESC -->
+    <div class="card bg-white border-0 shadow-sm rounded-4 p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="fa-solid fa-shop text-warning me-2"></i>Hệ Thống Chi Nhánh Cửa Hàng ESC (Sẵn Hàng - Nhận Ngay)
+            </h5>
+            <a th:href="@{/branches}" class="small text-primary text-decoration-none fw-bold">Chi tiết 4 chi nhánh <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="row g-3">
+            <div class="col-md-3" th:each="branch : ${branches}">
+                <div class="p-3 border rounded-3 bg-light h-100">
+                    <h6 class="fw-bold text-primary mb-1" th:text="${branch.branchName}">Chi nhánh Q.1</h6>
+                    <p class="small text-muted mb-2"><i class="fa-solid fa-location-dot me-1 text-danger"></i><span th:text="${branch.address + ', ' + branch.district}">Địa chỉ</span></p>
+                    <p class="small text-secondary mb-0"><i class="fa-solid fa-phone me-1"></i><strong th:text="${branch.phone}">Hotline</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Footer Fragment -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

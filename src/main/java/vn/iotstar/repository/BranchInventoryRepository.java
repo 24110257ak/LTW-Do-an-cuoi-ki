@@ -24,3 +24,4 @@ public interface BranchInventoryRepository extends JpaRepository<BranchInventory
     @Query("SELECT COALESCE(SUM(bi.quantity), 0) FROM BranchInventory bi WHERE bi.variant.variantId = :variantId")
     Integer sumQuantityByVariantId(@Param("variantId") Long variantId);
 }
+

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header-head}">
+    <title>Đặt Hàng Thành Công - ESC</title>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header-nav}"></div>
+
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <div class="card border-0 shadow rounded-4 p-5 text-center bg-white">
+                <div class="mb-4">
+                    <div class="bg-success-subtle text-success d-inline-flex justify-content-center align-items-center rounded-circle" style="width: 90px; height: 90px;">
+                        <i class="fa-solid fa-circle-check fs-1"></i>
+                    </div>
+                </div>
+
+                <h3 class="fw-extrabold text-dark mb-2">ĐẶT HÀNG THÀNH CÔNG!</h3>
+                <p class="text-secondary mb-4">Cảm ơn bạn đã tin tưởng mua sắm tại Chuỗi Cửa Hàng Thiết Bị Điện Tử ESC. Đơn hàng của bạn đã được tiếp nhận và nhân viên sẽ xử lý ngay.</p>
+
+                <!-- Box thông tin đơn hàng -->
+                <div class="p-4 bg-light rounded-4 text-start mb-4 border">
+                    <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                        <span class="text-muted small">Mã đơn hàng:</span>
+                        <strong class="text-primary fs-5" th:text="${order.orderCode}">ESC-20261021-00001</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small text-secondary">
+                        <span>Hình thức nhận:</span>
+                        <strong th:if="${order.orderType.name() == 'PICKUP'}" class="text-dark">
+                            <i class="fa-solid fa-store text-warning me-1"></i>Nhận tại <span th:text="${order.pickupBranch != null ? order.pickupBranch.branchName : 'cửa hàng'}">Chi nhánh</span>
+                        </strong>
+                        <strong th:unless="${order.orderType.name() == 'PICKUP'}" class="text-dark">
+                            <i class="fa-solid fa-truck-fast text-primary me-1"></i>Giao tận nhà
+                        </strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small text-secondary">
+                        <span>Người nhận:</span>
+                        <strong th:text="${order.receiverName + ' - ' + order.receiverPhone}">Nguyễn Văn A</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small text-secondary" th:if="${order.shippingAddress != null && !order.shippingAddress.isBlank()}">
+                        <span>Địa chỉ giao:</span>
+                        <strong th:text="${order.shippingAddress}">Địa chỉ giao hàng</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 small text-secondary">
+                        <span>Phương thức thanh toán:</span>
+                        <strong th:text="${order.paymentMethod}">COD</strong>
+                    </div>
+                    <div class="d-flex justify-content-between pt-2 border-top mt-2">
+                        <span class="fw-bold">Tổng thanh toán:</span>
+                        <span class="price-current fs-5" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    <a th:href="@{/orders}" class="btn btn-outline-primary rounded-pill px-4 py-2">
+                        <i class="fa-solid fa-box-open me-2"></i>Xem Lịch Sử Đơn Hàng
+                    </a>
+                    <a th:href="@{/}" class="btn btn-esc rounded-pill px-4 py-2">
+                        <i class="fa-solid fa-house me-2"></i>Về Trang Chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

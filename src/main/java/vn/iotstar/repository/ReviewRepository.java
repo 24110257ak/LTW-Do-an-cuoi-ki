@@ -16,3 +16,4 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Review> findByOrderItemOrderItemId(Long orderItemId);
     boolean existsByOrderItemOrderItemId(Long orderItemId);
 }
+

@@ -14,3 +14,4 @@ public interface ViewedProductRepository extends JpaRepository<ViewedProduct, Lo
     Optional<ViewedProduct> findByUserUserIdAndProductProductId(Long userId, Long productId);
     void deleteByUserUserIdAndProductProductId(Long userId, Long productId);
 }
+
