@@ -58,7 +58,7 @@ public class AuthController {
             userService.register(request);
             redirectAttributes.addFlashAttribute("email", request.getEmail());
             redirectAttributes.addFlashAttribute("successMessage",
-                    "Đăng ký thành công! Mã OTP xác thực 6 chữ số đã được gửi tới email " + request.getEmail() + ". Vui lòng nhập mã để kích hoạt.");
+                    "Đăng ký thành công! Mã OTP xác thực 6 chữ số đã được tạo (Xem mã trong Terminal / Console hoặc hộp thư " + request.getEmail() + ").");
             return "redirect:/auth/verify-otp?email=" + request.getEmail();
         } catch (BadRequestException e) {
             model.addAttribute("errorMessage", e.getMessage());
@@ -102,7 +102,7 @@ public class AuthController {
     public String resendOtp(@RequestParam String email, RedirectAttributes redirectAttributes) {
         try {
             userService.resendOtp(email);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã gửi lại mã OTP thành công. Vui lòng kiểm tra hộp thư!");
+            redirectAttributes.addFlashAttribute("successMessage", "Đã gửi lại mã OTP thành công! (Xem mã trong Terminal / Console hoặc hộp thư email).");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
@@ -119,7 +119,7 @@ public class AuthController {
         try {
             userService.forgotPassword(email);
             redirectAttributes.addFlashAttribute("email", email);
-            redirectAttributes.addFlashAttribute("successMessage", "Mã OTP đặt lại mật khẩu đã được gửi đến email của bạn.");
+            redirectAttributes.addFlashAttribute("successMessage", "Mã OTP đặt lại mật khẩu đã được tạo! (Xem mã trong Terminal / Console hoặc hộp thư email).");
             return "redirect:/auth/reset-password?email=" + email;
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());

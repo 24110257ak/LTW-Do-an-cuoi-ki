@@ -207,7 +207,11 @@ cloudinary.cloud-name=your_cloud_name
 cloudinary.api-key=your_api_key
 cloudinary.api-secret=your_api_secret
 
-# Cấu hình Spring Mail gửi OTP
+# Cấu hình Spring Mail & Chế độ Terminal OTP
+# Mặc định terminal-mode=true: in mã OTP trực tiếp ra Terminal/Console khi test (tiện lợi, không cần tài khoản Gmail thật)
+app.mail.terminal-mode=true
+app.mail.otp-expiry-minutes=5
+
 spring.mail.host=smtp.gmail.com
 spring.mail.port=587
 spring.mail.username=your_email@gmail.com
