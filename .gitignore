@@ -60,3 +60,7 @@ application-local.properties
 *.pyc
 __pycache__/
 *.ipynb
+
+# Documents uploaded to Google Docs
+*.docx
+quy định/
