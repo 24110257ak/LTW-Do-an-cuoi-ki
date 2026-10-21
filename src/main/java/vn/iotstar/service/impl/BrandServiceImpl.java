@@ -2,7 +2,9 @@ package vn.iotstar.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.iotstar.entity.Brand;
+import vn.iotstar.exception.ResourceNotFoundException;
 import vn.iotstar.repository.BrandRepository;
 import vn.iotstar.service.BrandService;
 
@@ -21,7 +23,27 @@ public class BrandServiceImpl implements BrandService {
     }
 
     @Override
+    public List<Brand> getAllBrands() {
+        return brandRepository.findAll();
+    }
+
+    @Override
     public Optional<Brand> getBrandById(Integer id) {
         return brandRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    public Brand saveBrand(Brand brand) {
+        return brandRepository.save(brand);
+    }
+
+    @Override
+    @Transactional
+    public void toggleBrandStatus(Integer id) {
+        Brand brand = brandRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Thương hiệu", "id", id));
+        brand.setIsActive(brand.getIsActive() == null || !brand.getIsActive());
+        brandRepository.save(brand);
     }
 }

@@ -2,15 +2,18 @@ package vn.iotstar.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.iotstar.entity.Coupon;
 import vn.iotstar.enums.DiscountType;
 import vn.iotstar.exception.BadRequestException;
+import vn.iotstar.exception.ResourceNotFoundException;
 import vn.iotstar.repository.CouponRepository;
 import vn.iotstar.service.CouponService;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -76,5 +79,39 @@ public class CouponServiceImpl implements CouponService {
         }
 
         return discount.min(orderAmount);
+    }
+
+    @Override
+    public List<Coupon> getAllCoupons() {
+        return couponRepository.findAll();
+    }
+
+    @Override
+    public Optional<Coupon> getCouponById(Integer id) {
+        return couponRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    public Coupon saveCoupon(Coupon coupon) {
+        if (coupon.getCouponCode() != null) {
+            coupon.setCouponCode(coupon.getCouponCode().trim().toUpperCase());
+        }
+        return couponRepository.save(coupon);
+    }
+
+    @Override
+    @Transactional
+    public void toggleCouponStatus(Integer id) {
+        Coupon coupon = couponRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Mã giảm giá", "id", id));
+        coupon.setIsActive(coupon.getIsActive() == null || !coupon.getIsActive());
+        couponRepository.save(coupon);
+    }
+
+    @Override
+    @Transactional
+    public void deleteCoupon(Integer id) {
+        couponRepository.deleteById(id);
     }
 }

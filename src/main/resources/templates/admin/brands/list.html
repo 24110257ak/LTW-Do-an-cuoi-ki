@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thương hiệu đối tác | TechChain HQ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light">
+
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/admin-sidebar :: sidebar('brands')}"></div>
+
+    <!-- Main Content -->
+    <div class="flex-grow-1 d-flex flex-column" style="min-width: 0;">
+        <div th:replace="~{fragments/admin-sidebar :: topbar}"></div>
+
+        <div class="container-fluid p-4">
+            <!-- Alert message -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}">Thành công</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1">Thương hiệu Đối tác (Brands)</h3>
+                    <p class="text-muted mb-0">Quản lý các hãng công nghệ: Apple, Samsung, Sony, Xiaomi, Asus, Dell...</p>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addBrandModal">
+                        <i class="bi bi-plus-lg me-1"></i> Thêm thương hiệu mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Brands Table -->
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Logo</th>
+                                    <th>Tên thương hiệu</th>
+                                    <th>Mô tả</th>
+                                    <th>Trạng thái</th>
+                                    <th class="text-end">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${brands == null || brands.isEmpty()}">
+                                    <td colspan="6" class="text-center py-5 text-muted">Chưa có thương hiệu nào.</td>
+                                </tr>
+                                <tr th:each="b : ${brands}">
+                                    <td th:text="${b.brandId}">1</td>
+                                    <td style="width: 80px;">
+                                        <img th:if="${b.logoUrl != null}" th:src="${b.logoUrl}" alt="" class="rounded border bg-white p-1" style="width: 60px; height: 35px; object-fit: contain;">
+                                        <span th:unless="${b.logoUrl != null}" class="text-muted small">Chưa có</span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-dark" th:text="${b.brandName}">Apple</strong>
+                                    </td>
+                                    <td class="text-muted small" th:text="${b.description}">Tập đoàn công nghệ Apple Inc.</td>
+                                    <td>
+                                        <form th:action="@{/admin/brands/{id}/toggle(id=${b.brandId})}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm border-0 p-0" title="Bấm để bật/tắt">
+                                                <span th:if="${b.isActive}" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Hoạt động</span>
+                                                <span th:if="${!b.isActive}" class="badge bg-secondary"><i class="bi bi-x-circle me-1"></i> Tạm tắt</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="text-end">
+                                        <form th:action="@{/admin/brands/{id}/toggle(id=${b.brandId})}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-arrow-repeat"></i> Đổi trạng thái
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Thương Hiệu -->
+<div class="modal fade" id="addBrandModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Thêm Thương hiệu mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/admin/brands/save}" th:object="${newBrand}" method="post" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Tên thương hiệu <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{brandName}" class="form-control" placeholder="Ví dụ: Apple, Samsung..." required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Logo thương hiệu (Cloudinary)</label>
+                        <input type="file" name="logoFile" class="form-control" accept="image/*">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mô tả ngắn</label>
+                        <textarea th:field="*{description}" class="form-control" rows="3" placeholder="Giới thiệu thương hiệu..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary fw-bold">Lưu thương hiệu</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
