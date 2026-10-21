@@ -243,6 +243,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Page<Order> getOrdersByBranchAndStatus(Integer branchId, OrderStatus status, Pageable pageable) {
+        if (status == null) {
+            return orderRepository.findByBranchBranchId(branchId, pageable);
+        }
+        return orderRepository.findByBranchBranchIdAndStatus(branchId, status, pageable);
+    }
+
+    @Override
     public Page<Order> getOrdersByStatus(OrderStatus status, Pageable pageable) {
         return orderRepository.findByStatus(status, pageable);
     }
@@ -258,6 +266,14 @@ public class OrderServiceImpl implements OrderService {
             order.setNote((order.getNote() != null ? order.getNote() + " | " : "") + note);
         }
         orderRepository.save(order);
+
+        // Gửi WebSocket thông báo cập nhật trạng thái đơn
+        try {
+            messagingTemplate.convertAndSend("/topic/order-status/" + order.getOrderCode(), String.format(
+                    "{\"orderCode\":\"%s\",\"status\":\"%s\"}", order.getOrderCode(), newStatus.name()));
+        } catch (Exception e) {
+            log.warn("Không thể gửi thông báo WebSocket cập nhật trạng thái: {}", e.getMessage());
+        }
     }
 
     @Override
@@ -269,5 +285,51 @@ public class OrderServiceImpl implements OrderService {
         order.setPaymentStatus(PaymentStatus.PAID);
         order.setVnpayTxnRef(vnpayTxnRef);
         orderRepository.save(order);
+    }
+
+    @Override
+    public BigDecimal getTotalRevenue() {
+        return orderRepository.sumTotalRevenue();
+    }
+
+    @Override
+    public BigDecimal getBranchRevenue(Integer branchId) {
+        return orderRepository.sumRevenueByBranch(branchId);
+    }
+
+    @Override
+    public long countOrdersByStatus(OrderStatus status) {
+        return orderRepository.countByStatus(status);
+    }
+
+    @Override
+    public long countTotalOrders() {
+        return orderRepository.count();
+    }
+
+    @Override
+    public long countBranchOrders(Integer branchId) {
+        return orderRepository.countByBranchBranchId(branchId);
+    }
+
+    @Override
+    public long countBranchOrdersByStatus(Integer branchId, OrderStatus status) {
+        return orderRepository.countByBranchBranchIdAndStatus(branchId, status);
+    }
+
+    @Override
+    public List<Order> getRecentOrders() {
+        return orderRepository.findTop10ByOrderByCreatedAtDesc();
+    }
+
+    @Override
+    public List<Order> getRecentBranchOrders(Integer branchId) {
+        return orderRepository.findTop10ByBranchBranchIdOrderByCreatedAtDesc(branchId);
+    }
+
+    @Override
+    public Page<Order> searchOrdersAdmin(Integer branchId, OrderStatus status, String keyword, Pageable pageable) {
+        String cleanKeyword = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
+        return orderRepository.searchOrdersAdmin(branchId, status, cleanKeyword, pageable);
     }
 }

@@ -30,4 +30,15 @@ public interface ProductService {
     List<BranchInventory> getInventoryForProduct(Long productId);
     List<BranchInventory> getAvailableBranchesForProduct(Long productId);
     Integer getTotalStockForVariant(Long variantId);
+
+    // Admin methods
+    Page<Product> getAllProductsPaged(Pageable pageable);
+    Page<Product> searchProductsAdmin(Integer categoryId, Integer brandId, String keyword, Pageable pageable);
+    Product saveProduct(Product product);
+    void toggleProductStatus(Long id);
+    ProductVariant saveVariant(ProductVariant variant);
+    void deleteVariant(Long variantId);
+    ProductImage saveImage(ProductImage image);
+    void deleteImage(Long imageId);
+    long countActiveProducts();
 }

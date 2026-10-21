@@ -2,6 +2,8 @@ package vn.iotstar.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -24,6 +26,7 @@ import vn.iotstar.repository.UserRepository;
 import vn.iotstar.service.OtpService;
 import vn.iotstar.service.UserService;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -58,21 +61,21 @@ public class UserServiceImpl implements UserService {
         User user = User.builder()
                 .username(request.getUsername().trim())
                 .email(request.getEmail().trim().toLowerCase())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .fullName(request.getFullName().trim())
                 .phone(request.getPhone() != null ? request.getPhone().trim() : null)
-                .password(passwordEncoder.encode(request.getPassword()))
                 .role(customerRole)
                 .isActive(true)
-                .isVerified(false) // Cần nhập mã OTP email để kích hoạt
+                .isVerified(false)
                 .build();
 
         user = userRepository.save(user);
 
-        // Tự động khởi tạo giỏ hàng cho tài khoản mới
+        // Tạo giỏ hàng rỗng cho user
         Cart cart = Cart.builder().user(user).build();
         cartRepository.save(cart);
 
-        // Gửi mã OTP kích hoạt qua Email
+        // Tạo và gửi mã OTP qua email (5 phút)
         otpService.generateAndSendOtp(user.getEmail(), OtpPurpose.REGISTER);
 
         return toSummaryResponse(user);
@@ -95,6 +98,9 @@ public class UserServiceImpl implements UserService {
     public void resendOtp(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng", "email", email));
+        if (Boolean.TRUE.equals(user.getIsVerified())) {
+            throw new BadRequestException("Tài khoản của bạn đã được xác thực trước đó!");
+        }
         otpService.generateAndSendOtp(user.getEmail(), OtpPurpose.REGISTER);
     }
 
@@ -192,6 +198,47 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    @Override
+    public Page<User> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<User> searchUsersAdmin(Integer roleId, String keyword, Pageable pageable) {
+        String cleanKeyword = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
+        return userRepository.searchUsersAdmin(roleId, cleanKeyword, pageable);
+    }
+
+    @Override
+    @Transactional
+    public void toggleUserStatus(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Người dùng", "id", userId));
+        user.setIsActive(user.getIsActive() == null || !user.getIsActive());
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void updateUserRole(Long userId, Integer roleId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Người dùng", "id", userId));
+        Role role = roleRepository.findById(roleId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vai trò", "id", roleId));
+        user.setRole(role);
+        userRepository.save(user);
+    }
+
+    @Override
+    public List<Role> getAllRoles() {
+        return roleRepository.findAll();
+    }
+
+    @Override
+    public long countUsers() {
+        return userRepository.count();
+    }
+
     private UserSummaryResponse toSummaryResponse(User user) {
         return UserSummaryResponse.builder()
                 .userId(user.getUserId())
@@ -206,4 +253,3 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 }
-
