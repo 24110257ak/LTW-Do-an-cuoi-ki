@@ -36,3 +36,4 @@ public class BranchInventory {
     @PreUpdate
     public void preUpdate() { this.updatedAt = LocalDateTime.now(); }
 }
+

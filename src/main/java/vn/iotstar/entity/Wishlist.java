@@ -29,3 +29,4 @@ public class Wishlist {
     @Builder.Default
     private LocalDateTime addedAt = LocalDateTime.now();
 }
+

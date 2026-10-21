@@ -74,3 +74,4 @@ public class Branch {
     @PreUpdate
     public void preUpdate() { this.updatedAt = LocalDateTime.now(); }
 }
+

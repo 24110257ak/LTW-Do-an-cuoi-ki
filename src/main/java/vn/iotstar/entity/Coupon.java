@@ -76,3 +76,4 @@ public class Coupon {
                 && usedCount < usageLimit;
     }
 }
+

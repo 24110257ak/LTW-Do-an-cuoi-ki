@@ -32,3 +32,4 @@ public class ChatMessage {
     @Builder.Default
     private LocalDateTime sentAt = LocalDateTime.now();
 }
+
