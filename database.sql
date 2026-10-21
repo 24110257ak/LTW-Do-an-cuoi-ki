@@ -2,8 +2,8 @@
 -- HỆ THỐNG WEBSITE BÁN HÀNG THEO MÔ HÌNH CHUỖI CỬA HÀNG THIẾT BỊ ĐIỆN TỬ
 -- Đề tài 27 - Nhóm 24 - Môn Lập Trình WEB - HCMUTE 2026
 -- Thành viên:
---   24110257 - Trần Vũ Anh Khoa (Nhóm trưởng)
---   24110292 - Mai Huy Nhật
+--   24110257 - Trần Vũ Anh Khoa
+--   24110292 - Mai Huy Nhật (Nhóm trưởng)
 --   24110304 - Đặng Nhật Phúc
 -- DB: Microsoft SQL Server 2019/2022
 -- Charset: NVARCHAR cho mọi trường tiếng Việt
