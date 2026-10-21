@@ -14,3 +14,4 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     Optional<ProductVariant> findBySku(String sku);
     boolean existsBySku(String sku);
 }
+

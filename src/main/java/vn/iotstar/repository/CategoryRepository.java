@@ -15,3 +15,4 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
     List<Category> findAllByIsActiveTrueOrderByDisplayOrderAsc();
     boolean existsBySlug(String slug);
 }
+

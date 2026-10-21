@@ -23,3 +23,4 @@ public class SlugUtils {
         return slug.toLowerCase(Locale.ENGLISH);
     }
 }
+

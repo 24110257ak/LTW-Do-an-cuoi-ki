@@ -20,3 +20,4 @@ public class VerifyOtpRequest {
     @NotBlank(message = "Mã OTP không được để trống")
     private String otpCode;
 }
+

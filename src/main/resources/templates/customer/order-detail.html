@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header-head}">
+    <title>Chi Tiết Đơn Hàng - ESC</title>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header-nav}"></div>
+
+<div class="container my-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/orders}" class="text-decoration-none">Đơn hàng</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${order.orderCode}">Chi tiết đơn</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                    <h5 class="fw-bold mb-0">Chi Tiết Đơn Hàng #<span th:text="${order.orderCode}">ESC-0001</span></h5>
+                    <span class="badge bg-primary fs-6 px-3 py-2" th:text="${order.status}">NEW</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light small">
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th class="text-center">Đơn giá</th>
+                            <th class="text-center">Số lượng</th>
+                            <th class="text-end">Thành tiền</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="item : ${order.orderItems}">
+                            <td>
+                                <strong class="d-block small" th:text="${item.productName}">Tên máy</strong>
+                                <span class="badge bg-light text-secondary border small" th:text="${item.variantInfo}">Màu/RAM</span>
+                            </td>
+                            <td class="text-center small text-danger" th:text="${#numbers.formatDecimal(item.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                            <td class="text-center small" th:text="${item.quantity}">1</td>
+                            <td class="text-end fw-bold text-danger small" th:text="${#numbers.formatDecimal(item.unitPrice * item.quantity, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex justify-content-between mt-3 pt-3 border-top small">
+                    <a th:href="@{/orders}" class="btn btn-outline-secondary btn-sm rounded-pill"><i class="fa-solid fa-arrow-left me-1"></i> Quay lại danh sách đơn</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Thông tin nhận hàng -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                <h6 class="fw-bold mb-3"><i class="fa-solid fa-location-dot text-primary me-2"></i>Địa Chỉ Nhận Hàng</h6>
+                <div class="small text-secondary mb-2">
+                    <strong>Người nhận:</strong> <span th:text="${order.receiverName}">Tên người nhận</span>
+                </div>
+                <div class="small text-secondary mb-2">
+                    <strong>Điện thoại:</strong> <span th:text="${order.receiverPhone}">0901234567</span>
+                </div>
+                <div class="small text-secondary mb-2" th:if="${order.shippingAddress != null}">
+                    <strong>Địa chỉ:</strong> <span th:text="${order.shippingAddress}">Địa chỉ giao</span>
+                </div>
+                <div class="small text-secondary mb-2" th:if="${order.pickupBranch != null}">
+                    <strong>Chi nhánh nhận:</strong> <span class="badge bg-warning-subtle text-warning border" th:text="${order.pickupBranch.branchName}">Chi nhánh Q.1</span>
+                </div>
+            </div>
+
+            <!-- Tóm tắt thanh toán -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h6 class="fw-bold mb-3"><i class="fa-solid fa-receipt text-success me-2"></i>Chi Tiết Thanh Toán</h6>
+                <div class="d-flex justify-content-between small text-secondary mb-2">
+                    <span>Tạm tính:</span>
+                    <span class="text-dark fw-bold" th:text="${#numbers.formatDecimal(order.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                </div>
+                <div class="d-flex justify-content-between small text-secondary mb-2">
+                    <span>Phí vận chuyển:</span>
+                    <span class="text-dark fw-bold" th:text="${#numbers.formatDecimal(order.shippingFee, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                </div>
+                <div class="d-flex justify-content-between small text-success mb-2">
+                    <span>Giảm giá:</span>
+                    <span class="fw-bold" th:text="'- ' + ${#numbers.formatDecimal(order.discountAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">- 0 đ</span>
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between">
+                    <span class="fw-bold">Tổng thanh toán:</span>
+                    <span class="price-current fs-5" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

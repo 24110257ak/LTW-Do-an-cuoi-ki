@@ -6,3 +6,4 @@ public interface CloudinaryService {
     String uploadFile(MultipartFile file, String folderName);
     void deleteFile(String publicId);
 }
+

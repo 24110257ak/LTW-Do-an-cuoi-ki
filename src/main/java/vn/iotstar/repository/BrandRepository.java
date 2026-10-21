@@ -13,3 +13,4 @@ public interface BrandRepository extends JpaRepository<Brand, Integer> {
     List<Brand> findAllByIsActiveTrue();
     boolean existsByBrandName(String brandName);
 }
+
