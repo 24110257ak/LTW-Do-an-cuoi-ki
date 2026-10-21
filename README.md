@@ -17,9 +17,9 @@
 
 | STT | Mã sinh viên | Họ và tên | Vai trò | Phân công Module |
 | :---: | :---: | :--- | :---: | :--- |
-| **1** | `24110257` | **Trần Vũ Anh Khoa** | *(Cập nhật sau)* | *(Cập nhật sau)* |
-| **2** | `24110292` | **Mai Huy Nhật** | *(Cập nhật sau)* | *(Cập nhật sau)* |
-| **3** | `24110304` | **Đặng Nhật Phúc** | *(Cập nhật sau)* | *(Cập nhật sau)* |
+| **1** | `24110257` | **Trần Vũ Anh Khoa** | Thành viên | *(Cập nhật sau)* |
+| **2** | `24110292` | **Mai Huy Nhật** | **Nhóm trưởng** | *(Cập nhật sau)* |
+| **3** | `24110304` | **Đặng Nhật Phúc** | Thành viên | *(Cập nhật sau)* |
 
 ---
 
