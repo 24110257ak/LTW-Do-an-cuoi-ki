@@ -43,10 +43,10 @@ public class Branch {
     @Column(name = "avatar_url", length = 500)
     private String avatarUrl;
 
-    @Column(name = "latitude", precision = 10, scale = 8)
+    @Column(name = "latitude")
     private Double latitude;
 
-    @Column(name = "longitude", precision = 11, scale = 8)
+    @Column(name = "longitude")
     private Double longitude;
 
     @Column(name = "open_time")

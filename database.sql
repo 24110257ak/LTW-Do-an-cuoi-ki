@@ -27,6 +27,10 @@ GO
 USE electronics_store_chain;
 GO
 
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+GO
+
 -- ==================================================================================
 -- BẢNG 1: ROLES - Vai trò người dùng
 -- ==================================================================================
@@ -710,8 +714,8 @@ INSERT INTO branch_inventory (branch_id, variant_id, quantity) VALUES
 (1, 15, 3), (1, 16, 2),                                        -- MacBook Pro
 (1, 17, 5), (1, 18, 3),                                        -- ROG Zephyrus
 (1, 23, 8), (1, 24, 4),                                        -- iPad Pro
-(1, 29, 10),(1, 30, 8),                                        -- Apple Watch Ultra 2
-(1, 31, 15),(1, 32, 10);                                       -- Galaxy Watch 7
+(1, 28, 10),(1, 29, 8),                                        -- Apple Watch Ultra 2
+(1, 30, 15),(1, 31, 10);                                       -- Galaxy Watch 7
 GO
 -- Chi nhánh Quận 3 (branch_id=2)
 INSERT INTO branch_inventory (branch_id, variant_id, quantity) VALUES
@@ -723,7 +727,9 @@ INSERT INTO branch_inventory (branch_id, variant_id, quantity) VALUES
 (2, 19, 4), (2, 20, 2),                                        -- Dell XPS 15
 (2, 21, 3), (2, 22, 1),                                        -- ThinkPad X1
 (2, 23, 6), (2, 25, 2),                                        -- iPad Pro
-(2, 26, 5), (2, 27, 2);                                        -- Galaxy Tab S9 Ultra
+(2, 26, 5), (2, 27, 2),                                        -- Galaxy Tab S9 Ultra
+(2, 28, 6), (2, 29, 3),                                        -- Apple Watch Ultra 2
+(2, 30, 8), (2, 31, 4);                                        -- Galaxy Watch 7
 GO
 -- Chi nhánh TP. Thủ Đức (branch_id=3)
 INSERT INTO branch_inventory (branch_id, variant_id, quantity) VALUES
@@ -736,8 +742,8 @@ INSERT INTO branch_inventory (branch_id, variant_id, quantity) VALUES
 (3, 19, 6), (3, 20, 3),                                        -- Dell XPS 15
 (3, 23, 12),(3, 24, 6), (3, 25, 3),                            -- iPad Pro
 (3, 26, 8), (3, 27, 4),                                        -- Galaxy Tab S9 Ultra
-(3, 29, 15),(3, 30, 10),                                       -- Apple Watch Ultra 2
-(3, 31, 20),(3, 32, 15);                                       -- Galaxy Watch 7
+(3, 28, 15),(3, 29, 10),                                       -- Apple Watch Ultra 2
+(3, 30, 20),(3, 31, 15);                                       -- Galaxy Watch 7
 GO
 -- Chi nhánh Gò Vấp (branch_id=4)
 INSERT INTO branch_inventory (branch_id, variant_id, quantity) VALUES
@@ -747,8 +753,8 @@ INSERT INTO branch_inventory (branch_id, variant_id, quantity) VALUES
 (4, 15, 2),                                                    -- MacBook Pro
 (4, 21, 2), (4, 22, 0),                                        -- ThinkPad X1 (hết 2TB)
 (4, 23, 5), (4, 24, 2),                                        -- iPad Pro
-(4, 29, 8), (4, 30, 5),                                        -- Apple Watch Ultra 2
-(4, 31, 12),(4, 32, 8);                                        -- Galaxy Watch 7
+(4, 28, 8), (4, 29, 5),                                        -- Apple Watch Ultra 2
+(4, 30, 12),(4, 31, 8);                                        -- Galaxy Watch 7
 GO
 
 -- -------------------------------------------------------------------------------
@@ -805,8 +811,8 @@ INSERT INTO order_items (order_id, variant_id, product_name, variant_info, unit_
 (1, 1,  N'iPhone 16 Pro Max', N'Titan Đen / 256GB',   33490000, 1),
 (2, 10, N'iPhone 15',         N'Hồng / 128GB',        21490000, 1),
 (3, 15, N'MacBook Pro 14 M4 Pro', N'Silver / 18GB / 512GB SSD', 60490000, 1),
-(4, 31, N'Apple Watch Ultra 2',   N'Natural Titan / 49mm',      7990000, 1),
-(5, 32, N'Samsung Galaxy Watch 7',N'Cream / 40mm',              8990000, 1);
+(4, 30, N'Samsung Galaxy Watch 7',N'Cream / 40mm',              7990000, 1),
+(5, 31, N'Samsung Galaxy Watch 7',N'Green / 44mm',              8990000, 1);
 GO
 
 -- -------------------------------------------------------------------------------
