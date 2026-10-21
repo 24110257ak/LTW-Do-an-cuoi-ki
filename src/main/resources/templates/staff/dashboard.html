@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bàn làm việc Cửa hàng | TechChain</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light">
+
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/admin-sidebar :: sidebar('staff-dashboard')}"></div>
+
+    <!-- Main Content -->
+    <div class="flex-grow-1 d-flex flex-column" style="min-width: 0;">
+        <div th:replace="~{fragments/admin-sidebar :: topbar}"></div>
+
+        <div class="container-fluid p-4">
+            <!-- Header title -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1">
+                        Bàn làm việc: <span class="text-primary" th:text="${currentBranch != null ? currentBranch.branchName : 'Cửa hàng'}">Chi nhánh Quận 1</span>
+                    </h3>
+                    <p class="text-muted mb-0">Địa chỉ: <span th:text="${currentBranch != null ? currentBranch.address : ''}">12 Lê Lợi, Q.1</span> | Hotline: <span th:text="${currentBranch != null ? currentBranch.phone : ''}">1800 6001</span></p>
+                </div>
+                <div>
+                    <a th:href="@{/staff/orders}" class="btn btn-primary me-2"><i class="bi bi-receipt me-1"></i> Quản lý đơn hàng</a>
+                    <a th:href="@{/staff/inventory}" class="btn btn-outline-dark"><i class="bi bi-boxes me-1"></i> Quản lý tồn kho</a>
+                </div>
+            </div>
+
+            <!-- Stats cards -->
+            <div class="row g-3 mb-4">
+                <!-- Đơn hàng mới cần xác nhận -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-3 border-start border-4 border-warning h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-muted small fw-semibold text-uppercase">Chờ xác nhận</div>
+                                    <h3 class="fw-bold my-1 text-warning" th:text="${newOrdersCount}">0</h3>
+                                    <a th:href="@{/staff/orders?status=NEW}" class="small text-decoration-none text-muted">Xem đơn mới <i class="bi bi-arrow-right"></i></a>
+                                </div>
+                                <div class="bg-warning bg-opacity-10 text-warning p-3 rounded-circle">
+                                    <i class="bi bi-bell-fill fs-3"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Đơn hàng đã xác nhận -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-3 border-start border-4 border-info h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-muted small fw-semibold text-uppercase">Đang đóng gói / Chờ lấy</div>
+                                    <h3 class="fw-bold my-1 text-info" th:text="${confirmedOrdersCount}">0</h3>
+                                    <a th:href="@{/staff/orders?status=CONFIRMED}" class="small text-decoration-none text-muted">Xem chi tiết <i class="bi bi-arrow-right"></i></a>
+                                </div>
+                                <div class="bg-info bg-opacity-10 text-info p-3 rounded-circle">
+                                    <i class="bi bi-box-seam-fill fs-3"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Đơn hàng đang giao -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-3 border-start border-4 border-primary h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-muted small fw-semibold text-uppercase">Đang giao hàng</div>
+                                    <h3 class="fw-bold my-1 text-primary" th:text="${shippingOrdersCount}">0</h3>
+                                    <a th:href="@{/staff/orders?status=SHIPPING}" class="small text-decoration-none text-muted">Xem đơn giao <i class="bi bi-arrow-right"></i></a>
+                                </div>
+                                <div class="bg-primary bg-opacity-10 text-primary p-3 rounded-circle">
+                                    <i class="bi bi-truck fs-3"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cảnh báo hết hàng tại kho -->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card border-0 shadow-sm rounded-3 border-start border-4 border-danger h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="text-muted small fw-semibold text-uppercase">Sắp / Đã hết hàng</div>
+                                    <h3 class="fw-bold my-1 text-danger">
+                                        <span th:text="${outOfStockCount}">0</span>
+                                        <span class="fs-6 text-muted fw-normal" th:text="'( ' + ${lowStockCount} + ' sắp hết)'">(0 sắp hết)</span>
+                                    </h3>
+                                    <a th:href="@{/staff/inventory}" class="small text-decoration-none text-danger fw-semibold">Kiểm tra tồn kho <i class="bi bi-arrow-right"></i></a>
+                                </div>
+                                <div class="bg-danger bg-opacity-10 text-danger p-3 rounded-circle">
+                                    <i class="bi bi-exclamation-triangle-fill fs-3"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent orders table -->
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-clock-history me-2 text-primary"></i> Đơn hàng gần nhất tại chi nhánh</h5>
+                    <a th:href="@{/staff/orders}" class="btn btn-outline-primary btn-sm">Xem tất cả đơn hàng</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th>Hình thức</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Thanh toán</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thời gian</th>
+                                    <th class="text-end">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${recentOrders == null || recentOrders.isEmpty()}">
+                                    <td colspan="8" class="text-center py-4 text-muted">Chưa có đơn hàng nào tại chi nhánh này.</td>
+                                </tr>
+                                <tr th:each="order : ${recentOrders}">
+                                    <td>
+                                        <strong class="text-primary" th:text="${order.orderCode}">ESC-20261021-00001</strong>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold" th:text="${order.receiverName}">Nguyễn Văn A</div>
+                                        <div class="small text-muted" th:text="${order.receiverPhone}">0901234567</div>
+                                    </td>
+                                    <td>
+                                        <span th:if="${order.orderType.name() == 'DELIVERY'}" class="badge bg-info-subtle text-info border border-info-subtle"><i class="bi bi-truck me-1"></i> Giao tận nơi</span>
+                                        <span th:if="${order.orderType.name() == 'PICKUP'}" class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="bi bi-shop me-1"></i> Nhận tại shop</span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-danger" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">34,000,000 đ</strong>
+                                    </td>
+                                    <td>
+                                        <span th:if="${order.paymentStatus.name() == 'PAID'}" class="badge bg-success">Đã thanh toán</span>
+                                        <span th:if="${order.paymentStatus.name() == 'PENDING'}" class="badge bg-secondary">Chưa thanh toán</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${order.status.name() == 'NEW'}" class="badge bg-warning text-dark">Chờ xác nhận</span>
+                                        <span th:if="${order.status.name() == 'CONFIRMED'}" class="badge bg-info text-dark">Đã xác nhận</span>
+                                        <span th:if="${order.status.name() == 'SHIPPING'}" class="badge bg-primary">Đang giao</span>
+                                        <span th:if="${order.status.name() == 'DELIVERED'}" class="badge bg-success">Đã giao</span>
+                                        <span th:if="${order.status.name() == 'CANCELLED'}" class="badge bg-danger">Đã hủy</span>
+                                    </td>
+                                    <td class="text-muted small" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">21/10/2026 14:00</td>
+                                    <td class="text-end">
+                                        <a th:href="@{/staff/orders/{id}(id=${order.orderId})}" class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i> Xem</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

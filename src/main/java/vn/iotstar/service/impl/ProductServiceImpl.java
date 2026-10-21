@@ -4,15 +4,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import vn.iotstar.entity.BranchInventory;
 import vn.iotstar.entity.Product;
 import vn.iotstar.entity.ProductImage;
 import vn.iotstar.entity.ProductVariant;
+import vn.iotstar.exception.ResourceNotFoundException;
 import vn.iotstar.repository.BranchInventoryRepository;
 import vn.iotstar.repository.ProductImageRepository;
 import vn.iotstar.repository.ProductRepository;
 import vn.iotstar.repository.ProductVariantRepository;
 import vn.iotstar.service.ProductService;
+import vn.iotstar.util.SlugUtils;
 
 import java.util.List;
 import java.util.Optional;
@@ -76,7 +79,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductVariant> getVariantsByProductId(Long productId) {
-        return productVariantRepository.findByProductProductIdAndIsActiveTrue(productId);
+        return productVariantRepository.findByProductProductId(productId);
     }
 
     @Override
@@ -102,5 +105,64 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Integer getTotalStockForVariant(Long variantId) {
         return branchInventoryRepository.sumQuantityByVariantId(variantId);
+    }
+
+    // --- Admin methods ---
+    @Override
+    public Page<Product> getAllProductsPaged(Pageable pageable) {
+        return productRepository.findAll(pageable);
+    }
+
+    @Override
+    public Page<Product> searchProductsAdmin(Integer categoryId, Integer brandId, String keyword, Pageable pageable) {
+        String cleanKeyword = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
+        return productRepository.searchProductsAdmin(categoryId, brandId, cleanKeyword, pageable);
+    }
+
+    @Override
+    @Transactional
+    public Product saveProduct(Product product) {
+        if (product.getSlug() == null || product.getSlug().isBlank()) {
+            product.setSlug(SlugUtils.toSlug(product.getProductName()));
+        }
+        return productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
+    public void toggleProductStatus(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm", "id", id));
+        product.setIsActive(product.getIsActive() == null || !product.getIsActive());
+        productRepository.save(product);
+    }
+
+    @Override
+    @Transactional
+    public ProductVariant saveVariant(ProductVariant variant) {
+        return productVariantRepository.save(variant);
+    }
+
+    @Override
+    @Transactional
+    public void deleteVariant(Long variantId) {
+        productVariantRepository.deleteById(variantId);
+    }
+
+    @Override
+    @Transactional
+    public ProductImage saveImage(ProductImage image) {
+        return productImageRepository.save(image);
+    }
+
+    @Override
+    @Transactional
+    public void deleteImage(Long imageId) {
+        productImageRepository.deleteById(imageId);
+    }
+
+    @Override
+    public long countActiveProducts() {
+        return productRepository.countByIsActiveTrue();
     }
 }

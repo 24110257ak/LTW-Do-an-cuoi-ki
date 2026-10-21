@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mã giảm giá (Coupons) | TechChain HQ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light">
+
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/admin-sidebar :: sidebar('coupons')}"></div>
+
+    <!-- Main Content -->
+    <div class="flex-grow-1 d-flex flex-column" style="min-width: 0;">
+        <div th:replace="~{fragments/admin-sidebar :: topbar}"></div>
+
+        <div class="container-fluid p-4">
+            <!-- Alert message -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}">Thành công</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1">Quản lý Mã Giảm Giá (Coupons)</h3>
+                    <p class="text-muted mb-0">Chương trình khuyến mãi, voucher giảm theo % hoặc số tiền mặt cố định</p>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCouponModal">
+                        <i class="bi bi-plus-lg me-1"></i> Tạo mã giảm giá mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Coupons Table -->
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã giảm giá</th>
+                                    <th>Loại giảm</th>
+                                    <th>Giá trị giảm</th>
+                                    <th>Đơn tối thiểu</th>
+                                    <th>Chi nhánh áp dụng</th>
+                                    <th>Đã dùng / Giới hạn</th>
+                                    <th>Hiệu lực đến</th>
+                                    <th>Trạng thái</th>
+                                    <th class="text-end">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${coupons == null || coupons.isEmpty()}">
+                                    <td colspan="9" class="text-center py-5 text-muted">Chưa có mã giảm giá nào.</td>
+                                </tr>
+                                <tr th:each="c : ${coupons}">
+                                    <td>
+                                        <code class="fw-bold fs-6 text-primary" th:text="${c.couponCode}">TECHCHAIN500K</code>
+                                    </td>
+                                    <td>
+                                        <span th:if="${c.discountType.name() == 'PERCENT'}" class="badge bg-info-subtle text-info border border-info-subtle">% Phần trăm</span>
+                                        <span th:if="${c.discountType.name() == 'AMOUNT'}" class="badge bg-warning-subtle text-warning border border-warning-subtle">Số tiền cố định</span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-danger" th:if="${c.discountType.name() == 'PERCENT'}" th:text="${c.discountValue} + '%'">10%</strong>
+                                        <strong class="text-danger" th:if="${c.discountType.name() == 'AMOUNT'}" th:text="${#numbers.formatDecimal(c.discountValue, 0, 'COMMA', 0, 'POINT')} + ' đ'">500,000 đ</strong>
+                                    </td>
+                                    <td>
+                                        <span th:text="${#numbers.formatDecimal(c.minOrderAmt, 0, 'COMMA', 0, 'POINT')} + ' đ'">10,000,000 đ</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${c.branch != null}" class="badge bg-light text-dark border" th:text="${c.branch.branchName}">Chi nhánh Q.1</span>
+                                        <span th:unless="${c.branch != null}" class="badge bg-primary-subtle text-primary border border-primary-subtle">Toàn chuỗi</span>
+                                    </td>
+                                    <td>
+                                        <span class="fw-semibold" th:text="${c.usedCount} + ' / ' + ${c.usageLimit}">12 / 100</span>
+                                    </td>
+                                    <td class="text-muted small" th:text="${#temporals.format(c.validUntil, 'dd/MM/yyyy')}">31/12/2026</td>
+                                    <td>
+                                        <form th:action="@{/admin/coupons/{id}/toggle(id=${c.couponId})}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-sm border-0 p-0" title="Bấm để bật/tắt">
+                                                <span th:if="${c.isActive}" class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Đang mở</span>
+                                                <span th:unless="${c.isActive}" class="badge bg-secondary"><i class="bi bi-x-circle me-1"></i> Khóa</span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td class="text-end">
+                                        <form th:action="@{/admin/coupons/{id}/delete(id=${c.couponId})}" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa mã giảm giá này?');">
+                                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Xóa">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal Thêm Coupon -->
+<div class="modal fade" id="addCouponModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Tạo Mã Giảm Giá mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/admin/coupons/save}" th:object="${newCoupon}" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mã Code <span class="text-danger">*</span></label>
+                        <input type="text" th:field="*{couponCode}" class="form-control text-uppercase" placeholder="SALE50K" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Loại giảm <span class="text-danger">*</span></label>
+                            <select th:field="*{discountType}" class="form-select" required>
+                                <option value="PERCENT">% Phần trăm</option>
+                                <option value="AMOUNT">Số tiền mặt (VNĐ)</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Giá trị giảm <span class="text-danger">*</span></label>
+                            <input type="number" th:field="*{discountValue}" class="form-control" placeholder="10 hoặc 100000" min="1" required>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Đơn hàng tối thiểu (VNĐ)</label>
+                            <input type="number" th:field="*{minOrderAmt}" class="form-control" placeholder="0" min="0">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Giảm tối đa (VNĐ)</label>
+                            <input type="number" th:field="*{maxDiscount}" class="form-control" placeholder="Để trống nếu không giới hạn">
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Số lượt dùng tối đa</label>
+                            <input type="number" th:field="*{usageLimit}" class="form-control" value="100" min="1" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Chi nhánh áp dụng</label>
+                            <select name="branchId" class="form-select">
+                                <option value="">Toàn chuỗi cửa hàng</option>
+                                <option th:each="b : ${branches}" th:value="${b.branchId}" th:text="${b.branchName}">Chi nhánh Q.1</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                    <button type="submit" class="btn btn-primary fw-bold">Tạo Coupon</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

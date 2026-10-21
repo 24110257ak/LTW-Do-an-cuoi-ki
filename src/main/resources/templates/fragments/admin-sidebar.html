@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<!-- Admin / Staff Sidebar Fragment -->
+<div th:fragment="sidebar(activeTab)" class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark shadow-sm" style="width: 260px; min-height: 100vh;">
+    <!-- Logo & Brand -->
+    <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+        <i class="bi bi-cpu-fill text-primary fs-3 me-2"></i>
+        <span class="fs-5 fw-bold">TECHCHAIN <span class="badge bg-primary text-uppercase" sec:authorize="hasRole('ADMIN')">ADMIN</span><span class="badge bg-warning text-dark text-uppercase" sec:authorize="!hasRole('ADMIN') && hasRole('STAFF')">STAFF</span></span>
+    </a>
+    <hr class="border-secondary">
+
+    <!-- Navigation links for ADMIN -->
+    <ul class="nav nav-pills flex-column mb-auto" sec:authorize="hasRole('ADMIN')">
+        <li class="nav-item mb-1">
+            <a th:href="@{/admin/dashboard}" class="nav-link text-white" th:classappend="${activeTab == 'dashboard' ? 'active bg-primary' : ''}">
+                <i class="bi bi-speedometer2 me-2"></i> Báo cáo tổng quan
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a th:href="@{/admin/orders}" class="nav-link text-white" th:classappend="${activeTab == 'orders' ? 'active bg-primary' : ''}">
+                <i class="bi bi-receipt me-2"></i> Toàn bộ đơn hàng
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a th:href="@{/admin/products}" class="nav-link text-white" th:classappend="${activeTab == 'products' ? 'active bg-primary' : ''}">
+                <i class="bi bi-box-seam me-2"></i> Quản lý sản phẩm
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a th:href="@{/admin/categories}" class="nav-link text-white" th:classappend="${activeTab == 'categories' ? 'active bg-primary' : ''}">
+                <i class="bi bi-grid me-2"></i> Danh mục ngành hàng
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a th:href="@{/admin/brands}" class="nav-link text-white" th:classappend="${activeTab == 'brands' ? 'active bg-primary' : ''}">
+                <i class="bi bi-award me-2"></i> Thương hiệu
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a th:href="@{/admin/branches}" class="nav-link text-white" th:classappend="${activeTab == 'branches' ? 'active bg-primary' : ''}">
+                <i class="bi bi-shop me-2"></i> Chuỗi chi nhánh
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a th:href="@{/admin/users}" class="nav-link text-white" th:classappend="${activeTab == 'users' ? 'active bg-primary' : ''}">
+                <i class="bi bi-people me-2"></i> Khách hàng & Nhân sự
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a th:href="@{/admin/coupons}" class="nav-link text-white" th:classappend="${activeTab == 'coupons' ? 'active bg-primary' : ''}">
+                <i class="bi bi-ticket-perforated me-2"></i> Mã giảm giá (Coupon)
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a th:href="@{/admin/banners}" class="nav-link text-white" th:classappend="${activeTab == 'banners' ? 'active bg-primary' : ''}">
+                <i class="bi bi-images me-2"></i> Banner quảng cáo
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a th:href="@{/admin/providers}" class="nav-link text-white" th:classappend="${activeTab == 'providers' ? 'active bg-primary' : ''}">
+                <i class="bi bi-truck me-2"></i> Đơn vị vận chuyển
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a th:href="@{/staff/dashboard}" class="nav-link text-warning">
+                <i class="bi bi-arrow-left-right me-2"></i> Chuyển xem Cửa hàng (Staff)
+            </a>
+        </li>
+    </ul>
+
+    <!-- Navigation links for STAFF (Branch Staff) -->
+    <ul class="nav nav-pills flex-column mb-auto" sec:authorize="!hasRole('ADMIN') && hasRole('STAFF')">
+        <li class="nav-item mb-1">
+            <a th:href="@{/staff/dashboard}" class="nav-link text-white" th:classappend="${activeTab == 'staff-dashboard' ? 'active bg-warning text-dark fw-bold' : ''}">
+                <i class="bi bi-speedometer2 me-2"></i> Bàn làm việc cửa hàng
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a th:href="@{/staff/orders}" class="nav-link text-white" th:classappend="${activeTab == 'staff-orders' ? 'active bg-warning text-dark fw-bold' : ''}">
+                <i class="bi bi-receipt me-2"></i> Đơn hàng tại chi nhánh
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a th:href="@{/staff/inventory}" class="nav-link text-white" th:classappend="${activeTab == 'staff-inventory' ? 'active bg-warning text-dark fw-bold' : ''}">
+                <i class="bi bi-boxes me-2"></i> Tồn kho chi nhánh
+            </a>
+        </li>
+    </ul>
+
+    <hr class="border-secondary">
+
+    <!-- User dropdown & Logout -->
+    <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <strong sec:authentication="name">User</strong>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
+            <li><a class="dropdown-item" th:href="@{/}"><i class="bi bi-shop me-2"></i> Về trang bán hàng</a></li>
+            <li><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person-badge me-2"></i> Hồ sơ cá nhân</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <form th:action="@{/auth/logout}" method="post" class="m-0">
+                    <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i> Đăng xuất</button>
+                </form>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Admin / Staff Header Fragment -->
+<nav th:fragment="topbar" class="navbar navbar-expand navbar-light bg-white border-bottom shadow-sm px-4 py-2 sticky-top">
+    <div class="container-fluid p-0">
+        <!-- Breadcrumb / Status -->
+        <div class="d-flex align-items-center">
+            <span class="fw-semibold text-secondary me-2">Hệ thống chuỗi TechChain</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle">
+                <i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i> Realtime Online
+            </span>
+        </div>
+
+        <!-- Right actions -->
+        <div class="d-flex align-items-center gap-3">
+            <!-- Active Branch Indicator / Switcher -->
+            <div th:if="${currentBranch != null}" class="d-flex align-items-center bg-light px-3 py-1 rounded border">
+                <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                <div class="small">
+                    <span class="text-muted d-block" style="font-size: 11px;">Chi nhánh đang xem</span>
+                    <strong class="text-dark" th:text="${currentBranch.branchName}">Chi nhánh Quận 1</strong>
+                </div>
+            </div>
+
+            <!-- Branch switch form (if branches present) -->
+            <form th:if="${branches != null && !branches.isEmpty()}" th:action="@{/staff/switch-branch}" method="post" class="d-flex align-items-center m-0">
+                <select name="branchId" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option th:each="b : ${branches}" th:value="${b.branchId}" th:text="${b.branchName}" th:selected="${currentBranch != null && currentBranch.branchId == b.branchId}">Chi nhánh</option>
+                </select>
+            </form>
+
+            <!-- Store Front Link -->
+            <a th:href="@{/}" target="_blank" class="btn btn-outline-secondary btn-sm" title="Mở trang bán hàng">
+                <i class="bi bi-box-arrow-up-right me-1"></i> Xem Website
+            </a>
+        </div>
+    </div>
+
+    <!-- Real-time WebSocket Order Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
+        <div id="liveOrderToast" class="toast align-items-center text-bg-primary border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi bi-bell-fill me-2 fs-5"></i>
+                    <strong id="toastOrderTitle">Có đơn hàng mới!</strong>
+                    <div id="toastOrderBody" class="small mt-1">Đơn hàng vừa được khách đặt.</div>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SockJS & STOMP Scripts for Real-time Notifications -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            try {
+                const socket = new SockJS('/ws');
+                const stompClient = Stomp.over(socket);
+                stompClient.debug = null; // Tắt debug log rác console
+
+                stompClient.connect({}, function (frame) {
+                    // Lắng nghe kênh đơn hàng mới toàn chuỗi
+                    stompClient.subscribe('/topic/orders', function (message) {
+                        try {
+                            const data = JSON.parse(message.body);
+                            const toastEl = document.getElementById('liveOrderToast');
+                            if (toastEl) {
+                                document.getElementById('toastOrderTitle').innerText = '🔔 Đơn hàng mới #' + (data.orderCode || '');
+                                document.getElementById('toastOrderBody').innerText = 'Khách: ' + (data.receiverName || '') + ' - Giá trị: ' + (Number(data.totalAmount || 0).toLocaleString('vi-VN')) + ' đ';
+                                const toast = new bootstrap.Toast(toastEl, { delay: 10000 });
+                                toast.show();
+                            }
+                        } catch (err) {
+                            console.warn("Parse order websocket message error:", err);
+                        }
+                    });
+                });
+            } catch (e) {
+                console.warn("WebSocket not supported or failed to initialize:", e);
+            }
+        });
+    </script>
+</nav>
+
+</body>
+</html>

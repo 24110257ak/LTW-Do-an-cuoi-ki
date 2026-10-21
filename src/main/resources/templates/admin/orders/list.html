@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toàn bộ đơn hàng toàn chuỗi | TechChain HQ</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light">
+
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div th:replace="~{fragments/admin-sidebar :: sidebar('orders')}"></div>
+
+    <!-- Main Content -->
+    <div class="flex-grow-1 d-flex flex-column" style="min-width: 0;">
+        <div th:replace="~{fragments/admin-sidebar :: topbar}"></div>
+
+        <div class="container-fluid p-4">
+            <!-- Alert message -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}">Thành công</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="fw-bold mb-1">Quản lý Đơn hàng Toàn chuỗi</h3>
+                    <p class="text-muted mb-0">Theo dõi trạng thái, lọc theo chi nhánh xử lý và điều phối đơn hàng</p>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="card border-0 shadow-sm rounded-3 mb-4">
+                <div class="card-body">
+                    <form th:action="@{/admin/orders}" method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" name="keyword" class="form-control" placeholder="Mã đơn / Tên khách / SĐT..." th:value="${keyword}">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="branchId" class="form-select">
+                                <option value="">-- Tất cả chi nhánh --</option>
+                                <option th:each="b : ${branches}" th:value="${b.branchId}" th:text="${b.branchName}" th:selected="${selectedBranch == b.branchId}">Chi nhánh Quận 1</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select name="status" class="form-select">
+                                <option value="ALL" th:selected="${selectedStatus == 'ALL'}">-- Tất cả trạng thái --</option>
+                                <option value="NEW" th:selected="${selectedStatus == 'NEW'}">Chờ xác nhận (NEW)</option>
+                                <option value="CONFIRMED" th:selected="${selectedStatus == 'CONFIRMED'}">Đã xác nhận (CONFIRMED)</option>
+                                <option value="SHIPPING" th:selected="${selectedStatus == 'SHIPPING'}">Đang giao hàng (SHIPPING)</option>
+                                <option value="DELIVERED" th:selected="${selectedStatus == 'DELIVERED'}">Giao thành công (DELIVERED)</option>
+                                <option value="CANCELLED" th:selected="${selectedStatus == 'CANCELLED'}">Đã hủy (CANCELLED)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-funnel me-1"></i> Lọc</button>
+                            <a th:href="@{/admin/orders}" class="btn btn-outline-secondary" title="Đặt lại"><i class="bi bi-arrow-counterclockwise"></i></a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Orders Table -->
+            <div class="card border-0 shadow-sm rounded-3">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã đơn</th>
+                                    <th>Khách hàng</th>
+                                    <th>Chi nhánh xử lý</th>
+                                    <th>Hình thức</th>
+                                    <th>Tổng tiền</th>
+                                    <th>Thanh toán</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thời gian</th>
+                                    <th class="text-end">Chi tiết</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:if="${orderPage.content.isEmpty()}">
+                                    <td colspan="9" class="text-center py-5 text-muted">Không tìm thấy đơn hàng nào phù hợp.</td>
+                                </tr>
+                                <tr th:each="order : ${orderPage.content}">
+                                    <td>
+                                        <a th:href="@{/admin/orders/{id}(id=${order.orderId})}" class="fw-bold text-decoration-none text-primary" th:text="${order.orderCode}">ESC-20261021-00001</a>
+                                    </td>
+                                    <td>
+                                        <div class="fw-bold" th:text="${order.receiverName}">Nguyễn Văn A</div>
+                                        <small class="text-muted" th:text="${order.receiverPhone}">0901234567</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border" th:text="${order.branch != null ? order.branch.branchName : 'Trung tâm'}">Quận 1</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${order.orderType.name() == 'DELIVERY'}" class="badge bg-info-subtle text-info border border-info-subtle"><i class="bi bi-truck me-1"></i> Giao tận nơi</span>
+                                        <span th:if="${order.orderType.name() == 'PICKUP'}" class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="bi bi-shop me-1"></i> Nhận tại shop</span>
+                                    </td>
+                                    <td>
+                                        <strong class="text-danger" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">34,000,000 đ</strong>
+                                    </td>
+                                    <td>
+                                        <span th:if="${order.paymentStatus.name() == 'PAID'}" class="badge bg-success">Đã thanh toán</span>
+                                        <span th:if="${order.paymentStatus.name() == 'PENDING'}" class="badge bg-secondary">Chờ thanh toán</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${order.status.name() == 'NEW'}" class="badge bg-warning text-dark">Chờ xác nhận</span>
+                                        <span th:if="${order.status.name() == 'CONFIRMED'}" class="badge bg-info text-dark">Đã xác nhận</span>
+                                        <span th:if="${order.status.name() == 'SHIPPING'}" class="badge bg-primary">Đang giao</span>
+                                        <span th:if="${order.status.name() == 'DELIVERED'}" class="badge bg-success">Đã giao</span>
+                                        <span th:if="${order.status.name() == 'CANCELLED'}" class="badge bg-danger">Đã hủy</span>
+                                    </td>
+                                    <td class="text-muted small" th:text="${#temporals.format(order.createdAt, 'dd/MM/yyyy HH:mm')}">21/10/2026</td>
+                                    <td class="text-end">
+                                        <a th:href="@{/admin/orders/{id}(id=${order.orderId})}" class="btn btn-outline-primary btn-sm"><i class="bi bi-eye"></i> Xem</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3" th:if="${orderPage.totalPages > 1}">
+                    <span class="small text-muted" th:text="'Trang ' + (${orderPage.number} + 1) + ' / ' + ${orderPage.totalPages}">Trang 1 / 1</span>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item" th:classappend="${orderPage.first ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/orders(branchId=${selectedBranch}, status=${selectedStatus}, keyword=${keyword}, page=${orderPage.number - 1})}">Trước</a>
+                        </li>
+                        <li class="page-item active">
+                            <span class="page-link" th:text="${orderPage.number + 1}">1</span>
+                        </li>
+                        <li class="page-item" th:classappend="${orderPage.last ? 'disabled' : ''}">
+                            <a class="page-link" th:href="@{/admin/orders(branchId=${selectedBranch}, status=${selectedStatus}, keyword=${keyword}, page=${orderPage.number + 1})}">Sau</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
