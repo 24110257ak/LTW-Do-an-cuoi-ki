@@ -21,3 +21,4 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findByShipperUserId(Long shipperId, Pageable pageable);
     boolean existsByOrderCode(String orderCode);
 }
+

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header-head}">
+    <title th:text="${product.productName} + ' - ESC Electronics'">Chi Tiết Sản Phẩm</title>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header-nav}"></div>
+
+<div class="container my-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/products}" class="text-decoration-none">Sản phẩm</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${product.productName}">Tên sản phẩm</li>
+        </ol>
+    </nav>
+
+    <!-- Product Info Section -->
+    <div class="row g-4 mb-5">
+        <!-- Col 1: Ảnh sản phẩm -->
+        <div class="col-lg-5">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white">
+                <div class="py-4" style="height: 380px;">
+                    <img id="mainProductImage" th:src="${product.thumbnailUrl != null ? product.thumbnailUrl : 'https://res.cloudinary.com/demo/image/upload/sample.jpg'}"
+                         class="img-fluid h-100 object-fit-contain" alt="Product Image">
+                </div>
+            </div>
+        </div>
+
+        <!-- Col 2: Thông tin & Đặt mua -->
+        <div class="col-lg-7">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-1 mb-2 rounded-pill w-fit"
+                      th:text="${product.brand != null ? product.brand.brandName : 'ESC'}">Brand</span>
+                <h3 class="fw-extrabold text-dark mb-2" th:text="${product.productName}">Tên sản phẩm</h3>
+
+                <!-- Rating & Sold -->
+                <div class="d-flex align-items-center mb-3 small">
+                    <div class="text-warning me-2">
+                        <i class="fa-solid fa-star"></i>
+                        <span class="text-dark fw-bold" th:text="${product.avgRating}">5.0</span>
+                    </div>
+                    <span class="text-muted me-3" th:text="'(' + ${product.reviewCount} + ' đánh giá)'">(0 đánh giá)</span>
+                    <span class="text-secondary"><i class="fa-solid fa-bag-shopping me-1"></i>Đã bán <strong th:text="${product.totalSold}">0</strong></span>
+                </div>
+
+                <!-- Price display -->
+                <div class="p-3 bg-light rounded-3 mb-4 d-flex align-items-baseline gap-3">
+                    <span class="price-current fs-2" id="displayPrice"
+                          th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">30.000.000 đ</span>
+                </div>
+
+                <!-- Form Thêm vào giỏ hàng -->
+                <form th:action="@{/cart/add}" method="post" id="addToCartForm">
+                    <!-- Chọn Phiên bản / Biến thể (Màu sắc, Dung lượng) -->
+                    <div class="mb-4" th:if="${variants != null && !variants.isEmpty()}">
+                        <label class="form-label fw-bold small text-muted text-uppercase mb-2">Chọn phiên bản / màu sắc:</label>
+                        <div class="row g-2">
+                            <div class="col-sm-6" th:each="v, iter : ${variants}">
+                                <div class="form-check p-0">
+                                    <input type="radio" class="btn-check variant-radio" name="variantId"
+                                           th:id="'variant_' + ${v.variantId}" th:value="${v.variantId}"
+                                           th:data-price="${#numbers.formatDecimal(v.getEffectivePrice(), 0, 'COMMA', 0, 'POINT')} + ' đ'"
+                                           th:checked="${iter.index == 0}">
+                                    <label class="btn btn-outline-secondary w-100 text-start p-2 rounded-3" th:for="'variant_' + ${v.variantId}">
+                                        <div class="fw-bold small" th:text="${v.getVariantInfo()}">Màu sắc / Dung lượng</div>
+                                        <div class="text-danger small fw-semibold"
+                                             th:text="${#numbers.formatDecimal(v.getEffectivePrice(), 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Số lượng -->
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <label class="fw-bold small text-muted text-uppercase">Số lượng:</label>
+                        <input type="number" name="quantity" class="form-control text-center" value="1" min="1" max="10" style="width: 80px;">
+                    </div>
+
+                    <!-- Nút mua hàng & Yêu thích -->
+                    <div class="d-flex gap-2 mb-4">
+                        <button type="submit" class="btn btn-danger btn-lg flex-grow-1 fw-bold py-3 rounded-pill shadow-sm">
+                            <i class="fa-solid fa-cart-shopping me-2"></i> THÊM VÀO GIỎ HÀNG
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Kiểm tra Tồn kho tại Hệ thống 4 Chi nhánh chuỗi (Nghiệp vụ cốt lõi) -->
+                <div class="border rounded-3 p-3 bg-light">
+                    <h6 class="fw-bold text-dark mb-2 d-flex align-items-center">
+                        <i class="fa-solid fa-store text-warning me-2"></i>Kiểm tra hàng tại 4 chi nhánh chuỗi ESC:
+                    </h6>
+                    <div class="row g-2">
+                        <div class="col-md-6" th:each="inv : ${branchStock}">
+                            <div class="p-2 bg-white rounded border small d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong th:text="${inv.branch.branchName}">Chi nhánh Q.1</strong>
+                                    <div class="text-muted" style="font-size: 0.75rem;" th:text="${inv.branch.district}">Quận 1</div>
+                                </div>
+                                <span th:if="${inv.quantity > 0}" class="badge bg-success-subtle text-success border border-success">
+                                    <i class="fa-solid fa-check me-1"></i>Còn hàng (<span th:text="${inv.quantity}">10</span>)
+                                </span>
+                                <span th:unless="${inv.quantity > 0}" class="badge bg-danger-subtle text-danger border border-danger">
+                                    <i class="fa-solid fa-xmark me-1"></i>Tạm hết hàng
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông số kỹ thuật & Đánh giá -->
+    <div class="row g-4 mb-5">
+        <div class="col-lg-8">
+            <!-- Mô tả -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white">
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-align-left text-primary me-2"></i>Mô Tả Sản Phẩm</h5>
+                <p class="text-secondary lh-lg mb-0" th:text="${product.description}">Mô tả chi tiết sản phẩm...</p>
+            </div>
+
+            <!-- Đánh giá từ khách hàng -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fa-solid fa-comments text-warning me-2"></i>Đánh Giá Từ Khách Hàng
+                        <span class="badge bg-secondary ms-2" th:text="${product.reviewCount}">0</span>
+                    </h5>
+                </div>
+
+                <div th:if="${reviews != null && reviews.totalElements > 0}">
+                    <div class="border-bottom py-3" th:each="rv : ${reviews.content}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <strong th:text="${rv.user.fullName}">Khách hàng</strong>
+                                <span class="badge bg-success-subtle text-success ms-2 small"><i class="fa-solid fa-check-circle me-1"></i>Đã mua hàng</span>
+                            </div>
+                            <small class="text-muted" th:text="${#temporals.format(rv.createdAt, 'dd/MM/yyyy HH:mm')}">21/10/2026</small>
+                        </div>
+                        <div class="text-warning small mb-2">
+                            <i th:each="i : ${#numbers.sequence(1, rv.stars)}" class="fa-solid fa-star"></i>
+                        </div>
+                        <p class="text-secondary mb-0 small" th:text="${rv.content}">Nội dung đánh giá...</p>
+                    </div>
+                </div>
+
+                <div th:unless="${reviews != null && reviews.totalElements > 0}" class="text-center py-4 text-muted small">
+                    <i class="fa-regular fa-comment-dots fs-3 mb-2"></i>
+                    <div>Chưa có đánh giá nào cho sản phẩm này. Hãy là người mua đầu tiên trải nghiệm và để lại nhận xét!</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Col 3: Chính sách chuỗi cửa hàng -->
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-shield-halved text-success me-2"></i>Chính Sách Chuỗi ESC</h6>
+                <ul class="list-unstyled small text-secondary">
+                    <li class="mb-3 d-flex align-items-start">
+                        <i class="fa-solid fa-truck-fast text-primary me-2 mt-1"></i>
+                        <div><strong>Giao hàng toàn quốc:</strong> Nhận hàng tận nơi hoặc chọn lấy tại chi nhánh gần nhất.</div>
+                    </li>
+                    <li class="mb-3 d-flex align-items-start">
+                        <i class="fa-solid fa-rotate-left text-warning me-2 mt-1"></i>
+                        <div><strong>Đổi trả 30 ngày:</strong> Lỗi 1 đổi 1 trong 30 ngày đầu tại bất kỳ chi nhánh nào.</div>
+                    </li>
+                    <li class="mb-3 d-flex align-items-start">
+                        <i class="fa-solid fa-medal text-success me-2 mt-1"></i>
+                        <div><strong>Bảo hành chính hãng:</strong> 12 tháng tại các trung tâm bảo hành ủy quyền.</div>
+                    </li>
+                    <li class="d-flex align-items-start">
+                        <i class="fa-solid fa-headset text-danger me-2 mt-1"></i>
+                        <div><strong>Hỗ trợ kỹ thuật:</strong> Live chat trực tuyến hoặc hotline 1900 2427.</div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    // Live update price when changing variants
+    document.querySelectorAll('.variant-radio').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            if (this.checked) {
+                document.getElementById('displayPrice').innerText = this.getAttribute('data-price');
+            }
+        });
+    });
+</script>
+</body>
+</html>

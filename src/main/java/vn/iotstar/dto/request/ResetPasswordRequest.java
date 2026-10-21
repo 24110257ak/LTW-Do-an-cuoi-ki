@@ -25,3 +25,4 @@ public class ResetPasswordRequest {
     @Size(min = 6, message = "Mật khẩu mới phải có ít nhất 6 ký tự")
     private String newPassword;
 }
+

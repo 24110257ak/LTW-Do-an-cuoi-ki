@@ -13,3 +13,4 @@ public interface BranchRepository extends JpaRepository<Branch, Integer> {
     Optional<Branch> findByManagerUserId(Long managerId);
     boolean existsByBranchName(String branchName);
 }
+

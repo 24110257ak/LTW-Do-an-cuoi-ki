@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<footer th:fragment="footer" class="bg-dark text-white pt-5 pb-3 mt-5">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Col 1: Giới thiệu hệ thống chuỗi -->
+            <div class="col-lg-4 col-md-6">
+                <h5 class="text-warning fw-bold mb-3"><i class="fa-solid fa-bolt me-2"></i>ESC ELECTRONICS STORE CHAIN</h5>
+                <p class="text-secondary small">Hệ thống website bán lẻ thiết bị công nghệ hàng đầu theo mô hình chuỗi đa chi nhánh. Cam kết hàng chính hãng 100%, bảo hành toàn quốc và dịch vụ chăm sóc tận tâm.</p>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-secondary p-2"><i class="fa-solid fa-shield-halved me-1"></i>100% Chính Hãng</span>
+                    <span class="badge bg-secondary p-2"><i class="fa-solid fa-truck-fast me-1"></i>Giao Nhanh 2H</span>
+                    <span class="badge bg-secondary p-2"><i class="fa-solid fa-rotate-left me-1"></i>Đổi Trả 30 Ngày</span>
+                </div>
+            </div>
+
+            <!-- Col 2: Hệ thống chi nhánh chuỗi cửa hàng -->
+            <div class="col-lg-4 col-md-6">
+                <h6 class="text-uppercase fw-bold text-light mb-3"><i class="fa-solid fa-map-location-dot me-2 text-warning"></i>Hệ Thống 4 Chi Nhánh TP.HCM</h6>
+                <ul class="list-unstyled small text-secondary">
+                    <li class="mb-2"><i class="fa-solid fa-location-dot me-2 text-danger"></i><strong>Quận 1:</strong> 123 Lê Lợi, P. Bến Nghé - (028) 3822 1234</li>
+                    <li class="mb-2"><i class="fa-solid fa-location-dot me-2 text-danger"></i><strong>Quận 3:</strong> 45 Điện Biên Phủ, P. Đakao - (028) 3930 5678</li>
+                    <li class="mb-2"><i class="fa-solid fa-location-dot me-2 text-danger"></i><strong>TP. Thủ Đức:</strong> 2 Võ Văn Ngân, P. Bình Thọ - (028) 3896 9012</li>
+                    <li class="mb-2"><i class="fa-solid fa-location-dot me-2 text-danger"></i><strong>Quận Gò Vấp:</strong> 200 Quang Trung, P. 10 - (028) 3894 3456</li>
+                </ul>
+            </div>
+
+            <!-- Col 3: Hỗ trợ khách hàng & đồ án -->
+            <div class="col-lg-4 col-md-12">
+                <h6 class="text-uppercase fw-bold text-light mb-3"><i class="fa-solid fa-headset me-2 text-warning"></i>Thông Tin Đồ Án Cuối Kỳ</h6>
+                <p class="small text-secondary mb-1"><strong>Môn học:</strong> Lập trình WEB - Nhóm 24</p>
+                <p class="small text-secondary mb-1"><strong>Đề tài 27:</strong> Chuỗi Cửa Hàng Thiết Bị Điện Tử</p>
+                <p class="small text-secondary mb-3"><strong>Công nghệ:</strong> Spring Boot 3 + JPA + SQL Server + WebSocket + JWT + Cloudinary + Bootstrap 5</p>
+                <div class="d-flex align-items-center">
+                    <span class="btn btn-sm btn-outline-warning disabled"><i class="fa-solid fa-phone me-1"></i>Hotline: 1900 2427 (8:00 - 21:30)</span>
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-secondary my-4">
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center small text-secondary">
+            <div>© 2026 Nhóm 24 - Đồ án cuối kỳ môn Lập trình Web - HCMUTE.</div>
+            <div>Giảng viên hướng dẫn: <strong>ThS. Nguyễn Hữu Trung</strong></div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- SockJS and STOMP for Realtime WebSocket -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+</footer>
+</body>
+</html>

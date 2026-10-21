@@ -10,3 +10,4 @@ import java.util.List;
 public interface BannerRepository extends JpaRepository<Banner, Integer> {
     List<Banner> findAllByIsActiveTrueOrderByDisplayOrderAsc();
 }
+

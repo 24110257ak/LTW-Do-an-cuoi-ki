@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header-head}">
+    <title>Đặt Hàng & Thanh Toán - Chuỗi Cửa Hàng ESC</title>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header-nav}"></div>
+
+<div class="container my-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/cart}" class="text-decoration-none">Giỏ hàng</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Xác nhận thanh toán</li>
+        </ol>
+    </nav>
+
+    <!-- Flash message -->
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i><span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <form th:action="@{/checkout/place-order}" method="post" th:object="${checkoutRequest}">
+        <div class="row g-4">
+            <!-- Col 1: Hình thức nhận hàng & Địa chỉ -->
+            <div class="col-lg-7">
+                <!-- Chọn hình thức mua hàng (Nghiệp vụ chuỗi) -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-truck-ramp-box text-primary me-2"></i>1. Chọn Hình Thức Nhận Hàng</h5>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" th:field="*{orderType}" id="typeDelivery" value="DELIVERY" checked>
+                            <label class="btn btn-outline-primary w-100 p-3 rounded-4 text-start" for="typeDelivery">
+                                <div class="fw-bold"><i class="fa-solid fa-truck-fast me-2"></i>Giao tận nơi</div>
+                                <small class="text-muted">Nhận hàng tại nhà hoặc cơ quan</small>
+                            </label>
+                        </div>
+                        <div class="col-6">
+                            <input type="radio" class="btn-check" th:field="*{orderType}" id="typePickup" value="PICKUP">
+                            <label class="btn btn-outline-primary w-100 p-3 rounded-4 text-start" for="typePickup">
+                                <div class="fw-bold"><i class="fa-solid fa-store me-2"></i>Nhận tại cửa hàng</div>
+                                <small class="text-muted">Đến chi nhánh gần nhất nhận máy</small>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Khu vực 1A: Nhận tại cửa hàng (PICKUP) -->
+                    <div id="pickupSection" class="border rounded-3 p-3 bg-light mb-3 d-none">
+                        <label class="form-label fw-bold small text-dark"><i class="fa-solid fa-map-pin text-danger me-1"></i>Chọn chi nhánh bạn muốn đến nhận:</label>
+                        <select class="form-select" th:field="*{pickupBranchId}">
+                            <option value="">-- Chọn 1 trong 4 chi nhánh chuỗi ESC --</option>
+                            <option th:each="br : ${branches}" th:value="${br.branchId}"
+                                    th:text="${br.branchName + ' (' + br.address + ', ' + br.district + ')'}">Chi nhánh Q.1</option>
+                        </select>
+                        <small class="text-muted d-block mt-2"><i class="fa-solid fa-circle-info me-1"></i>Nhân viên chi nhánh sẽ chuẩn bị máy sẵn và gọi điện xác nhận sau khi bạn đặt đơn.</small>
+                    </div>
+
+                    <!-- Khu vực 1B: Giao tận nhà (DELIVERY) -->
+                    <div id="deliverySection">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Họ và tên người nhận *</label>
+                                <input type="text" class="form-control" th:field="*{receiverName}" placeholder="Nguyễn Văn A" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-semibold">Số điện thoại nhận hàng *</label>
+                                <input type="tel" class="form-control" th:field="*{receiverPhone}" placeholder="0901234567" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Tỉnh / Thành phố *</label>
+                                <input type="text" class="form-control" th:field="*{province}" value="TP. Hồ Chí Minh" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Quận / Huyện *</label>
+                                <input type="text" class="form-control" th:field="*{district}" placeholder="Quận 1" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold">Phường / Xã *</label>
+                                <input type="text" class="form-control" th:field="*{ward}" placeholder="Phường Bến Nghé" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold">Số nhà, tên đường chi tiết *</label>
+                                <input type="text" class="form-control" th:field="*{street}" placeholder="12 Lê Lợi" required>
+                            </div>
+
+                            <!-- Chọn đơn vị vận chuyển -->
+                            <div class="col-12 mt-3">
+                                <label class="form-label small fw-semibold">Chọn Đơn Vị Vận Chuyển:</label>
+                                <div class="row g-2">
+                                    <div class="col-md-6" th:each="p : ${providers}">
+                                        <div class="form-check border rounded p-2 bg-light">
+                                            <input class="form-check-input ms-1" type="radio" th:field="*{providerId}" th:value="${p.providerId}" th:id="'prov_' + ${p.providerId}">
+                                            <label class="form-check-label ms-2 small d-flex justify-content-between pe-2 w-100" th:for="'prov_' + ${p.providerId}">
+                                                <span th:text="${p.providerName}">Giao Hàng Nhanh</span>
+                                                <strong class="text-danger" th:text="${#numbers.formatDecimal(p.baseFee, 0, 'COMMA', 0, 'POINT')} + ' đ'">25.000 đ</strong>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ghi chú đơn hàng -->
+                    <div class="mt-3">
+                        <label class="form-label small fw-semibold">Ghi chú cho đơn hàng (tùy chọn):</label>
+                        <textarea class="form-control" th:field="*{note}" rows="2" placeholder="Ghi chú thêm về giờ giao, lưu ý máy..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Phương thức thanh toán -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-credit-card text-success me-2"></i>2. Phương Thức Thanh Toán</h5>
+                    <div class="d-flex flex-column gap-2">
+                        <div class="form-check border rounded-3 p-3 bg-light">
+                            <input class="form-check-input ms-1" type="radio" th:field="*{paymentMethod}" id="payCOD" value="COD" checked>
+                            <label class="form-check-label ms-2" for="payCOD">
+                                <strong><i class="fa-solid fa-money-bill-wave text-success me-2"></i>Thanh toán khi nhận hàng (COD)</strong>
+                                <div class="small text-muted">Nhận máy, kiểm tra hàng chính hãng mới thanh toán tiền mặt.</div>
+                            </label>
+                        </div>
+                        <div class="form-check border rounded-3 p-3 bg-light">
+                            <input class="form-check-input ms-1" type="radio" th:field="*{paymentMethod}" id="payVNPAY" value="VNPAY">
+                            <label class="form-check-label ms-2" for="payVNPAY">
+                                <strong><i class="fa-solid fa-qrcode text-primary me-2"></i>Thanh toán trực tuyến VNPAY Sandbox</strong>
+                                <div class="small text-muted">Thanh toán qua quét mã VNPAY-QR, thẻ ATM nội địa hoặc thẻ Visa/Mastercard.</div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Col 2: Chi tiết đơn hàng & Mã giảm giá -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white sticky-top" style="top: 80px;">
+                    <h5 class="fw-bold mb-3">Đơn Hàng Của Bạn</h5>
+
+                    <!-- Danh sách món -->
+                    <div class="border-bottom pb-3 mb-3" style="max-height: 250px; overflow-y: auto;">
+                        <div class="d-flex align-items-center mb-2" th:each="item : ${cartItems}">
+                            <div class="me-2" style="width: 45px; height: 45px;">
+                                <img th:src="${item.variant.product.thumbnailUrl != null ? item.variant.product.thumbnailUrl : 'https://res.cloudinary.com/demo/image/upload/sample.jpg'}"
+                                     class="img-fluid h-100 object-fit-contain" alt="img">
+                            </div>
+                            <div class="flex-grow-1 small">
+                                <div class="fw-bold text-truncate" th:text="${item.variant.product.productName}">Tên máy</div>
+                                <div class="text-muted" style="font-size: 0.75rem;" th:text="${item.variant.getVariantInfo()}">Phiên bản</div>
+                            </div>
+                            <div class="text-end small">
+                                <div class="text-muted" th:text="'x' + ${item.quantity}">x1</div>
+                                <strong class="text-danger" th:text="${#numbers.formatDecimal(item.variant.getEffectivePrice() * item.quantity, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nhập Voucher giảm giá -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-semibold">Mã giảm giá (Coupon):</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control text-uppercase" th:field="*{couponCode}" placeholder="WELCOME100K">
+                            <button type="button" class="btn btn-outline-primary" id="btnApplyCoupon">Áp dụng</button>
+                        </div>
+                        <small class="text-muted" style="font-size: 0.75rem;">Mã gợi ý: <code>WELCOME100K</code>, <code>SALE10PCT</code>, <code>FREESHIP</code></small>
+                    </div>
+
+                    <!-- Bảng tính tiền -->
+                    <div class="small">
+                        <div class="d-flex justify-content-between mb-2 text-secondary">
+                            <span>Tạm tính:</span>
+                            <span class="fw-bold text-dark" th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2 text-secondary">
+                            <span>Phí giao hàng:</span>
+                            <span class="fw-bold text-dark" id="displayShippingFee">25.000 đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 text-success">
+                            <span>Giảm giá Voucher:</span>
+                            <span class="fw-bold" id="displayDiscount">- 0 đ</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-4">
+                            <span class="fw-bold fs-6">Tổng thanh toán:</span>
+                            <span class="price-current fs-4" id="displayTotal"
+                                  th:text="${#numbers.formatDecimal(subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>
+                        </div>
+                    </div>
+
+                    <!-- Nút xác nhận đặt hàng -->
+                    <button type="submit" class="btn btn-danger btn-lg w-100 fw-bold py-3 rounded-pill shadow">
+                        <i class="fa-solid fa-shield-check me-2"></i> HOÀN TẤT ĐẶT HÀNG
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    // Xử lý chuyển đổi giao diện giữa Giao tận nơi (DELIVERY) và Nhận tại chi nhánh (PICKUP)
+    const typeDelivery = document.getElementById('typeDelivery');
+    const typePickup = document.getElementById('typePickup');
+    const deliverySection = document.getElementById('deliverySection');
+    const pickupSection = document.getElementById('pickupSection');
+    const displayShippingFee = document.getElementById('displayShippingFee');
+
+    function updateOrderTypeView() {
+        if (typePickup.checked) {
+            pickupSection.classList.remove('d-none');
+            deliverySection.classList.add('d-none');
+            displayShippingFee.innerText = '0 đ (Nhận tại shop)';
+        } else {
+            pickupSection.classList.add('d-none');
+            deliverySection.classList.remove('d-none');
+            displayShippingFee.innerText = '25.000 đ';
+        }
+    }
+
+    typeDelivery.addEventListener('change', updateOrderTypeView);
+    typePickup.addEventListener('change', updateOrderTypeView);
+    updateOrderTypeView();
+</script>
+</body>
+</html>

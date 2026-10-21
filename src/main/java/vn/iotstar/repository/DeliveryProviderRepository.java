@@ -10,3 +10,4 @@ import java.util.List;
 public interface DeliveryProviderRepository extends JpaRepository<DeliveryProvider, Integer> {
     List<DeliveryProvider> findAllByIsActiveTrue();
 }
+

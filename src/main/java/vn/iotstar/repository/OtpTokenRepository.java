@@ -19,3 +19,4 @@ public interface OtpTokenRepository extends JpaRepository<OtpToken, Long> {
     @Query("UPDATE OtpToken o SET o.isUsed = true WHERE o.email = :email AND o.purpose = :purpose")
     void invalidateOldTokens(@Param("email") String email, @Param("purpose") OtpPurpose purpose);
 }
+

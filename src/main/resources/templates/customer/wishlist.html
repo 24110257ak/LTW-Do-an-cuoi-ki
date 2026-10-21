@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header-head}">
+    <title>Sản Phẩm Yêu Thích - ESC</title>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header-nav}"></div>
+
+<div class="container my-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/profile}" class="text-decoration-none">Tài khoản</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Sản phẩm yêu thích</li>
+        </ol>
+    </nav>
+
+    <!-- Flash message -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i><span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+        <h4 class="fw-bold mb-3"><i class="fa-solid fa-heart text-danger me-2"></i>Danh Sách Sản Phẩm Yêu Thích</h4>
+
+        <div th:if="${wishlistItems != null && !wishlistItems.isEmpty()}" class="row g-4">
+            <div class="col-6 col-md-4 col-lg-3" th:each="wl : ${wishlistItems}">
+                <div class="card card-product h-100 p-3 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="text-center py-3 bg-light rounded-3 mb-3" style="height: 160px;">
+                            <img th:if="${wl.product.thumbnailUrl != null}" th:src="${wl.product.thumbnailUrl}"
+                                 class="img-fluid h-100 object-fit-contain" alt="Product Image">
+                            <i th:unless="${wl.product.thumbnailUrl != null}" class="fa-solid fa-mobile-screen fs-1 text-secondary"></i>
+                        </div>
+                        <h6 class="fw-bold mb-1">
+                            <a th:href="@{'/products/' + ${wl.product.slug}}" class="text-dark text-decoration-none small text-truncate-2" th:text="${wl.product.productName}">Tên máy</a>
+                        </h6>
+                        <div class="price-current mb-3" th:text="${#numbers.formatDecimal(wl.product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <a th:href="@{'/products/' + ${wl.product.slug}}" class="btn btn-esc btn-sm flex-grow-1">Xem mua</a>
+                        <form th:action="@{/wishlist/toggle}" method="post">
+                            <input type="hidden" name="productId" th:value="${wl.product.productId}">
+                            <button type="submit" class="btn btn-outline-danger btn-sm" title="Bỏ thích"><i class="fa-solid fa-trash"></i></button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div th:unless="${wishlistItems != null && !wishlistItems.isEmpty()}" class="text-center py-5 text-muted small">
+            <i class="fa-regular fa-heart fs-1 mb-3 text-secondary"></i>
+            <h5>Bạn chưa lưu sản phẩm yêu thích nào</h5>
+            <p>Khám phá sản phẩm và bấm vào biểu tượng trái tim để lưu lại xem sau nhé!</p>
+            <a th:href="@{/products}" class="btn btn-esc btn-sm rounded-pill px-4 py-2">Khám phá sản phẩm</a>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

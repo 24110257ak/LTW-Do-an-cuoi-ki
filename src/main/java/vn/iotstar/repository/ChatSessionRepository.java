@@ -14,3 +14,4 @@ public interface ChatSessionRepository extends JpaRepository<ChatSession, Long> 
     List<ChatSession> findByBranchBranchIdAndStatusOrderByCreatedAtDesc(Integer branchId, ChatSessionStatus status);
     Optional<ChatSession> findByCustomerUserIdAndBranchBranchIdAndStatus(Long customerId, Integer branchId, ChatSessionStatus status);
 }
+
