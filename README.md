@@ -1,7 +1,7 @@
 # 📱 ĐỒ ÁN CUỐI KỲ: HỆ THỐNG WEBSITE BÁN HÀNG THEO MÔ HÌNH CHUỖI CỬA HÀNG THIẾT BỊ ĐIỆN TỬ
 
 > **Môn học:** Lập trình WEB  
-> **Trường Đại học:** Trường Đại học Sư phạm Kỹ thuật TP. Hồ Chí Minh (HCMUTE)  
+> **Trường Đại học:** Đại học Công nghệ Kỹ thuật Thành phố Hồ Chí Minh  
 > **Khoa:** Công nghệ Thông tin  
 > **Thời gian báo cáo:** 7h00 - 18h00 ngày 31/10/2026 tại phòng A5-203  
 > **Số thứ tự nhóm:** `Nhóm 24`  
@@ -247,4 +247,4 @@ mvn spring-boot:run
 - [ ] Tạo sheet mang tên `24` trên bảng điểm chung của lớp và tự chấm điểm theo quy định.
 
 ---
-*© 2026 Nhóm 24 - Lập trình Web - HCMUTE. Mọi quyền được bảo lưu.*
+*© 2026 Nhóm 24 - Lập trình Web - Đại học Công nghệ Kỹ thuật Thành phố Hồ Chí Minh. Mọi quyền được bảo lưu.*
