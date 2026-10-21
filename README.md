@@ -13,11 +13,13 @@
 
 ## 👥 1. THÀNH VIÊN THỰC HIỆN & PHÂN CÔNG NHIỆM VỤ (NHÓM 24)
 
-| STT | Mã sinh viên | Họ và tên | Vai trò đảm nhận | Phân công Module & Nghiệp vụ chi tiết |
+*(Phần phân công nhiệm vụ chi tiết sẽ được cập nhật và hoàn thiện theo tiến độ thực tế)*
+
+| STT | Mã sinh viên | Họ và tên | Vai trò | Phân công Module |
 | :---: | :---: | :--- | :---: | :--- |
-| **1** | `24110257` | **Trần Vũ Anh Khoa** | **Nhóm trưởng / Core Backend & System Security** | - **Hệ thống & Bảo mật:** Cấu hình Spring Security 6, JWT Filter, Đăng ký/Quên mật khẩu gửi **Mã OTP qua Email**, mã hóa BCrypt.<br>- **Hạ tầng Media & Realtime:** Tích hợp **Cloudinary SDK** upload hình ảnh; Cấu hình **WebSocket STOMP** (Thông báo đơn hàng tức thời + Live Chat tư vấn kỹ thuật trực tuyến).<br>- **Module Quản trị Hệ thống (Admin):** Quản lý người dùng, phân quyền, quản lý danh mục, cấu hình nhà vận chuyển & phí giao hàng, chiết khấu app, tổng hợp báo cáo.<br>- **Quản lý dự án:** Thiết kế kiến trúc tổng thể, quản lý Git/GitHub Branching, tổng hợp Báo cáo `.docx`. |
-| **2** | `24110292` | **Mai Huy Nhật** | **Backend Lead / CSDL & Multi-Branch** | - **Cơ sở dữ liệu & Model:** Thiết kế CSDL SQL Server, viết `database.sql`, xây dựng Hibernate Entities, Repositories, DTOs.<br>- **Module Chi nhánh / Cửa hàng (Vendor / Store Manager):** Quản lý hồ sơ chi nhánh, kho hàng theo chi nhánh (Multi-branch Inventory), quản lý sản phẩm chi nhánh, tạo chương trình khuyến mãi/voucher riêng chi nhánh, báo cáo doanh thu cửa hàng.<br>- **Module Giao vận (Shipper):** Quản lý danh sách đơn hàng được phân công giao, cập nhật tiến độ giao hàng realtime, thống kê đơn giao thành công. |
-| **3** | `24110304` | **Đặng Nhật Phúc** | **Frontend Lead & Customer Experience** | - **Giao diện Khách hàng & Khách vãng lai (Guest & User):** Xây dựng giao diện Responsive với Bootstrap 5 & Thymeleaf Layouts.<br>- **Trang chủ & Tra cứu sản phẩm:** Hiển thị sản phẩm bán chạy (>10 sản phẩm sắp xếp giảm dần), sản phẩm mới nhất, yêu thích; phân trang 20 sản phẩm/trang, bộ lọc thông minh & kiểm tra chi nhánh còn hàng.<br>- **Trang cá nhân (User Profile):** Quản lý sổ địa chỉ giao hàng đa điểm (Multiple Delivery Addresses).<br>- **Giao dịch & Tương tác:** Giỏ hàng lưu Database, Đặt hàng & Thanh toán (COD / VNPAY), Áp dụng Mã giảm giá (Coupon), Quản lý lịch sử đơn hàng 6 trạng thái, Đánh giá/Bình luận có text (≥50 ký tự) kèm ảnh Cloudinary. |
+| **1** | `24110257` | **Trần Vũ Anh Khoa** | *(Cập nhật sau)* | *(Cập nhật sau)* |
+| **2** | `24110292` | **Mai Huy Nhật** | *(Cập nhật sau)* | *(Cập nhật sau)* |
+| **3** | `24110304` | **Đặng Nhật Phúc** | *(Cập nhật sau)* | *(Cập nhật sau)* |
 
 ---
 
