@@ -31,3 +31,4 @@ public class Cart {
     @PreUpdate
     public void preUpdate() { this.updatedAt = LocalDateTime.now(); }
 }
+

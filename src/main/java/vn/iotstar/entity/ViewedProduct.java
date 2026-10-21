@@ -32,3 +32,4 @@ public class ViewedProduct {
     @PreUpdate
     public void preUpdate() { this.viewedAt = LocalDateTime.now(); }
 }
+

@@ -31,3 +31,4 @@ public class DeliveryProvider {
     @Builder.Default
     private Boolean isActive = true;
 }
+
