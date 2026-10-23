@@ -1,4 +1,4 @@
-package vn.iotstar.controller;
+package vn.iotstar.controller.staff;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
