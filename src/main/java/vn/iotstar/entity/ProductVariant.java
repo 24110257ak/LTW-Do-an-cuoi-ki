@@ -34,6 +34,11 @@ public class ProductVariant {
     @Column(name = "ram", length = 50)
     private String ram;
 
+    /** Giá vốn nhập hàng (COGS - Cost of Goods Sold) */
+    @Column(name = "cost_price", nullable = false)
+    @Builder.Default
+    private BigDecimal costPrice = BigDecimal.ZERO;
+
     @Column(name = "price", nullable = false)
     private BigDecimal price;
 
@@ -71,4 +76,3 @@ public class ProductVariant {
         return sb.toString();
     }
 }
-

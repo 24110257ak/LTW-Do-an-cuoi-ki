@@ -241,6 +241,7 @@ CREATE TABLE product_variants (
     color         NVARCHAR(100) NULL,           -- Màu sắc: Titan Đen, Trắng Ngà...
     storage       NVARCHAR(50)  NULL,           -- Dung lượng: 128GB, 256GB...
     ram           NVARCHAR(50)  NULL,           -- RAM: 8GB, 16GB, 32GB...
+    cost_price    DECIMAL(18,0) NOT NULL DEFAULT 0, -- Giá vốn biến thể (COGS)
     price         DECIMAL(18,0) NOT NULL,       -- Giá niêm yết biến thể
     promo_price   DECIMAL(18,0) NULL,           -- Giá khuyến mãi
     sku           NVARCHAR(100) NOT NULL UNIQUE,
@@ -258,6 +259,7 @@ CREATE TABLE branch_inventory (
     branch_id     INT NOT NULL,
     variant_id    BIGINT NOT NULL,
     quantity      INT NOT NULL DEFAULT 0,
+    safety_stock  INT NOT NULL DEFAULT 3,       -- Ngưỡng an toàn cảnh báo sắp hết hàng
     updated_at    DATETIME NOT NULL DEFAULT GETDATE(),
     CONSTRAINT fk_inv_branch FOREIGN KEY (branch_id) REFERENCES branches(branch_id),
     CONSTRAINT fk_inv_variant FOREIGN KEY (variant_id) REFERENCES product_variants(variant_id),
@@ -344,18 +346,24 @@ CREATE TABLE orders (
     shipping_fee       DECIMAL(18,0) NOT NULL DEFAULT 0,
     -- Thông tin nhận tại cửa hàng (PICKUP)
     pickup_branch_id   INT NULL,
-    -- Tài chính
+    -- Tài chính & Quản trị Lợi nhuận (P&L)
     subtotal           DECIMAL(18,0) NOT NULL DEFAULT 0,
     discount_amount    DECIMAL(18,0) NOT NULL DEFAULT 0,
     total_amount       DECIMAL(18,0) NOT NULL DEFAULT 0,
+    total_cost         DECIMAL(18,0) NOT NULL DEFAULT 0,       -- Tổng giá vốn đơn hàng (COGS)
+    gross_profit       DECIMAL(18,0) NOT NULL DEFAULT 0,       -- Lợi nhuận gộp (Gross Profit)
     coupon_id          INT NULL,
-    -- Thanh toán
+    -- Thanh toán & Quản trị đối soát tiền mặt COD
     payment_method     NVARCHAR(20) NOT NULL DEFAULT 'COD', -- COD | VNPAY
     payment_status     NVARCHAR(20) NOT NULL DEFAULT 'PENDING', -- PENDING | PAID | REFUNDED
     vnpay_txn_ref      NVARCHAR(100) NULL,
-    -- Trạng thái đơn hàng (6 trạng thái)
+    cod_collected      BIT NOT NULL DEFAULT 0,                 -- Shipper đã thu tiền mặt COD
+    cod_reconciled     BIT NOT NULL DEFAULT 0,                 -- Kế toán đã đối soát nộp quỹ
+    cod_reconciled_at  DATETIME NULL,
+    cod_transaction_id NVARCHAR(100) NULL,
+    -- Trạng thái đơn hàng (10 trạng thái)
     status             NVARCHAR(30) NOT NULL DEFAULT 'NEW',
-        -- NEW | CONFIRMED | SHIPPING | DELIVERED | CANCELLED | RETURNED_REFUND
+        -- NEW | CONFIRMED | READY_FOR_PICKUP | SHIPPING | DELIVERY_FAILED | RETURNING | RETURNED | DELIVERED | CANCELLED | RETURNED_REFUND
     shipper_id         BIGINT NULL,
     note               NVARCHAR(500) NULL,
     cancelled_reason   NVARCHAR(300) NULL,
@@ -367,7 +375,7 @@ CREATE TABLE orders (
     CONSTRAINT fk_order_provider FOREIGN KEY (provider_id) REFERENCES delivery_providers(provider_id),
     CONSTRAINT fk_order_coupon FOREIGN KEY (coupon_id) REFERENCES coupons(coupon_id),
     CONSTRAINT fk_order_shipper FOREIGN KEY (shipper_id) REFERENCES users(user_id),
-    CONSTRAINT chk_order_status CHECK (status IN ('NEW','CONFIRMED','SHIPPING','DELIVERED','CANCELLED','RETURNED_REFUND')),
+    CONSTRAINT chk_order_status CHECK (status IN ('NEW','CONFIRMED','READY_FOR_PICKUP','SHIPPING','DELIVERY_FAILED','RETURNING','RETURNED','DELIVERED','CANCELLED','RETURNED_REFUND')),
     CONSTRAINT chk_payment_method CHECK (payment_method IN ('COD','VNPAY')),
     CONSTRAINT chk_order_type CHECK (order_type IN ('DELIVERY','PICKUP'))
 );
@@ -383,6 +391,7 @@ CREATE TABLE order_items (
     product_name   NVARCHAR(300) NOT NULL, -- Snapshot tên sản phẩm lúc mua
     variant_info   NVARCHAR(200) NULL,     -- Snapshot màu/ROM/RAM lúc mua
     unit_price     DECIMAL(18,0) NOT NULL,
+    cost_price     DECIMAL(18,0) NOT NULL DEFAULT 0, -- Snapshot giá vốn lúc mua (COGS)
     quantity       INT NOT NULL DEFAULT 1 CHECK (quantity > 0),
     line_total     AS (unit_price * quantity) PERSISTED,
     CONSTRAINT fk_oi_order FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
