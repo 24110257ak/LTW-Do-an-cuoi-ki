@@ -585,16 +585,16 @@ GO
 -- customer1   -> Customer@123
 -- customer2   -> Customer@123
 INSERT INTO users (username, email, password, full_name, phone, is_active, is_verified, role_id, branch_id) VALUES
-(N'admin',        N'admin@esc.vn',                N'$2a$12$kUHSq8RRqOhGGLGP0XmgXeVZ8YCY25S2J5LjFGBN/ZNMGwAXGVxOq', N'Quản trị viên Hệ thống',  N'0901234567', 1, 1, 4, NULL),
-(N'staff_q1',     N'staff.q1@esc.vn',             N'$2a$12$xfJSh74sIQR1N8V00cVSb.cqUHV7v4W.xPGnBHRmAH4W8xT0s9Wha', N'Nguyễn Văn An',            N'0902345678', 1, 1, 2, 1),
-(N'staff_q3',     N'staff.q3@esc.vn',             N'$2a$12$xfJSh74sIQR1N8V00cVSb.cqUHV7v4W.xPGnBHRmAH4W8xT0s9Wha', N'Trần Thị Bích',            N'0903456789', 1, 1, 2, 2),
-(N'staff_thuduc', N'staff.thuduc@esc.vn',         N'$2a$12$xfJSh74sIQR1N8V00cVSb.cqUHV7v4W.xPGnBHRmAH4W8xT0s9Wha', N'Lê Văn Cường',             N'0904567890', 1, 1, 2, 3),
-(N'staff_govap',  N'staff.govap@esc.vn',          N'$2a$12$xfJSh74sIQR1N8V00cVSb.cqUHV7v4W.xPGnBHRmAH4W8xT0s9Wha', N'Phạm Thị Dung',            N'0905678901', 1, 1, 2, 4),
-(N'shipper1',     N'shipper1@esc.vn',             N'$2a$12$j7OEiXUV1V7/MbI5G5P7q.KOEp8oTD7ZeGMmDCcImr3BoMOZlL8im', N'Hoàng Minh Đức',           N'0906789012', 1, 1, 3, NULL),
-(N'shipper2',     N'shipper2@esc.vn',             N'$2a$12$j7OEiXUV1V7/MbI5G5P7q.KOEp8oTD7ZeGMmDCcImr3BoMOZlL8im', N'Vũ Thị Hoa',               N'0907890123', 1, 1, 3, NULL),
-(N'customer1',    N'customer1@gmail.com',         N'$2a$12$9fPGBbO3mPxHCPBTeyF6QecfXF0m1cVgC.YhkCtXF0lqhOaX.OERW', N'Trần Vũ Anh Khoa',         N'0908901234', 1, 1, 1, NULL),
-(N'customer2',    N'customer2@gmail.com',         N'$2a$12$9fPGBbO3mPxHCPBTeyF6QecfXF0m1cVgC.YhkCtXF0lqhOaX.OERW', N'Mai Huy Nhật',              N'0909012345', 1, 1, 1, NULL),
-(N'customer3',    N'customer3@gmail.com',         N'$2a$12$9fPGBbO3mPxHCPBTeyF6QecfXF0m1cVgC.YhkCtXF0lqhOaX.OERW', N'Đặng Nhật Phúc',           N'0910123456', 1, 1, 1, NULL);
+(N'admin',        N'admin@esc.vn',                N'$2a$10$Ceeo6FmYhUKF/aYHBmw2eOCUCeVdqFGw0Xg0D4jbASog0rj2.xNq2', N'Quản trị viên Hệ thống',  N'0901234567', 1, 1, 4, NULL),
+(N'staff_q1',     N'staff.q1@esc.vn',             N'$2a$10$p1DQk4zx/lmyVmqwCT/eauk6APbG4a4DH4CoFovQDJrU/l0GiKdT6', N'Nguyễn Văn An',            N'0902345678', 1, 1, 2, 1),
+(N'staff_q3',     N'staff.q3@esc.vn',             N'$2a$10$p1DQk4zx/lmyVmqwCT/eauk6APbG4a4DH4CoFovQDJrU/l0GiKdT6', N'Trần Thị Bích',            N'0903456789', 1, 1, 2, 2),
+(N'staff_thuduc', N'staff.thuduc@esc.vn',         N'$2a$10$p1DQk4zx/lmyVmqwCT/eauk6APbG4a4DH4CoFovQDJrU/l0GiKdT6', N'Lê Văn Cường',             N'0904567890', 1, 1, 2, 3),
+(N'staff_govap',  N'staff.govap@esc.vn',          N'$2a$10$p1DQk4zx/lmyVmqwCT/eauk6APbG4a4DH4CoFovQDJrU/l0GiKdT6', N'Phạm Thị Dung',            N'0905678901', 1, 1, 2, 4),
+(N'shipper1',     N'shipper1@esc.vn',             N'$2a$10$ZqrMnOVPKXWNWg6EGL3R5OnqKW2BbJNK5jExgXaeAS/7CtJuk3fvO', N'Hoàng Minh Đức',           N'0906789012', 1, 1, 3, NULL),
+(N'shipper2',     N'shipper2@esc.vn',             N'$2a$10$ZqrMnOVPKXWNWg6EGL3R5OnqKW2BbJNK5jExgXaeAS/7CtJuk3fvO', N'Vũ Thị Hoa',               N'0907890123', 1, 1, 3, NULL),
+(N'customer1',    N'customer1@gmail.com',         N'$2a$10$9fYEMORVZrxvW7K47zuX3uOaAoe3sBpXtdkwRKQldQ/80BcaBr1CW', N'Trần Vũ Anh Khoa',         N'0908901234', 1, 1, 1, NULL),
+(N'customer2',    N'customer2@gmail.com',         N'$2a$10$9fYEMORVZrxvW7K47zuX3uOaAoe3sBpXtdkwRKQldQ/80BcaBr1CW', N'Mai Huy Nhật',              N'0909012345', 1, 1, 1, NULL),
+(N'customer3',    N'customer3@gmail.com',         N'$2a$10$9fYEMORVZrxvW7K47zuX3uOaAoe3sBpXtdkwRKQldQ/80BcaBr1CW', N'Đặng Nhật Phúc',           N'0910123456', 1, 1, 1, NULL);
 GO
 
 -- -------------------------------------------------------------------------------

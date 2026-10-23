@@ -55,6 +55,23 @@ public class OrderIdempotencyTest {
     @Autowired
     private ProductVariantRepository variantRepository;
 
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
+    @Test
+    @DisplayName("Kiểm tra mã hóa BCrypt của các tài khoản thử nghiệm mẫu")
+    void testStandardPasswordsMatchBCrypt() {
+        String adminHash = "$2a$10$Ceeo6FmYhUKF/aYHBmw2eOCUCeVdqFGw0Xg0D4jbASog0rj2.xNq2";
+        String staffHash = "$2a$10$p1DQk4zx/lmyVmqwCT/eauk6APbG4a4DH4CoFovQDJrU/l0GiKdT6";
+        String shipperHash = "$2a$10$ZqrMnOVPKXWNWg6EGL3R5OnqKW2BbJNK5jExgXaeAS/7CtJuk3fvO";
+        String custHash = "$2a$10$9fYEMORVZrxvW7K47zuX3uOaAoe3sBpXtdkwRKQldQ/80BcaBr1CW";
+
+        assertTrue(passwordEncoder.matches("Admin@123", adminHash));
+        assertTrue(passwordEncoder.matches("Staff@123", staffHash));
+        assertTrue(passwordEncoder.matches("Shipper@123", shipperHash));
+        assertTrue(passwordEncoder.matches("Customer@123", custHash));
+    }
+
     private User customer;
     private Branch branch;
     private ProductVariant variant;
