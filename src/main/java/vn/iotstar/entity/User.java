@@ -63,6 +63,10 @@ public class User implements UserDetails {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
@@ -94,4 +98,3 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() { return Boolean.TRUE.equals(isActive) && Boolean.TRUE.equals(isVerified); }
 }
-

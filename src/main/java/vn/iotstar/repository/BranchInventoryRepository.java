@@ -1,6 +1,8 @@
 package vn.iotstar.repository;
 
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -15,6 +17,10 @@ public interface BranchInventoryRepository extends JpaRepository<BranchInventory
     List<BranchInventory> findByVariantVariantId(Long variantId);
     Optional<BranchInventory> findByBranchBranchIdAndVariantVariantId(Integer branchId, Long variantId);
 
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT bi FROM BranchInventory bi WHERE bi.branch.branchId = :branchId AND bi.variant.variantId = :variantId")
+    Optional<BranchInventory> findByBranchAndVariantForUpdate(@Param("branchId") Integer branchId, @Param("variantId") Long variantId);
+
     @Query("SELECT bi FROM BranchInventory bi WHERE bi.variant.product.productId = :productId AND bi.branch.branchId = :branchId")
     List<BranchInventory> findByProductAndBranch(@Param("productId") Long productId, @Param("branchId") Integer branchId);
 
@@ -24,4 +30,3 @@ public interface BranchInventoryRepository extends JpaRepository<BranchInventory
     @Query("SELECT COALESCE(SUM(bi.quantity), 0) FROM BranchInventory bi WHERE bi.variant.variantId = :variantId")
     Integer sumQuantityByVariantId(@Param("variantId") Long variantId);
 }
-
