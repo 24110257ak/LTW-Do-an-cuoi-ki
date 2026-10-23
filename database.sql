@@ -105,6 +105,11 @@ CREATE TABLE branches (
 );
 GO
 
+-- Liên kết nhân viên / quản lý trực thuộc chi nhánh
+ALTER TABLE users ADD branch_id INT NULL;
+ALTER TABLE users ADD CONSTRAINT fk_users_branch FOREIGN KEY (branch_id) REFERENCES branches(branch_id);
+GO
+
 -- ==================================================================================
 -- BẢNG 5: CATEGORIES - Danh mục sản phẩm (hỗ trợ phân cấp)
 -- ==================================================================================
@@ -131,6 +136,62 @@ CREATE TABLE brands (
     description  NVARCHAR(1000) NULL,
     is_active    BIT NOT NULL DEFAULT 1,
     created_at   DATETIME NOT NULL DEFAULT GETDATE()
+);
+GO
+
+-- ==================================================================================
+-- BẢNG 25: STOCK_TRANSFERS - Phiếu điều chuyển kho liên chi nhánh
+-- ==================================================================================
+CREATE TABLE stock_transfers (
+    transfer_id            BIGINT IDENTITY(1,1) PRIMARY KEY,
+    transfer_code          NVARCHAR(50) NOT NULL UNIQUE,
+    source_branch_id       INT NOT NULL,
+    destination_branch_id  INT NOT NULL,
+    status                 NVARCHAR(30) NOT NULL DEFAULT 'PENDING',
+    created_by_id          BIGINT NOT NULL,
+    approved_by_id         BIGINT NULL,
+    note                   NVARCHAR(500) NULL,
+    created_at             DATETIME NOT NULL DEFAULT GETDATE(),
+    updated_at             DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT fk_st_src_branch FOREIGN KEY (source_branch_id) REFERENCES branches(branch_id),
+    CONSTRAINT fk_st_dest_branch FOREIGN KEY (destination_branch_id) REFERENCES branches(branch_id),
+    CONSTRAINT fk_st_created_by FOREIGN KEY (created_by_id) REFERENCES users(user_id),
+    CONSTRAINT fk_st_approved_by FOREIGN KEY (approved_by_id) REFERENCES users(user_id),
+    CONSTRAINT chk_st_status CHECK (status IN ('PENDING', 'APPROVED', 'IN_TRANSIT', 'COMPLETED', 'CANCELLED'))
+);
+GO
+
+-- ==================================================================================
+-- BẢNG 26: STOCK_TRANSFER_ITEMS - Chi tiết sản phẩm phiếu điều chuyển
+-- ==================================================================================
+CREATE TABLE stock_transfer_items (
+    item_id     BIGINT IDENTITY(1,1) PRIMARY KEY,
+    transfer_id BIGINT NOT NULL,
+    variant_id  BIGINT NOT NULL,
+    quantity    INT NOT NULL CHECK (quantity > 0),
+    CONSTRAINT fk_sti_transfer FOREIGN KEY (transfer_id) REFERENCES stock_transfers(transfer_id) ON DELETE CASCADE,
+    CONSTRAINT fk_sti_variant FOREIGN KEY (variant_id) REFERENCES product_variants(variant_id)
+);
+GO
+
+-- ==================================================================================
+-- BẢNG 27: STOCK_LOGS - Nhật ký kiểm toán biến động kho (Audit Trail)
+-- ==================================================================================
+CREATE TABLE stock_logs (
+    log_id          BIGINT IDENTITY(1,1) PRIMARY KEY,
+    branch_id       INT NOT NULL,
+    variant_id      BIGINT NOT NULL,
+    movement_type   NVARCHAR(30) NOT NULL,
+    quantity_change INT NOT NULL,
+    quantity_after  INT NOT NULL,
+    performed_by_id BIGINT NULL,
+    reference_code  NVARCHAR(100) NULL,
+    note            NVARCHAR(500) NULL,
+    created_at      DATETIME NOT NULL DEFAULT GETDATE(),
+    CONSTRAINT fk_sl_branch FOREIGN KEY (branch_id) REFERENCES branches(branch_id),
+    CONSTRAINT fk_sl_variant FOREIGN KEY (variant_id) REFERENCES product_variants(variant_id),
+    CONSTRAINT fk_sl_user FOREIGN KEY (performed_by_id) REFERENCES users(user_id),
+    CONSTRAINT chk_sl_type CHECK (movement_type IN ('SALE', 'RETURN', 'TRANSFER_OUT', 'TRANSFER_IN', 'ADJUSTMENT'))
 );
 GO
 
@@ -271,6 +332,7 @@ GO
 CREATE TABLE orders (
     order_id           BIGINT IDENTITY(1,1) PRIMARY KEY,
     order_code         NVARCHAR(30) NOT NULL UNIQUE,   -- ESC-20261021-00001
+    checkout_token     NVARCHAR(64) NULL UNIQUE,       -- Chống trùng lặp tạo đơn (Idempotency)
     user_id            BIGINT NOT NULL,
     branch_id          INT NULL,                       -- Chi nhánh xử lý (NULL = auto)
     order_type         NVARCHAR(20) NOT NULL DEFAULT 'DELIVERY', -- DELIVERY | PICKUP
@@ -476,6 +538,10 @@ CREATE INDEX idx_orders_code ON orders(order_code);
 CREATE INDEX idx_reviews_product ON reviews(product_id);
 CREATE INDEX idx_notif_user ON notifications(user_id, is_read);
 CREATE INDEX idx_notif_branch ON notifications(branch_id, is_read);
+CREATE INDEX idx_transfers_source ON stock_transfers(source_branch_id, status);
+CREATE INDEX idx_transfers_dest ON stock_transfers(destination_branch_id, status);
+CREATE INDEX idx_stock_logs_branch ON stock_logs(branch_id, created_at DESC);
+CREATE INDEX idx_stock_logs_variant ON stock_logs(variant_id, created_at DESC);
 GO
 
 -- ==================================================================================
@@ -509,17 +575,17 @@ GO
 -- shipper1    -> Shipper@123
 -- customer1   -> Customer@123
 -- customer2   -> Customer@123
-INSERT INTO users (username, email, password, full_name, phone, is_active, is_verified, role_id) VALUES
-(N'admin',        N'admin@esc.vn',                N'$2a$12$kUHSq8RRqOhGGLGP0XmgXeVZ8YCY25S2J5LjFGBN/ZNMGwAXGVxOq', N'Quản trị viên Hệ thống',  N'0901234567', 1, 1, 4),
-(N'staff_q1',     N'staff.q1@esc.vn',             N'$2a$12$xfJSh74sIQR1N8V00cVSb.cqUHV7v4W.xPGnBHRmAH4W8xT0s9Wha', N'Nguyễn Văn An',            N'0902345678', 1, 1, 2),
-(N'staff_q3',     N'staff.q3@esc.vn',             N'$2a$12$xfJSh74sIQR1N8V00cVSb.cqUHV7v4W.xPGnBHRmAH4W8xT0s9Wha', N'Trần Thị Bích',            N'0903456789', 1, 1, 2),
-(N'staff_thuduc', N'staff.thuduc@esc.vn',         N'$2a$12$xfJSh74sIQR1N8V00cVSb.cqUHV7v4W.xPGnBHRmAH4W8xT0s9Wha', N'Lê Văn Cường',             N'0904567890', 1, 1, 2),
-(N'staff_govap',  N'staff.govap@esc.vn',          N'$2a$12$xfJSh74sIQR1N8V00cVSb.cqUHV7v4W.xPGnBHRmAH4W8xT0s9Wha', N'Phạm Thị Dung',            N'0905678901', 1, 1, 2),
-(N'shipper1',     N'shipper1@esc.vn',             N'$2a$12$j7OEiXUV1V7/MbI5G5P7q.KOEp8oTD7ZeGMmDCcImr3BoMOZlL8im', N'Hoàng Minh Đức',           N'0906789012', 1, 1, 3),
-(N'shipper2',     N'shipper2@esc.vn',             N'$2a$12$j7OEiXUV1V7/MbI5G5P7q.KOEp8oTD7ZeGMmDCcImr3BoMOZlL8im', N'Vũ Thị Hoa',               N'0907890123', 1, 1, 3),
-(N'customer1',    N'customer1@gmail.com',         N'$2a$12$9fPGBbO3mPxHCPBTeyF6QecfXF0m1cVgC.YhkCtXF0lqhOaX.OERW', N'Trần Vũ Anh Khoa',         N'0908901234', 1, 1, 1),
-(N'customer2',    N'customer2@gmail.com',         N'$2a$12$9fPGBbO3mPxHCPBTeyF6QecfXF0m1cVgC.YhkCtXF0lqhOaX.OERW', N'Mai Huy Nhật',              N'0909012345', 1, 1, 1),
-(N'customer3',    N'customer3@gmail.com',         N'$2a$12$9fPGBbO3mPxHCPBTeyF6QecfXF0m1cVgC.YhkCtXF0lqhOaX.OERW', N'Đặng Nhật Phúc',           N'0910123456', 1, 1, 1);
+INSERT INTO users (username, email, password, full_name, phone, is_active, is_verified, role_id, branch_id) VALUES
+(N'admin',        N'admin@esc.vn',                N'$2a$12$kUHSq8RRqOhGGLGP0XmgXeVZ8YCY25S2J5LjFGBN/ZNMGwAXGVxOq', N'Quản trị viên Hệ thống',  N'0901234567', 1, 1, 4, NULL),
+(N'staff_q1',     N'staff.q1@esc.vn',             N'$2a$12$xfJSh74sIQR1N8V00cVSb.cqUHV7v4W.xPGnBHRmAH4W8xT0s9Wha', N'Nguyễn Văn An',            N'0902345678', 1, 1, 2, 1),
+(N'staff_q3',     N'staff.q3@esc.vn',             N'$2a$12$xfJSh74sIQR1N8V00cVSb.cqUHV7v4W.xPGnBHRmAH4W8xT0s9Wha', N'Trần Thị Bích',            N'0903456789', 1, 1, 2, 2),
+(N'staff_thuduc', N'staff.thuduc@esc.vn',         N'$2a$12$xfJSh74sIQR1N8V00cVSb.cqUHV7v4W.xPGnBHRmAH4W8xT0s9Wha', N'Lê Văn Cường',             N'0904567890', 1, 1, 2, 3),
+(N'staff_govap',  N'staff.govap@esc.vn',          N'$2a$12$xfJSh74sIQR1N8V00cVSb.cqUHV7v4W.xPGnBHRmAH4W8xT0s9Wha', N'Phạm Thị Dung',            N'0905678901', 1, 1, 2, 4),
+(N'shipper1',     N'shipper1@esc.vn',             N'$2a$12$j7OEiXUV1V7/MbI5G5P7q.KOEp8oTD7ZeGMmDCcImr3BoMOZlL8im', N'Hoàng Minh Đức',           N'0906789012', 1, 1, 3, NULL),
+(N'shipper2',     N'shipper2@esc.vn',             N'$2a$12$j7OEiXUV1V7/MbI5G5P7q.KOEp8oTD7ZeGMmDCcImr3BoMOZlL8im', N'Vũ Thị Hoa',               N'0907890123', 1, 1, 3, NULL),
+(N'customer1',    N'customer1@gmail.com',         N'$2a$12$9fPGBbO3mPxHCPBTeyF6QecfXF0m1cVgC.YhkCtXF0lqhOaX.OERW', N'Trần Vũ Anh Khoa',         N'0908901234', 1, 1, 1, NULL),
+(N'customer2',    N'customer2@gmail.com',         N'$2a$12$9fPGBbO3mPxHCPBTeyF6QecfXF0m1cVgC.YhkCtXF0lqhOaX.OERW', N'Mai Huy Nhật',              N'0909012345', 1, 1, 1, NULL),
+(N'customer3',    N'customer3@gmail.com',         N'$2a$12$9fPGBbO3mPxHCPBTeyF6QecfXF0m1cVgC.YhkCtXF0lqhOaX.OERW', N'Đặng Nhật Phúc',           N'0910123456', 1, 1, 1, NULL);
 GO
 
 -- -------------------------------------------------------------------------------
@@ -856,6 +922,25 @@ INSERT INTO banners (title, image_url, link_url, display_order) VALUES
 (N'iPhone 16 Pro Max - Đỉnh cao mới', N'https://res.cloudinary.com/demo/image/upload/sample.jpg', N'/products/iphone-16-pro-max', 1),
 (N'Khuyến mãi Laptop tháng 10 - Giảm đến 15%', N'https://res.cloudinary.com/demo/image/upload/sample.jpg', N'/collections/laptop', 2),
 (N'MacBook Pro M4 - Sức mạnh vượt trội', N'https://res.cloudinary.com/demo/image/upload/sample.jpg', N'/products/macbook-pro-14-m4-pro', 3);
+GO
+
+-- -------------------------------------------------------------------------------
+-- STOCK_TRANSFERS & ITEMS (Dữ liệu mẫu điều chuyển kho giữa các chi nhánh)
+-- -------------------------------------------------------------------------------
+INSERT INTO stock_transfers (transfer_code, source_branch_id, destination_branch_id, status, created_by_id, approved_by_id, note) VALUES
+(N'TRF-20261021-00001', 1, 2, 'COMPLETED', 2, 1, N'Điều chuyển iPhone 16 Pro Max sang chi nhánh Q.3 để phục vụ khách đặt hàng');
+
+INSERT INTO stock_transfer_items (transfer_id, variant_id, quantity) VALUES
+(1, 1, 5);
+GO
+
+-- -------------------------------------------------------------------------------
+-- STOCK_LOGS (Dữ liệu mẫu sổ nhật ký kiểm toán kho)
+-- -------------------------------------------------------------------------------
+INSERT INTO stock_logs (branch_id, variant_id, movement_type, quantity_change, quantity_after, performed_by_id, reference_code, note) VALUES
+(1, 1, 'TRANSFER_OUT', -5, 20, 1, N'TRF-20261021-00001', N'Xuất kho chuyển sang chi nhánh Q.3'),
+(2, 1, 'TRANSFER_IN',   5, 15, 3, N'TRF-20261021-00001', N'Nhập kho nhận từ chi nhánh Q.1 chuyển đến'),
+(1, 1, 'SALE',         -1, 19, 2, N'ESC-20261021-00001', N'Bán hàng đơn #ESC-20261021-00001');
 GO
 
 PRINT N'==========================================';

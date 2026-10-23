@@ -15,11 +15,13 @@ import vn.iotstar.exception.ResourceNotFoundException;
 import vn.iotstar.repository.*;
 import vn.iotstar.service.CartService;
 import vn.iotstar.service.CouponService;
+import vn.iotstar.service.InventoryService;
 import vn.iotstar.service.OrderService;
 import vn.iotstar.util.OrderCodeUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +40,7 @@ public class OrderServiceImpl implements OrderService {
     private final DeliveryProviderRepository providerRepository;
     private final ProductRepository productRepository;
     private final BranchInventoryRepository inventoryRepository;
+    private final InventoryService inventoryService;
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -46,6 +49,16 @@ public class OrderServiceImpl implements OrderService {
     public Order placeOrder(Long userId, CheckoutRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng", "id", userId));
+
+        // 0. Chống click đúp / đặt hàng trùng lặp qua Checkout Token Idempotency
+        if (request.getCheckoutToken() != null && !request.getCheckoutToken().isBlank()) {
+            Optional<Order> existingOrder = orderRepository.findByUserUserIdAndCheckoutToken(userId, request.getCheckoutToken().trim());
+            if (existingOrder.isPresent()) {
+                log.info("Phát hiện checkoutToken trùng lặp: {}, trả về đơn hàng đã tồn tại #{}",
+                        request.getCheckoutToken(), existingOrder.get().getOrderCode());
+                return existingOrder.get();
+            }
+        }
 
         List<CartItem> cartItems = cartService.getCartItems(userId);
         if (cartItems.isEmpty()) {
@@ -120,6 +133,7 @@ public class OrderServiceImpl implements OrderService {
 
         Order order = Order.builder()
                 .orderCode(OrderCodeUtils.generateOrderCode())
+                .checkoutToken(request.getCheckoutToken() != null && !request.getCheckoutToken().isBlank() ? request.getCheckoutToken().trim() : null)
                 .user(user)
                 .branch(assignedBranch)
                 .orderType(request.getOrderType())
@@ -142,8 +156,12 @@ public class OrderServiceImpl implements OrderService {
         order = orderRepository.save(order);
 
         // 5. Tạo OrderItems và cập nhật kho, sản phẩm
+        // Sắp xếp các mục theo variantId tăng dần để triệt tiêu Deadlock khi nhiều khách cùng mua đồng thời
+        List<CartItem> sortedCartItems = new ArrayList<>(cartItems);
+        sortedCartItems.sort(Comparator.comparing(item -> item.getVariant().getVariantId()));
+
         List<OrderItem> orderItems = new ArrayList<>();
-        for (CartItem cartItem : cartItems) {
+        for (CartItem cartItem : sortedCartItems) {
             ProductVariant variant = cartItem.getVariant();
             Product product = variant.getProduct();
 
@@ -161,13 +179,17 @@ public class OrderServiceImpl implements OrderService {
             product.setTotalSold(product.getTotalSold() + cartItem.getQuantity());
             productRepository.save(product);
 
-            // Giảm tồn kho tại chi nhánh được gán nếu có
+            // Giảm tồn kho tại chi nhánh qua InventoryService với khóa PESSIMISTIC_WRITE & ghi nhật ký StockLog
             if (assignedBranch != null) {
-                inventoryRepository.findByBranchBranchIdAndVariantVariantId(assignedBranch.getBranchId(), variant.getVariantId())
-                        .ifPresent(inv -> {
-                            inv.setQuantity(Math.max(0, inv.getQuantity() - cartItem.getQuantity()));
-                            inventoryRepository.save(inv);
-                        });
+                inventoryService.adjustStock(
+                        assignedBranch.getBranchId(),
+                        variant.getVariantId(),
+                        -cartItem.getQuantity(),
+                        StockMovementType.SALE,
+                        user,
+                        order.getOrderCode(),
+                        "Bán hàng đơn #" + order.getOrderCode()
+                );
             }
         }
         order.setOrderItems(orderItems);
@@ -187,12 +209,11 @@ public class OrderServiceImpl implements OrderService {
         notificationRepository.save(notif);
 
         try {
-            // Gửi WebSocket Realtime tới kênh /topic/orders
-            messagingTemplate.convertAndSend("/topic/orders", String.format(
-                    "{\"orderCode\":\"%s\",\"totalAmount\":%.0f,\"receiverName\":\"%s\"}",
-                    order.getOrderCode(), order.getTotalAmount(), order.getReceiverName()));
+            messagingTemplate.convertAndSend("/topic/admin/orders", String.format(
+                    "{\"orderCode\":\"%s\",\"totalAmount\":%s,\"customer\":\"%s\"}",
+                    order.getOrderCode(), order.getTotalAmount(), user.getFullName()));
         } catch (Exception e) {
-            log.warn("Không thể gửi thông báo WebSocket: {}", e.getMessage());
+            log.warn("Không thể gửi thông báo WebSocket đặt hàng mới: {}", e.getMessage());
         }
 
         return order;
@@ -227,9 +248,37 @@ public class OrderServiceImpl implements OrderService {
             throw new BadRequestException("Đơn hàng đã được giao hoặc hoàn tất, không thể hủy!");
         }
 
+        OrderStatus oldStatus = order.getStatus();
         order.setStatus(OrderStatus.CANCELLED);
         order.setCancelledReason(reason != null ? reason : "Khách hàng hủy đơn");
         orderRepository.save(order);
+
+        // Hoàn lại lượt dùng mã giảm giá nếu có
+        if (order.getCoupon() != null) {
+            Coupon coupon = order.getCoupon();
+            coupon.setUsedCount(Math.max(0, coupon.getUsedCount() - 1));
+            couponRepository.save(coupon);
+        }
+
+        // Hoàn trả tồn kho và ghi nhận StockLog kiểm toán
+        if (oldStatus != OrderStatus.CANCELLED && oldStatus != OrderStatus.RETURNED_REFUND && order.getBranch() != null) {
+            List<OrderItem> items = orderItemRepository.findByOrderOrderId(order.getOrderId());
+            for (OrderItem item : items) {
+                try {
+                    inventoryService.adjustStock(
+                            order.getBranch().getBranchId(),
+                            item.getVariant().getVariantId(),
+                            item.getQuantity(),
+                            StockMovementType.RETURN,
+                            order.getUser(),
+                            order.getOrderCode(),
+                            "Hoàn kho khi khách hủy đơn #" + order.getOrderCode()
+                    );
+                } catch (Exception ex) {
+                    log.error("Lỗi hoàn kho cho sản phẩm {}: {}", item.getVariant().getVariantId(), ex.getMessage());
+                }
+            }
+        }
     }
 
     @Override
@@ -261,11 +310,40 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", orderId));
 
+        OrderStatus oldStatus = order.getStatus();
         order.setStatus(newStatus);
         if (note != null && !note.isBlank()) {
             order.setNote((order.getNote() != null ? order.getNote() + " | " : "") + note);
         }
         orderRepository.save(order);
+
+        // Nếu chuyển trạng thái sang CANCELLED hoặc RETURNED_REFUND thì hoàn trả tồn kho và ghi StockLog
+        if ((newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.RETURNED_REFUND)
+                && (oldStatus != OrderStatus.CANCELLED && oldStatus != OrderStatus.RETURNED_REFUND)
+                && order.getBranch() != null) {
+            if (order.getCoupon() != null) {
+                Coupon coupon = order.getCoupon();
+                coupon.setUsedCount(Math.max(0, coupon.getUsedCount() - 1));
+                couponRepository.save(coupon);
+            }
+
+            List<OrderItem> items = orderItemRepository.findByOrderOrderId(order.getOrderId());
+            for (OrderItem item : items) {
+                try {
+                    inventoryService.adjustStock(
+                            order.getBranch().getBranchId(),
+                            item.getVariant().getVariantId(),
+                            item.getQuantity(),
+                            StockMovementType.RETURN,
+                            null,
+                            order.getOrderCode(),
+                            "Hoàn kho cập nhật trạng thái " + newStatus.name() + " đơn #" + order.getOrderCode()
+                    );
+                } catch (Exception ex) {
+                    log.error("Lỗi hoàn kho cho sản phẩm {}: {}", item.getVariant().getVariantId(), ex.getMessage());
+                }
+            }
+        }
 
         // Gửi WebSocket thông báo cập nhật trạng thái đơn
         try {

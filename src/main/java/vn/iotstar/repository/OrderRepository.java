@@ -16,6 +16,8 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByOrderCode(String orderCode);
+    Optional<Order> findByCheckoutToken(String checkoutToken);
+    Optional<Order> findByUserUserIdAndCheckoutToken(Long userId, String checkoutToken);
     List<Order> findByUserUserIdOrderByCreatedAtDesc(Long userId);
     Page<Order> findByUserUserId(Long userId, Pageable pageable);
     Page<Order> findByBranchBranchId(Integer branchId, Pageable pageable);
