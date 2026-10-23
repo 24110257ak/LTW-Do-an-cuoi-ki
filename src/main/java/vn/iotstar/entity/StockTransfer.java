@@ -65,3 +65,4 @@ public class StockTransfer {
         this.updatedAt = LocalDateTime.now();
     }
 }
+

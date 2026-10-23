@@ -218,3 +218,4 @@ public class StockTransferServiceImpl implements StockTransferService {
         transferRepository.save(transfer);
     }
 }
+

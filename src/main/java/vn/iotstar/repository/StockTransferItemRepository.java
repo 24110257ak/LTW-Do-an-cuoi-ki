@@ -11,3 +11,4 @@ public interface StockTransferItemRepository extends JpaRepository<StockTransfer
 
     List<StockTransferItem> findByTransferTransferId(Long transferId);
 }
+

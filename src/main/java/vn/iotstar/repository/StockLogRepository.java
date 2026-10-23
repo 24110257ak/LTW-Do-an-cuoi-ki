@@ -24,3 +24,4 @@ public interface StockLogRepository extends JpaRepository<StockLog, Long> {
 
     Page<StockLog> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }
+

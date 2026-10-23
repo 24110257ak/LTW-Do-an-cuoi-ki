@@ -209,3 +209,4 @@ public class StockTransferServiceTest {
         assertEquals(10, inventoryService.getAvailableQuantity(branchSource.getBranchId(), variant.getVariantId()));
     }
 }
+

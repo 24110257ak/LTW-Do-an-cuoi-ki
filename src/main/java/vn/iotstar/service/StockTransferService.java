@@ -28,3 +28,4 @@ public interface StockTransferService {
 
     void cancelTransfer(Long transferId, User actor, String reason);
 }
+

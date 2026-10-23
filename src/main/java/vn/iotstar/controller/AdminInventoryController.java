@@ -74,3 +74,4 @@ public class AdminInventoryController {
         return "redirect:/admin/inventory/logs";
     }
 }
+

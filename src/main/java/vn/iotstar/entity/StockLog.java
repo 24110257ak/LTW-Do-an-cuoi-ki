@@ -51,3 +51,4 @@ public class StockLog {
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 }
+

@@ -19,3 +19,4 @@ public interface StockTransferRepository extends JpaRepository<StockTransfer, Lo
 
     List<StockTransfer> findAllByOrderByCreatedAtDesc();
 }
+

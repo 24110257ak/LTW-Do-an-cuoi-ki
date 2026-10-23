@@ -16,3 +16,4 @@ public enum StockMovementType {
         this.displayName = displayName;
     }
 }
+

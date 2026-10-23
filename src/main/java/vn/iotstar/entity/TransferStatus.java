@@ -16,3 +16,4 @@ public enum TransferStatus {
         this.displayName = displayName;
     }
 }
+

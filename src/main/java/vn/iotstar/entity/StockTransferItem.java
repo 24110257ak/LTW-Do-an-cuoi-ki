@@ -30,3 +30,4 @@ public class StockTransferItem {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 }
+

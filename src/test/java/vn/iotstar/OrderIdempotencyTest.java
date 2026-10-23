@@ -151,3 +151,4 @@ public class OrderIdempotencyTest {
         assertEquals(8, inventoryService.getAvailableQuantity(branch.getBranchId(), variant.getVariantId()));
     }
 }
+
