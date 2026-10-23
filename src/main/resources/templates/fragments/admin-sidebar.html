@@ -44,6 +44,16 @@
             </a>
         </li>
         <li class="nav-item mb-1">
+            <a th:href="@{/admin/transfers}" class="nav-link text-white" th:classappend="${activeTab == 'transfers' ? 'active bg-primary' : ''}">
+                <i class="bi bi-arrow-left-right me-2"></i> Điều chuyển kho
+            </a>
+        </li>
+        <li class="nav-item mb-1">
+            <a th:href="@{/admin/inventory/logs}" class="nav-link text-white" th:classappend="${activeTab == 'inventory-logs' ? 'active bg-primary' : ''}">
+                <i class="bi bi-journal-text me-2"></i> Nhật ký kho (Audit Log)
+            </a>
+        </li>
+        <li class="nav-item mb-1">
             <a th:href="@{/admin/users}" class="nav-link text-white" th:classappend="${activeTab == 'users' ? 'active bg-primary' : ''}">
                 <i class="bi bi-people me-2"></i> Khách hàng & Nhân sự
             </a>

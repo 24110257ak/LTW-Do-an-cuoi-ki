@@ -14,6 +14,8 @@ import vn.iotstar.enums.PaymentMethod;
 @AllArgsConstructor
 public class CheckoutRequest {
 
+    private String checkoutToken;
+
     @NotNull(message = "Vui lòng chọn hình thức nhận hàng")
     private OrderType orderType; // DELIVERY hoặc PICKUP
 

@@ -27,6 +27,9 @@ public class Order {
     @Column(name = "order_code", length = 30, nullable = false, unique = true)
     private String orderCode;
 
+    @Column(name = "checkout_token", length = 64, unique = true)
+    private String checkoutToken;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -128,4 +131,3 @@ public class Order {
     @PreUpdate
     public void preUpdate() { this.updatedAt = LocalDateTime.now(); }
 }
-
