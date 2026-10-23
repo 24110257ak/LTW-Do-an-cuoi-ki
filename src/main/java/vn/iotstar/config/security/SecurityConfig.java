@@ -24,7 +24,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
 @Configuration
 @EnableWebSecurity
@@ -94,7 +93,7 @@ public class SecurityConfig {
                         .ignoringRequestMatchers("/ws/**", "/api/**")
                 )
                 .authorizeHttpRequests(auth -> auth
-                        // Public assets
+                        // Public assets & Swagger Documentation
                         .requestMatchers(
                                 "/",
                                 "/index",
@@ -111,7 +110,10 @@ public class SecurityConfig {
                                 "/ws/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
+                                "/v3/api-docs",
                                 "/v3/api-docs/**",
+                                "/api-docs",
+                                "/api-docs/**",
                                 "/error/**"
                         ).permitAll()
                         // Phân quyền theo vai trò
@@ -162,4 +164,3 @@ public class SecurityConfig {
         };
     }
 }
-

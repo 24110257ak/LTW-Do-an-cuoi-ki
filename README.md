@@ -157,6 +157,20 @@ graph TD
 - Cập nhật trạng thái: Đang giao -> Đã giao thành công / Hủy đơn.
 - Thống kê đơn giao thành công và tiền COD cần nộp lại.
 
+### 4.6. Hệ thống RESTful API & Swagger OpenAPI 3.0 (Tích hợp JWT)
+- **Chuẩn hóa API RESTful:** Hỗ trợ đầy đủ các phương thức HTTP (GET, POST, PUT, DELETE) với cấu trúc phản hồi chuẩn hóa ApiResponse<T>.
+- **Bảo mật Token Bearer JWT:** Cấp phát mã JWT sau khi đăng nhập qua /api/auth/login, bảo vệ các API nghiệp vụ quan trọng qua Filter JwtAuthenticationFilter.
+- **Tài liệu trực quan tương tác Swagger UI:**
+  - Đường dẫn truy cập: http://localhost:8080/swagger-ui.html
+  - OpenAPI 3.0 JSON Schema: http://localhost:8080/api-docs
+  - Hỗ trợ nút **Authorize** nhập mã Bearer JWT token trực tiếp trên trình duyệt để gọi test API trực tiếp.
+- **Danh mục các Controller RESTful đã triển khai:**
+  - AuthApiController (/api/auth/**): Đăng nhập, Đăng ký, Lấy thông tin tài khoản hiện hành (/me).
+  - ProductApiController (/api/products/**): Tìm kiếm, Lọc đa tiêu chí, Chi tiết sản phẩm & biến thể, Quản trị sản phẩm.
+  - CategoryApiController (/api/categories/**): Tra cứu danh mục công khai & Phân cấp danh mục.
+  - OrderApiController (/api/orders/**): Đặt hàng (Checkout), Lịch sử đơn cá nhân, Hủy đơn, Shipper giao hàng & Kế toán đối soát COD.
+  - FinancialApiController (/api/admin/financial/**): Báo cáo tài chính toàn chuỗi (Doanh thu, Giá vốn COGS, Lợi nhuận gộp), Hiệu quả chi nhánh, Cảnh báo tồn kho an toàn & Đề xuất điều chuyển tự động.
+
 ---
 
 ## 🌿 5. CHIẾN LƯỢC PHÂN NHÁNH GIT (GIT FLOW STRATEGY)
@@ -173,7 +187,9 @@ main (Phiên bản phát hành chính thức, mã nguồn hoàn chỉnh sẵn s�
         ├── feature/customer-and-public-portal  (Phase 3: Trang chủ, Catalog 20 sp/trang, Chi tiết, Tra cứu kho, Giỏ hàng, Checkout, Review, Wishlist)
         ├── feature/admin-and-staff-portal      (Phase 4 & 5: HQ Admin Dashboard, Quản lý sản phẩm, Staff Portal chi nhánh, Kho hàng, WebSocket STOMP & Live Chat)
         ├── docs/final-report                   (Phase 6: Hoàn thiện Báo cáo tổng thể, Setup Guide, Chuẩn hóa tài liệu)
-        └── feature/inventory-transfer-and-audit-log (Phase 7: Điều chuyển kho liên chi nhánh, Audit Trail, Khóa bi quan, Idempotency & Bộ Test tự động)
+        ├── feature/inventory-transfer-and-audit-log (Phase 7: Điều chuyển kho liên chi nhánh, Audit Trail, Khóa bi quan, Idempotency & Bộ Test tự động)
+        ├── feature/smart-logistics-and-cogs    (Phase 8: Logistics thông minh, Smart Routing, Giá vốn COGS, Lợi nhuận gộp & Đối soát COD)
+        └── feature/rest-api-and-swagger-jwt    (Phase 9: Hệ thống RESTful API chuẩn OpenAPI 3.0 với xác thực Bearer JWT & Swagger UI)
 ```
 
 ### Bảng theo dõi các nhánh chức năng thực tế trên GitHub:
