@@ -13,13 +13,13 @@
 
 ## 👥 1. THÀNH VIÊN THỰC HIỆN & PHÂN CÔNG NHIỆM VỤ (NHÓM 24)
 
-Dự án được xây dựng và phối hợp theo mô hình Agile/Scrum kết hợp quy trình phân nhánh Git Flow bài bản, minh bạch giữa 3 thành viên:
+*(Phần phân công nhiệm vụ chi tiết sẽ được cập nhật và hoàn thiện theo tiến độ thực tế)*
 
-| STT | Mã sinh viên | Họ và tên | Vai trò | Phân công Module & Đóng góp kỹ thuật chính |
+| STT | Mã sinh viên | Họ và tên | Vai trò | Phân công Module |
 | :---: | :---: | :--- | :---: | :--- |
-| **1** | 24110292 | **Mai Huy Nhật** | **Nhóm trưởng / Backend Lead** | - **Kiến trúc hệ thống & CSDL:** Thiết kế chuẩn 3 tầng (3-tier), lược đồ CSDL SQL Server 27 bảng, ánh xạ JPA Entities, Repositories, quan hệ dữ liệu.<br>- **Quản lý chuỗi & Kho phân tán:** Nghiệp vụ tồn kho đa chi nhánh, Phiếu điều chuyển kho liên chi nhánh (StockTransfer) với quy trình phê duyệt & khóa bi quan chống Deadlock.<br>- **Kinh tế & Logistics thông minh:** Thuật toán Smart Order Routing định tuyến đơn tối ưu theo vị trí và tồn kho; Quản trị Giá vốn (COGS), Lợi nhuận gộp theo thời gian thực; Nghiệp vụ vận hành & đối soát tiền mặt COD; Thuật toán tự động đề xuất điều chuyển cân bằng tồn kho.<br>- **RESTful API & Automated Testing:** Xây dựng bộ REST API (/api/**), cấu hình OpenAPI 3.0 Swagger UI và viết toàn bộ 19 Unit/Integration Tests (JUnit 5 + H2 Database). |
-| **2** | 24110257 | **Trần Vũ Anh Khoa** | **Security & Platform Lead** | - **Bảo mật kép (Dual Security):** Thiết kế Spring Security 6 hỗ trợ đồng thời Web MVC Session Form Login và Stateless Bearer JWT Filter cho REST API.<br>- **Xác thực tài khoản & OTP:** Xây dựng hệ thống đăng ký, kích hoạt tài khoản và khôi phục mật khẩu qua OTP (hỗ trợ Email Service và Terminal Mode tiện lợi chấm điểm).<br>- **Phân quyền người dùng:** Thiết lập ma trận bảo mật 5 vai trò (Guest, Customer, Staff/Store Manager, Shipper, Admin) bảo vệ toàn bộ endpoints /admin/**, /staff/**, /shipper/**, /api/**.<br>- **Hạ tầng & Nền tảng:** Tích hợp lưu trữ đám mây Cloudinary CDN, WebSocket STOMP chuông báo đơn mới & Live Chat tư vấn; Tích hợp cổng thanh toán VNPAY Sandbox và giải pháp chống trùng lặp đơn hàng Checkout Token Idempotency. |
-| **3** | 24110304 | **Đặng Nhật Phúc** | **Frontend & UI/UX Lead** | - **Giao diện người dùng Responsive:** Thiết kế toàn bộ giao diện với Thymeleaf 3 + Bootstrap 5.3 + Bootstrap Icons + FontAwesome 6 chuẩn hóa hiển thị trên Mobile, Tablet, Desktop.<br>- **Portal Khách hàng (Customer Portal):** Trang chủ, Catalog 20 sp/trang với bộ lọc đa tiêu chí, Trang chi tiết sản phẩm & biến thể đa thuộc tính (ROM, RAM, Màu sắc), Tra cứu tồn kho chi nhánh theo thời gian thực, Giỏ hàng, Đặt hàng đa hình thức (Giao tận nơi / Nhận tại cửa hàng), Sổ địa chỉ nhận hàng đa điểm, Đánh giá sản phẩm kèm tải ảnh thật.<br>- **Portal Quản trị & Cửa hàng (Admin & Staff Portal):** HQ Dashboard trực quan hóa biểu đồ doanh thu chi nhánh và cơ cấu đơn hàng (Chart.js); Giao diện CRUD Sản phẩm, Quản lý chi nhánh, Quản trị tồn kho, Quản lý phiếu điều chuyển kho liên chi nhánh (/admin/transfers), Sổ nhật ký kiểm toán tồn kho (/admin/inventory/logs); Staff Portal xử lý đơn hàng chi nhánh & Live Chat support. |
+| **1** | 24110257 | **Trần Vũ Anh Khoa** | Thành viên | *(Cập nhật sau)* |
+| **2** | 24110292 | **Mai Huy Nhật** | **Nhóm trưởng** | *(Cập nhật sau)* |
+| **3** | 24110304 | **Đặng Nhật Phúc** | Thành viên | *(Cập nhật sau)* |
 
 ---
 
