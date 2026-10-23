@@ -29,6 +29,11 @@ public class BranchInventory {
     @Builder.Default
     private Integer quantity = 0;
 
+    /** Ngưỡng tồn kho an toàn cảnh báo sắp hết hàng */
+    @Column(name = "safety_stock", nullable = false)
+    @Builder.Default
+    private Integer safetyStock = 3;
+
     @Column(name = "updated_at", nullable = false)
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
@@ -36,4 +41,3 @@ public class BranchInventory {
     @PreUpdate
     public void preUpdate() { this.updatedAt = LocalDateTime.now(); }
 }
-

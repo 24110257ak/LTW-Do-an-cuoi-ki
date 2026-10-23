@@ -30,11 +30,31 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     long countByBranchBranchId(Integer branchId);
     long countByBranchBranchIdAndStatus(Integer branchId, OrderStatus status);
 
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status != vn.iotstar.enums.OrderStatus.CANCELLED")
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status != vn.iotstar.enums.OrderStatus.CANCELLED AND o.status != vn.iotstar.enums.OrderStatus.RETURNED_REFUND")
     BigDecimal sumTotalRevenue();
 
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.branch.branchId = :branchId AND o.status != vn.iotstar.enums.OrderStatus.CANCELLED")
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.branch.branchId = :branchId AND o.status != vn.iotstar.enums.OrderStatus.CANCELLED AND o.status != vn.iotstar.enums.OrderStatus.RETURNED_REFUND")
     BigDecimal sumRevenueByBranch(@Param("branchId") Integer branchId);
+
+    @Query("SELECT COALESCE(SUM(o.grossProfit), 0) FROM Order o WHERE o.status != vn.iotstar.enums.OrderStatus.CANCELLED AND o.status != vn.iotstar.enums.OrderStatus.RETURNED_REFUND")
+    BigDecimal sumTotalGrossProfit();
+
+    @Query("SELECT COALESCE(SUM(o.grossProfit), 0) FROM Order o WHERE o.branch.branchId = :branchId AND o.status != vn.iotstar.enums.OrderStatus.CANCELLED AND o.status != vn.iotstar.enums.OrderStatus.RETURNED_REFUND")
+    BigDecimal sumGrossProfitByBranch(@Param("branchId") Integer branchId);
+
+    @Query("SELECT COALESCE(SUM(o.totalCost), 0) FROM Order o WHERE o.status != vn.iotstar.enums.OrderStatus.CANCELLED AND o.status != vn.iotstar.enums.OrderStatus.RETURNED_REFUND")
+    BigDecimal sumTotalCost();
+
+    @Query("SELECT COALESCE(SUM(o.totalCost), 0) FROM Order o WHERE o.branch.branchId = :branchId AND o.status != vn.iotstar.enums.OrderStatus.CANCELLED AND o.status != vn.iotstar.enums.OrderStatus.RETURNED_REFUND")
+    BigDecimal sumTotalCostByBranch(@Param("branchId") Integer branchId);
+
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.paymentMethod = vn.iotstar.enums.PaymentMethod.COD AND o.codCollected = true AND o.codReconciled = false")
+    BigDecimal sumPendingCodReconciliationAmount();
+
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.paymentMethod = vn.iotstar.enums.PaymentMethod.COD AND o.codReconciled = true")
+    BigDecimal sumReconciledCodAmount();
+
+    List<Order> findByCodCollectedTrueAndCodReconciledFalseOrderByCreatedAtAsc();
 
     List<Order> findTop10ByOrderByCreatedAtDesc();
     List<Order> findTop10ByBranchBranchIdOrderByCreatedAtDesc(Integer branchId);

@@ -68,7 +68,7 @@ public class Order {
     @JoinColumn(name = "pickup_branch_id")
     private Branch pickupBranch;
 
-    // --- Tài chính ---
+    // --- Tài chính & Quản trị Lợi nhuận (P&L) ---
     @Column(name = "subtotal", nullable = false)
     @Builder.Default
     private BigDecimal subtotal = BigDecimal.ZERO;
@@ -80,6 +80,16 @@ public class Order {
     @Column(name = "total_amount", nullable = false)
     @Builder.Default
     private BigDecimal totalAmount = BigDecimal.ZERO;
+
+    /** Tổng giá vốn của đơn hàng (COGS) */
+    @Column(name = "total_cost", nullable = false)
+    @Builder.Default
+    private BigDecimal totalCost = BigDecimal.ZERO;
+
+    /** Lợi nhuận gộp của đơn hàng (Gross Profit = Subtotal - Discount - TotalCost) */
+    @Column(name = "gross_profit", nullable = false)
+    @Builder.Default
+    private BigDecimal grossProfit = BigDecimal.ZERO;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coupon_id")
@@ -98,6 +108,21 @@ public class Order {
 
     @Column(name = "vnpay_txn_ref", length = 100)
     private String vnpayTxnRef;
+
+    // --- Quản trị đối soát tiền mặt COD (COD Cash Reconciliation) ---
+    @Column(name = "cod_collected", nullable = false)
+    @Builder.Default
+    private Boolean codCollected = false;
+
+    @Column(name = "cod_reconciled", nullable = false)
+    @Builder.Default
+    private Boolean codReconciled = false;
+
+    @Column(name = "cod_reconciled_at")
+    private LocalDateTime codReconciledAt;
+
+    @Column(name = "cod_transaction_id", length = 100)
+    private String codTransactionId;
 
     // --- Trạng thái đơn hàng ---
     @Enumerated(EnumType.STRING)
