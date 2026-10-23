@@ -31,7 +31,7 @@
 | **2. Cấu trúc Project đúng chuẩn 3 tầng** | **0.5 đ** | Chuẩn Spring Boot 3-tier: Controller (Web & API) - Service - Repository - Entity/DTO, phân chia package mạch lạc. |
 | **3. Nghiệp vụ, Logic, Validation & Security** | **6.0 đ** | Đầy đủ 5 roles (Guest, User, Vendor/Store Manager, Admin, Shipper), xử lý validation đầy đủ (`jakarta.validation`), bảo mật Spring Security 6 + OTP kích hoạt qua Email/Terminal. |
 | **4. Giao diện Đẹp, Thân thiện & Responsive** | **1.0 đ** | Template Bootstrap 5.3 hiện đại, tối ưu di động, máy tính bảng và desktop, trải nghiệm mượt mà. |
-| **5. Tính năng Sáng tạo & Nâng cao** | **1.0 đ** | - Xác thực bảo mật kép với **JWT**.<br>- **WebSocket STOMP** thông báo đơn hàng realtime và Livechat tư vấn.<br>- Tích hợp lưu trữ CDN **Cloudinary**.<br>- Thanh toán trực tuyến **VNPAY Sandbox**.<br>- Hệ thống Quản lý **Chuỗi cửa hàng & Tồn kho đa chi nhánh (Multi-branch Inventory)**. |
+| **5. Tính năng Sáng tạo & Nâng cao** | **1.0 đ** | - Xác thực bảo mật kép với **JWT**.<br>- **WebSocket STOMP** thông báo đơn hàng realtime và Livechat tư vấn.<br>- Tích hợp lưu trữ CDN **Cloudinary**.<br>- Thanh toán trực tuyến **VNPAY Sandbox**.<br>- Hệ thống Quản lý **Chuỗi cửa hàng & Tồn kho đa chi nhánh (Multi-branch Inventory)**.<br>- **Điều chuyển kho liên chi nhánh** với quy trình duyệt & khóa chống Deadlock.<br>- **Sổ nhật ký kiểm toán tồn kho (Audit Trail)** & Chống đặt trùng đơn (**Checkout Idempotency**).<br>- **Kiểm thử tự động (Automated Testing)** đạt chuẩn với JUnit 5 & H2 Database. |
 | **6. Khả năng Báo cáo & Trả lời phản biện** | **0.5 đ** | Báo cáo chi tiết, video demo rõ mặt 3 thành viên, nắm vững source code và kiến trúc. |
 
 ---
@@ -95,7 +95,7 @@ graph TD
   - `spring-boot-starter-websocket` (STOMP Protocol Realtime)
   - `com.cloudinary:cloudinary-http44:1.38.0` (Lưu trữ ảnh mây)
   - `io.jsonwebtoken:jjwt` (JWT Token)
-- **Database:** Microsoft SQL Server 2019/2022 + SSMS (24 bảng quan hệ, collation `Vietnamese_CI_AS`)
+- **Database:** Microsoft SQL Server 2019/2022 + SSMS (27 bảng quan hệ, collation `Vietnamese_CI_AS`)
 - **Frontend:** Thymeleaf 3, Bootstrap 5.3, Bootstrap Icons, FontAwesome 6, Chart.js, SockJS, STOMP.js
 - **Build tool:** Apache Maven
 
@@ -168,11 +168,12 @@ main (Phiên bản phát hành chính thức, mã nguồn hoàn chỉnh sẵn s�
   │
   └── dev (Nhánh tích hợp tổng thể - Integration Branch)
         │
-        ├── feature/database-and-entity         (Phase 1: Khởi tạo CSDL 24 bảng, JPA Entities, Enums & Seed Data)
+        ├── feature/database-and-entity         (Phase 1: Khởi tạo CSDL 27 bảng, JPA Entities, Enums & Seed Data)
         ├── feature/security-jwt-and-email-otp  (Phase 2: Spring Security 6 kép, JWT Filter, OTP Email/Terminal, Repositories & Cloudinary)
         ├── feature/customer-and-public-portal  (Phase 3: Trang chủ, Catalog 20 sp/trang, Chi tiết, Tra cứu kho, Giỏ hàng, Checkout, Review, Wishlist)
         ├── feature/admin-and-staff-portal      (Phase 4 & 5: HQ Admin Dashboard, Quản lý sản phẩm, Staff Portal chi nhánh, Kho hàng, WebSocket STOMP & Live Chat)
-        └── docs/final-report                   (Phase 6: Hoàn thiện Báo cáo tổng thể, Setup Guide, Chuẩn hóa tài liệu)
+        ├── docs/final-report                   (Phase 6: Hoàn thiện Báo cáo tổng thể, Setup Guide, Chuẩn hóa tài liệu)
+        └── feature/inventory-transfer-and-audit-log (Phase 7: Điều chuyển kho liên chi nhánh, Audit Trail, Khóa bi quan, Idempotency & Bộ Test tự động)
 ```
 
 ### Bảng theo dõi các nhánh chức năng thực tế trên GitHub:
@@ -180,11 +181,12 @@ main (Phiên bản phát hành chính thức, mã nguồn hoàn chỉnh sẵn s�
 | :---: | :--- | :---: | :--- | :---: |
 | **1** | `main` | Production | Mã nguồn chính thức, chạy ổn định, sẵn sàng báo cáo chấm điểm. | ✅ Đã đồng bộ |
 | **2** | `dev` | Integration | Nhánh trung gian tích hợp các tính năng trước khi đưa vào `main`. | ✅ Đã đồng bộ |
-| **3** | `feature/database-and-entity` | Phase 1 | CSDL SQL Server 24 bảng, 16 Entities, 8 Enums, seed data mẫu. | ✅ Đã merge vào `dev` |
+| **3** | `feature/database-and-entity` | Phase 1 | CSDL SQL Server 27 bảng, 16 Entities, 8 Enums, seed data mẫu. | ✅ Đã merge vào `dev` |
 | **4** | `feature/security-jwt-and-email-otp` | Phase 2 | Spring Security 6 kép, JWT, OTP (Email + Terminal mode), Cloudinary CDN. | ✅ Đã merge vào `dev` |
 | **5** | `feature/customer-and-public-portal` | Phase 3 | Portal khách hàng: Catalog 20 sp/trang, Bộ lọc, Giỏ hàng, Checkout, Tra cứu kho. | ✅ Đã merge vào `dev` |
 | **6** | `feature/admin-and-staff-portal` | Phase 4 & 5 | Admin & Staff Portal, Tồn kho đa chi nhánh, WebSocket STOMP & Live Chat. | ✅ Đã merge vào `dev` |
 | **7** | `docs/final-report` | Phase 6 | Báo cáo chi tiết, tài liệu hướng dẫn và hồ sơ nghiệm thu đồ án. | ✅ Đã merge vào `dev` |
+| **8** | `feature/inventory-transfer-and-audit-log` | Phase 7 | Điều chuyển kho liên chi nhánh, Sổ nhật ký kiểm toán (Audit Trail), Khóa bi quan, Chống đặt trùng đơn (Idempotency) & 9 Test cases tự động. | ✅ Đã merge vào `main` |
 
 ---
 
@@ -198,7 +200,7 @@ main (Phiên bản phát hành chính thức, mã nguồn hoàn chỉnh sẵn s�
 ### Bước 2: Thiết lập Cơ sở dữ liệu SQL Server
 1. Mở SQL Server Management Studio (SSMS).
 2. Mở file `database.sql` và nhấn **Execute (F5)** (hoặc chạy bằng lệnh `sqlcmd`).
-3. Script sẽ tự động tạo database `electronics_store_chain` cùng toàn bộ 24 bảng và nạp đầy đủ dữ liệu mẫu (10 tài khoản, 4 chi nhánh, 12 sản phẩm công nghệ, 31 biến thể, tồn kho chi nhánh, coupons).
+3. Script sẽ tự động tạo database `electronics_store_chain` cùng toàn bộ 27 bảng và nạp đầy đủ dữ liệu mẫu (10 tài khoản, 4 chi nhánh, 12 sản phẩm công nghệ, 31 biến thể, tồn kho chi nhánh, coupons).
 
 ### Bước 3: Cấu hình `application.properties`
 Chỉnh sửa file cấu hình tại `src/main/resources/application.properties` nếu có thay đổi thông số cục bộ:
@@ -254,7 +256,7 @@ java -jar target/electronics-chain-store-1.0.0-SNAPSHOT.jar
 
 - [x] Khởi tạo Repository GitHub và tài liệu kế hoạch `README.md`.
 - [x] Hoàn thành toàn bộ Source Code chức năng trên các nhánh Git Flow chuẩn.
-- [x] File script `database.sql` đầy đủ 24 bảng, quan hệ khóa ngoại và dữ liệu mẫu phong phú.
+- [x] File script `database.sql` đầy đủ 27 bảng, quan hệ khóa ngoại và dữ liệu mẫu phong phú.
 - [x] Cấu hình Terminal OTP Mode tiện lợi cho việc kiểm thử và chấm điểm đồ án.
 - [ ] File tài liệu báo cáo `.docx` đầy đủ hình kiến trúc, sơ đồ hoạt động, giải thích code, ảnh UI, hướng dẫn cài đặt và bảng tổng hợp Prompt AI.
 - [ ] Video demo chức năng có xuất hiện mặt 3 thành viên giới thiệu và thuyết minh.
