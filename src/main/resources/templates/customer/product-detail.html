@@ -99,10 +99,13 @@
                                     <strong th:text="${inv.branch.branchName}">Chi nhánh Q.1</strong>
                                     <div class="text-muted" style="font-size: 0.75rem;" th:text="${inv.branch.district}">Quận 1</div>
                                 </div>
-                                <span th:if="${inv.quantity > 0}" class="badge bg-success-subtle text-success border border-success">
-                                    <i class="fa-solid fa-check me-1"></i>Còn hàng (<span th:text="${inv.quantity}">10</span>)
+                                <span th:if="${inv.quantity > 5}" class="badge bg-success-subtle text-success border border-success">
+                                    <i class="fa-solid fa-check me-1"></i>Sẵn hàng tại shop
                                 </span>
-                                <span th:unless="${inv.quantity > 0}" class="badge bg-danger-subtle text-danger border border-danger">
+                                <span th:if="${inv.quantity > 0 && inv.quantity <= 5}" class="badge bg-warning-subtle text-warning-emphasis border border-warning">
+                                    <i class="fa-solid fa-fire me-1"></i>Chỉ còn <span th:text="${inv.quantity}"></span> máy (Sắp hết)
+                                </span>
+                                <span th:if="${inv.quantity <= 0}" class="badge bg-danger-subtle text-danger border border-danger">
                                     <i class="fa-solid fa-xmark me-1"></i>Tạm hết hàng
                                 </span>
                             </div>
