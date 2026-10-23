@@ -23,6 +23,7 @@ import vn.iotstar.util.SecurityUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 
 @Slf4j
 @Controller
@@ -52,6 +53,7 @@ public class CheckoutController {
 
         // Chuẩn bị form request với thông tin mặc định
         CheckoutRequest checkoutRequest = new CheckoutRequest();
+        checkoutRequest.setCheckoutToken(UUID.randomUUID().toString());
         checkoutRequest.setOrderType(OrderType.DELIVERY);
         checkoutRequest.setPaymentMethod(PaymentMethod.COD);
         checkoutRequest.setReceiverName(user.getFullName());
@@ -87,6 +89,10 @@ public class CheckoutController {
         User user = SecurityUtils.getCurrentUser().orElse(null);
         if (user == null) {
             return "redirect:/auth/login";
+        }
+
+        if (request.getCheckoutToken() == null || request.getCheckoutToken().isBlank()) {
+            request.setCheckoutToken(UUID.randomUUID().toString());
         }
 
         if (bindingResult.hasErrors()) {

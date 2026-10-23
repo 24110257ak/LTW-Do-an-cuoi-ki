@@ -99,7 +99,10 @@
                                     </td>
                                     <td>
                                         <span th:if="${order.paymentStatus.name() == 'PAID'}" class="badge bg-success">Đã thanh toán</span>
-                                        <span th:if="${order.paymentStatus.name() == 'PENDING'}" class="badge bg-secondary">Chưa thanh toán</span>
+                                        <span th:if="${order.paymentStatus.name() == 'PENDING' && order.paymentMethod.name() == 'COD'}" class="badge bg-warning text-dark border border-warning" title="Đơn cần thu tiền mặt khi giao">
+                                            <i class="bi bi-cash-coin me-1"></i>Thu COD
+                                        </span>
+                                        <span th:if="${order.paymentStatus.name() == 'PENDING' && order.paymentMethod.name() != 'COD'}" class="badge bg-secondary">Chưa thanh toán</span>
                                     </td>
                                     <td>
                                         <span th:if="${order.status.name() == 'NEW'}" class="badge bg-warning text-dark">Chờ xác nhận</span>

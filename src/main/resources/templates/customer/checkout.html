@@ -23,6 +23,8 @@
     </div>
 
     <form th:action="@{/checkout/place-order}" method="post" th:object="${checkoutRequest}">
+        <!-- Chống tạo đơn trùng lặp khi người dùng double-click hoặc retry mạng (Idempotency Token) -->
+        <input type="hidden" th:field="*{checkoutToken}">
         <div class="row g-4">
             <!-- Col 1: Hình thức nhận hàng & Địa chỉ -->
             <div class="col-lg-7">

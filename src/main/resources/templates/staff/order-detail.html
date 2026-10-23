@@ -40,6 +40,22 @@
                 </div>
             </div>
 
+            <!-- Cảnh báo thu COD nổi bật dành cho nhân viên điều phối & giao hàng -->
+            <div th:if="${order.paymentMethod != null && order.paymentMethod.name() == 'COD' && order.paymentStatus != null && order.paymentStatus.name() == 'PENDING'}"
+                 class="alert alert-warning border-warning border-2 d-flex align-items-center mb-4 shadow-sm rounded-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill fs-1 me-3 text-warning"></i>
+                <div class="flex-grow-1">
+                    <h5 class="alert-heading fw-bold mb-1 text-dark">
+                        <i class="bi bi-cash-coin me-1"></i> ĐƠN HÀNG THU TIỀN MẶT KHI GIAO (COD)
+                    </h5>
+                    <p class="mb-0 text-secondary">
+                        Đơn hàng chưa thanh toán trực tuyến. Nhân viên / Bưu tá <strong>BẮT BUỘC THU TIỀN MẶT</strong> khi giao máy cho khách: 
+                        <strong class="text-danger fs-5 ms-1" th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'">34,000,000 đ</strong>
+                    </p>
+                </div>
+                <span class="badge bg-danger fs-6 px-3 py-2 ms-3">CHƯA THU TIỀN</span>
+            </div>
+
             <div class="row g-4">
                 <!-- Left: Order items and customer info -->
                 <div class="col-lg-8">
