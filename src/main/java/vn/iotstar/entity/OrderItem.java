@@ -41,6 +41,11 @@ public class OrderItem {
     @Column(name = "unit_price", nullable = false)
     private BigDecimal unitPrice;
 
+    /** Snapshot giá vốn tại thời điểm mua (phục vụ tính lợi nhuận gộp lịch sử) */
+    @Column(name = "cost_price", nullable = false)
+    @Builder.Default
+    private BigDecimal costPrice = BigDecimal.ZERO;
+
     @Column(name = "quantity", nullable = false)
     @Builder.Default
     private Integer quantity = 1;
@@ -49,5 +54,10 @@ public class OrderItem {
     public BigDecimal getLineTotal() {
         return unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
-}
 
+    @Transient
+    public BigDecimal getLineProfit() {
+        return (unitPrice.subtract(costPrice != null ? costPrice : BigDecimal.ZERO))
+                .multiply(BigDecimal.valueOf(quantity));
+    }
+}

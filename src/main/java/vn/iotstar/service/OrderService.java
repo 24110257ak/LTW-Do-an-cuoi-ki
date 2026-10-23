@@ -3,6 +3,8 @@ package vn.iotstar.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import vn.iotstar.dto.request.CheckoutRequest;
+import vn.iotstar.entity.Branch;
+import vn.iotstar.entity.CartItem;
 import vn.iotstar.entity.Order;
 import vn.iotstar.enums.OrderStatus;
 
@@ -33,4 +35,15 @@ public interface OrderService {
     List<Order> getRecentOrders();
     List<Order> getRecentBranchOrders(Integer branchId);
     Page<Order> searchOrdersAdmin(Integer branchId, OrderStatus status, String keyword, Pageable pageable);
+
+    // Logistics thông minh & Điểu phối đơn hàng (Smart Order Routing)
+    Branch resolveBestFulfillmentBranch(String province, String district, List<CartItem> cartItems);
+    BigDecimal calculateEstimatedShippingFee(String province, String district, BigDecimal subtotal, Integer providerId);
+
+    // Vận hành giao hàng & Đối soát tiền mặt COD (COD Cash Reconciliation)
+    Order shipperConfirmDelivered(Long orderId, Long shipperUserId, String note);
+    Order reportDeliveryFailed(Long orderId, String note);
+    Order confirmReturnedToWarehouse(Long orderId, Long warehouseStaffUserId, String conditionNote);
+    Order reconcileCodPayment(Long orderId, Long accountantUserId, String transactionRef);
+    List<Order> getPendingCodReconciliationOrders();
 }

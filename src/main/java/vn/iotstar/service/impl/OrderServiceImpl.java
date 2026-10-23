@@ -20,6 +20,7 @@ import vn.iotstar.service.OrderService;
 import vn.iotstar.util.OrderCodeUtils;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -73,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
             subtotal = subtotal.add(lineTotal);
         }
 
-        // 2. Xử lý chi nhánh phục vụ và phí giao hàng
+        // 2. Xử lý chi nhánh phục vụ và phí giao hàng (Smart Order Routing & Logistics)
         Branch assignedBranch = null;
         Branch pickupBranch = null;
         BigDecimal shippingFee = BigDecimal.ZERO;
@@ -88,21 +89,14 @@ public class OrderServiceImpl implements OrderService {
             assignedBranch = pickupBranch;
             shippingFee = BigDecimal.ZERO;
         } else {
-            // DELIVERY
+            // DELIVERY: Ưu tiên chọn nhà vận chuyển nếu khách chọn
             if (request.getProviderId() != null) {
                 provider = providerRepository.findById(request.getProviderId()).orElse(null);
-                if (provider != null) {
-                    shippingFee = provider.getBaseFee();
-                }
-            } else {
-                shippingFee = BigDecimal.valueOf(30000); // Phí tiêu chuẩn
             }
+            shippingFee = calculateEstimatedShippingFee(request.getProvince(), request.getDistrict(), subtotal, request.getProviderId());
 
-            // Gán cho chi nhánh đầu tiên của chuỗi xử lý mặc định
-            List<Branch> branches = branchRepository.findAllByIsActiveTrue();
-            if (!branches.isEmpty()) {
-                assignedBranch = branches.get(0);
-            }
+            // Smart Order Routing: Định tuyến chi nhánh gần nhất và có đủ hàng phục vụ
+            assignedBranch = resolveBestFulfillmentBranch(request.getProvince(), request.getDistrict(), cartItems);
         }
 
         // 3. Xử lý mã giảm giá
@@ -146,6 +140,10 @@ public class OrderServiceImpl implements OrderService {
                 .subtotal(subtotal)
                 .discountAmount(discountAmount)
                 .totalAmount(totalAmount)
+                .totalCost(BigDecimal.ZERO)
+                .grossProfit(BigDecimal.ZERO)
+                .codCollected(false)
+                .codReconciled(false)
                 .coupon(coupon)
                 .paymentMethod(request.getPaymentMethod())
                 .paymentStatus(PaymentStatus.PENDING)
@@ -155,15 +153,20 @@ public class OrderServiceImpl implements OrderService {
 
         order = orderRepository.save(order);
 
-        // 5. Tạo OrderItems và cập nhật kho, sản phẩm
+        // 5. Tạo OrderItems, tính COGS (Giá vốn hàng bán) & Lợi nhuận gộp, cập nhật tồn kho
         // Sắp xếp các mục theo variantId tăng dần để triệt tiêu Deadlock khi nhiều khách cùng mua đồng thời
         List<CartItem> sortedCartItems = new ArrayList<>(cartItems);
         sortedCartItems.sort(Comparator.comparing(item -> item.getVariant().getVariantId()));
 
+        BigDecimal totalCost = BigDecimal.ZERO;
         List<OrderItem> orderItems = new ArrayList<>();
         for (CartItem cartItem : sortedCartItems) {
             ProductVariant variant = cartItem.getVariant();
             Product product = variant.getProduct();
+
+            BigDecimal costPrice = variant.getCostPrice() != null ? variant.getCostPrice() : BigDecimal.ZERO;
+            BigDecimal lineCost = costPrice.multiply(BigDecimal.valueOf(cartItem.getQuantity()));
+            totalCost = totalCost.add(lineCost);
 
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
@@ -171,6 +174,7 @@ public class OrderServiceImpl implements OrderService {
                     .productName(product.getProductName())
                     .variantInfo(variant.getVariantInfo())
                     .unitPrice(variant.getEffectivePrice())
+                    .costPrice(costPrice)
                     .quantity(cartItem.getQuantity())
                     .build();
             orderItems.add(orderItemRepository.save(orderItem));
@@ -193,6 +197,11 @@ public class OrderServiceImpl implements OrderService {
             }
         }
         order.setOrderItems(orderItems);
+        order.setTotalCost(totalCost);
+        // Lợi nhuận gộp = Doanh thu thuần (Subtotal - Discount) - Tổng giá vốn (Total Cost)
+        BigDecimal grossProfit = subtotal.subtract(discountAmount).subtract(totalCost);
+        order.setGrossProfit(grossProfit);
+        orderRepository.save(order);
 
         // 6. Xóa giỏ hàng sau khi đặt thành công
         cartService.clearCart(userId);
@@ -217,6 +226,227 @@ public class OrderServiceImpl implements OrderService {
         }
 
         return order;
+    }
+
+    @Override
+    public Branch resolveBestFulfillmentBranch(String province, String district, List<CartItem> cartItems) {
+        List<Branch> activeBranches = branchRepository.findAllByIsActiveTrue();
+        if (activeBranches.isEmpty()) {
+            return null;
+        }
+
+        // Lọc các chi nhánh có đủ tồn kho cho toàn bộ danh mục sản phẩm trong giỏ
+        List<Branch> capableBranches = new ArrayList<>();
+        for (Branch branch : activeBranches) {
+            boolean hasAll = true;
+            for (CartItem item : cartItems) {
+                Optional<BranchInventory> invOpt = inventoryRepository.findByBranchBranchIdAndVariantVariantId(
+                        branch.getBranchId(), item.getVariant().getVariantId());
+                if (invOpt.isEmpty() || invOpt.get().getQuantity() < item.getQuantity()) {
+                    hasAll = false;
+                    break;
+                }
+            }
+            if (hasAll) {
+                capableBranches.add(branch);
+            }
+        }
+
+        if (!capableBranches.isEmpty()) {
+            // Ưu tiên 1: Cùng Quận/Huyện
+            if (district != null && !district.isBlank()) {
+                for (Branch b : capableBranches) {
+                    if (b.getDistrict() != null && district.toLowerCase().contains(b.getDistrict().toLowerCase())) {
+                        log.info("Smart Order Routing: Khớp chi nhánh cấp Quận [{}] cho đơn hàng", b.getBranchName());
+                        return b;
+                    }
+                }
+            }
+            // Ưu tiên 2: Cùng Tỉnh/Thành
+            if (province != null && !province.isBlank()) {
+                for (Branch b : capableBranches) {
+                    if (b.getProvince() != null && province.toLowerCase().contains(b.getProvince().toLowerCase())) {
+                        log.info("Smart Order Routing: Khớp chi nhánh cấp Tỉnh [{}] cho đơn hàng", b.getBranchName());
+                        return b;
+                    }
+                }
+            }
+            // Ưu tiên 3: Chi nhánh có tổng tồn kho các mặt hàng này dồi dào nhất
+            capableBranches.sort((b1, b2) -> {
+                int stock1 = cartItems.stream().mapToInt(ci -> inventoryRepository.findByBranchBranchIdAndVariantVariantId(b1.getBranchId(), ci.getVariant().getVariantId()).map(BranchInventory::getQuantity).orElse(0)).sum();
+                int stock2 = cartItems.stream().mapToInt(ci -> inventoryRepository.findByBranchBranchIdAndVariantVariantId(b2.getBranchId(), ci.getVariant().getVariantId()).map(BranchInventory::getQuantity).orElse(0)).sum();
+                return Integer.compare(stock2, stock1);
+            });
+            log.info("Smart Order Routing: Chọn chi nhánh tồn kho dồi dào nhất [{}]", capableBranches.get(0).getBranchName());
+            return capableBranches.get(0);
+        }
+
+        // Dự phòng nếu không có chi nhánh nào có đủ 100% giỏ: Chọn chi nhánh đầu tiên của hệ thống
+        log.warn("Smart Order Routing: Không có chi nhánh nào có đủ 100% mặt hàng trong giỏ, gán chi nhánh trung tâm: {}", activeBranches.get(0).getBranchName());
+        return activeBranches.get(0);
+    }
+
+    @Override
+    public BigDecimal calculateEstimatedShippingFee(String province, String district, BigDecimal subtotal, Integer providerId) {
+        // Chính sách 1: Miễn phí vận chuyển toàn quốc cho đơn hàng từ 5 triệu đồng trở lên
+        if (subtotal != null && subtotal.compareTo(BigDecimal.valueOf(5000000)) >= 0) {
+            return BigDecimal.ZERO;
+        }
+
+        // Chính sách 2: Áp dụng đơn giá cơ bản của đơn vị vận chuyển nếu khách chọn
+        if (providerId != null) {
+            Optional<DeliveryProvider> providerOpt = providerRepository.findById(providerId);
+            if (providerOpt.isPresent() && providerOpt.get().getBaseFee() != null) {
+                return providerOpt.get().getBaseFee();
+            }
+        }
+
+        // Chính sách 3: Phân vùng địa lý thông minh
+        if (province == null || province.isBlank()) {
+            return BigDecimal.valueOf(30000);
+        }
+
+        String prov = province.toLowerCase();
+        if (prov.contains("hồ chí minh") || prov.contains("tp.hcm") || prov.contains("hcm") || prov.contains("sài gòn")) {
+            if (district != null) {
+                String dist = district.toLowerCase();
+                // Các quận nội thành TP.HCM (gần kho trung tâm): 25.000 đ
+                if (dist.contains("1") || dist.contains("3") || dist.contains("5") || dist.contains("10")
+                        || dist.contains("bình thạnh") || dist.contains("phú nhuận") || dist.contains("gò vấp")
+                        || dist.contains("tân bình") || dist.contains("tân phú") || dist.contains("thủ đức")) {
+                    return BigDecimal.valueOf(25000);
+                }
+            }
+            return BigDecimal.valueOf(30000); // Ngoại thành TP.HCM
+        }
+
+        // Các tỉnh thành phố khác trên toàn quốc: 40.000 đ
+        return BigDecimal.valueOf(40000);
+    }
+
+    @Override
+    @Transactional
+    public Order shipperConfirmDelivered(Long orderId, Long shipperUserId, String note) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", orderId));
+
+        if (order.getStatus() == OrderStatus.DELIVERED) {
+            return order;
+        }
+
+        order.setStatus(OrderStatus.DELIVERED);
+        if (shipperUserId != null) {
+            userRepository.findById(shipperUserId).ifPresent(order::setShipper);
+        }
+
+        // Nếu là đơn hàng COD: Shipper đã thu tiền mặt từ khách hàng
+        if (order.getPaymentMethod() == PaymentMethod.COD) {
+            order.setCodCollected(true);
+            order.setPaymentStatus(PaymentStatus.PAID);
+        }
+
+        if (note != null && !note.isBlank()) {
+            order.setNote((order.getNote() != null ? order.getNote() + " | " : "") + "Shipper xác nhận: " + note);
+        }
+
+        Order saved = orderRepository.save(order);
+
+        try {
+            messagingTemplate.convertAndSend("/topic/order-status/" + saved.getOrderCode(), String.format(
+                    "{\"orderCode\":\"%s\",\"status\":\"%s\"}", saved.getOrderCode(), OrderStatus.DELIVERED.name()));
+        } catch (Exception e) {
+            log.warn("Không thể gửi thông báo WebSocket giao hàng thành công: {}", e.getMessage());
+        }
+
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public Order reportDeliveryFailed(Long orderId, String note) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", orderId));
+
+        order.setStatus(OrderStatus.DELIVERY_FAILED);
+        String reason = note != null ? note : "Khách hàng không nghe máy / hẹn lại";
+        order.setNote((order.getNote() != null ? order.getNote() + " | " : "") + "Giao không thành công: " + reason);
+
+        // Chú ý: Chưa hoàn kho tại bước này (Reverse Logistics Restock Safety Guard)
+        // vì hàng hóa vẫn đang nằm trên thùng xe shipper, tránh ghi sai lệch số liệu tồn vật lý.
+        return orderRepository.save(order);
+    }
+
+    @Override
+    @Transactional
+    public Order confirmReturnedToWarehouse(Long orderId, Long warehouseStaffUserId, String conditionNote) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", orderId));
+
+        OrderStatus oldStatus = order.getStatus();
+        order.setStatus(OrderStatus.RETURNED);
+        order.setCodCollected(false);
+        order.setPaymentStatus(PaymentStatus.REFUNDED);
+        String condition = (conditionNote != null && !conditionNote.isBlank()) ? conditionNote : "Nguyên vẹn tem mác";
+        order.setNote((order.getNote() != null ? order.getNote() + " | " : "") + "Thủ kho nhận hoàn kho: " + condition);
+
+        User staff = warehouseStaffUserId != null ? userRepository.findById(warehouseStaffUserId).orElse(null) : null;
+
+        // Chỉ nhập lại tồn kho vật lý sau khi thủ kho đã kiểm đếm thực tế
+        if (oldStatus != OrderStatus.RETURNED && oldStatus != OrderStatus.RETURNED_REFUND && order.getBranch() != null) {
+            List<OrderItem> items = orderItemRepository.findByOrderOrderId(order.getOrderId());
+            for (OrderItem item : items) {
+                try {
+                    inventoryService.adjustStock(
+                            order.getBranch().getBranchId(),
+                            item.getVariant().getVariantId(),
+                            item.getQuantity(),
+                            StockMovementType.RETURN,
+                            staff,
+                            order.getOrderCode(),
+                            "Nhập kho hàng hoàn đơn #" + order.getOrderCode()
+                    );
+                } catch (Exception ex) {
+                    log.error("Lỗi hoàn kho cho biến thể {}: {}", item.getVariant().getVariantId(), ex.getMessage());
+                }
+            }
+        }
+
+        return orderRepository.save(order);
+    }
+
+    @Override
+    @Transactional
+    public Order reconcileCodPayment(Long orderId, Long accountantUserId, String transactionRef) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", orderId));
+
+        if (order.getPaymentMethod() != PaymentMethod.COD) {
+            throw new BadRequestException("Đơn hàng này không thuộc diện thanh toán khi nhận hàng (COD)!");
+        }
+        if (!Boolean.TRUE.equals(order.getCodCollected())) {
+            throw new BadRequestException("Đơn hàng chưa được shipper xác nhận thu tiền COD!");
+        }
+        if (Boolean.TRUE.equals(order.getCodReconciled())) {
+            throw new BadRequestException("Đơn hàng này đã được kế toán đối soát nộp quỹ trước đó!");
+        }
+
+        String txnId = (transactionRef != null && !transactionRef.isBlank())
+                ? transactionRef.trim()
+                : "COD-REC-" + order.getOrderCode() + "-" + (System.currentTimeMillis() % 100000);
+
+        order.setCodReconciled(true);
+        order.setCodReconciledAt(LocalDateTime.now());
+        order.setCodTransactionId(txnId);
+
+        log.info("Kế toán đối soát thành công đơn COD #{}, số tiền {}, mã chứng từ: {}",
+                order.getOrderCode(), order.getTotalAmount(), txnId);
+
+        return orderRepository.save(order);
+    }
+
+    @Override
+    public List<Order> getPendingCodReconciliationOrders() {
+        return orderRepository.findByCodCollectedTrueAndCodReconciledFalseOrderByCreatedAtAsc();
     }
 
     @Override
@@ -261,7 +491,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // Hoàn trả tồn kho và ghi nhận StockLog kiểm toán
-        if (oldStatus != OrderStatus.CANCELLED && oldStatus != OrderStatus.RETURNED_REFUND && order.getBranch() != null) {
+        if (oldStatus != OrderStatus.CANCELLED && oldStatus != OrderStatus.RETURNED_REFUND && oldStatus != OrderStatus.RETURNED && order.getBranch() != null) {
             List<OrderItem> items = orderItemRepository.findByOrderOrderId(order.getOrderId());
             for (OrderItem item : items) {
                 try {
@@ -315,12 +545,20 @@ public class OrderServiceImpl implements OrderService {
         if (note != null && !note.isBlank()) {
             order.setNote((order.getNote() != null ? order.getNote() + " | " : "") + note);
         }
+
+        // Đồng bộ trạng thái COD nếu giao hàng thành công
+        if (newStatus == OrderStatus.DELIVERED && order.getPaymentMethod() == PaymentMethod.COD) {
+            order.setCodCollected(true);
+            order.setPaymentStatus(PaymentStatus.PAID);
+        }
+
         orderRepository.save(order);
 
-        // Nếu chuyển trạng thái sang CANCELLED hoặc RETURNED_REFUND thì hoàn trả tồn kho và ghi StockLog
-        if ((newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.RETURNED_REFUND)
-                && (oldStatus != OrderStatus.CANCELLED && oldStatus != OrderStatus.RETURNED_REFUND)
-                && order.getBranch() != null) {
+        // Nếu chuyển trạng thái sang CANCELLED, RETURNED hoặc RETURNED_REFUND thì hoàn trả tồn kho và ghi StockLog
+        boolean isRestockStatus = (newStatus == OrderStatus.CANCELLED || newStatus == OrderStatus.RETURNED_REFUND || newStatus == OrderStatus.RETURNED);
+        boolean wasRestocked = (oldStatus == OrderStatus.CANCELLED || oldStatus == OrderStatus.RETURNED_REFUND || oldStatus == OrderStatus.RETURNED);
+
+        if (isRestockStatus && !wasRestocked && order.getBranch() != null) {
             if (order.getCoupon() != null) {
                 Coupon coupon = order.getCoupon();
                 coupon.setUsedCount(Math.max(0, coupon.getUsedCount() - 1));

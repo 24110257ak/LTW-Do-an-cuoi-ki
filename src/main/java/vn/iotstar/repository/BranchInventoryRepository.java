@@ -29,4 +29,11 @@ public interface BranchInventoryRepository extends JpaRepository<BranchInventory
 
     @Query("SELECT COALESCE(SUM(bi.quantity), 0) FROM BranchInventory bi WHERE bi.variant.variantId = :variantId")
     Integer sumQuantityByVariantId(@Param("variantId") Long variantId);
+
+    @Query("SELECT bi FROM BranchInventory bi WHERE bi.quantity <= bi.safetyStock")
+    List<BranchInventory> findLowStockAlerts();
+
+    List<BranchInventory> findByBranchBranchIdAndQuantityLessThanEqual(Integer branchId, Integer threshold);
+    List<BranchInventory> findByQuantityLessThanEqual(Integer threshold);
+    List<BranchInventory> findByVariantVariantIdAndQuantityGreaterThanOrderByQuantityDesc(Long variantId, Integer threshold);
 }
