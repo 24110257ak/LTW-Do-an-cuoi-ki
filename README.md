@@ -13,13 +13,13 @@
 
 ## 👥 1. THÀNH VIÊN THỰC HIỆN & PHÂN CÔNG NHIỆM VỤ (NHÓM 24)
 
-*(Phần phân công nhiệm vụ chi tiết sẽ được cập nhật và hoàn thiện theo tiến độ thực tế)*
+Dự án được xây dựng và phối hợp theo mô hình Agile/Scrum kết hợp quy trình phân nhánh Git Flow bài bản, minh bạch giữa 3 thành viên:
 
-| STT | Mã sinh viên | Họ và tên | Vai trò | Phân công Module |
+| STT | Mã sinh viên | Họ và tên | Vai trò | Phân công Module & Đóng góp kỹ thuật chính |
 | :---: | :---: | :--- | :---: | :--- |
-| **1** | `24110257` | **Trần Vũ Anh Khoa** | Thành viên | *(Cập nhật sau)* |
-| **2** | `24110292` | **Mai Huy Nhật** | **Nhóm trưởng** | *(Cập nhật sau)* |
-| **3** | `24110304` | **Đặng Nhật Phúc** | Thành viên | *(Cập nhật sau)* |
+| **1** | 24110292 | **Mai Huy Nhật** | **Nhóm trưởng / Backend Lead** | - **Kiến trúc hệ thống & CSDL:** Thiết kế chuẩn 3 tầng (3-tier), lược đồ CSDL SQL Server 27 bảng, ánh xạ JPA Entities, Repositories, quan hệ dữ liệu.<br>- **Quản lý chuỗi & Kho phân tán:** Nghiệp vụ tồn kho đa chi nhánh, Phiếu điều chuyển kho liên chi nhánh (StockTransfer) với quy trình phê duyệt & khóa bi quan chống Deadlock.<br>- **Kinh tế & Logistics thông minh:** Thuật toán Smart Order Routing định tuyến đơn tối ưu theo vị trí và tồn kho; Quản trị Giá vốn (COGS), Lợi nhuận gộp theo thời gian thực; Nghiệp vụ vận hành & đối soát tiền mặt COD; Thuật toán tự động đề xuất điều chuyển cân bằng tồn kho.<br>- **RESTful API & Automated Testing:** Xây dựng bộ REST API (/api/**), cấu hình OpenAPI 3.0 Swagger UI và viết toàn bộ 19 Unit/Integration Tests (JUnit 5 + H2 Database). |
+| **2** | 24110257 | **Trần Vũ Anh Khoa** | **Security & Platform Lead** | - **Bảo mật kép (Dual Security):** Thiết kế Spring Security 6 hỗ trợ đồng thời Web MVC Session Form Login và Stateless Bearer JWT Filter cho REST API.<br>- **Xác thực tài khoản & OTP:** Xây dựng hệ thống đăng ký, kích hoạt tài khoản và khôi phục mật khẩu qua OTP (hỗ trợ Email Service và Terminal Mode tiện lợi chấm điểm).<br>- **Phân quyền người dùng:** Thiết lập ma trận bảo mật 5 vai trò (Guest, Customer, Staff/Store Manager, Shipper, Admin) bảo vệ toàn bộ endpoints /admin/**, /staff/**, /shipper/**, /api/**.<br>- **Hạ tầng & Nền tảng:** Tích hợp lưu trữ đám mây Cloudinary CDN, WebSocket STOMP chuông báo đơn mới & Live Chat tư vấn; Tích hợp cổng thanh toán VNPAY Sandbox và giải pháp chống trùng lặp đơn hàng Checkout Token Idempotency. |
+| **3** | 24110304 | **Đặng Nhật Phúc** | **Frontend & UI/UX Lead** | - **Giao diện người dùng Responsive:** Thiết kế toàn bộ giao diện với Thymeleaf 3 + Bootstrap 5.3 + Bootstrap Icons + FontAwesome 6 chuẩn hóa hiển thị trên Mobile, Tablet, Desktop.<br>- **Portal Khách hàng (Customer Portal):** Trang chủ, Catalog 20 sp/trang với bộ lọc đa tiêu chí, Trang chi tiết sản phẩm & biến thể đa thuộc tính (ROM, RAM, Màu sắc), Tra cứu tồn kho chi nhánh theo thời gian thực, Giỏ hàng, Đặt hàng đa hình thức (Giao tận nơi / Nhận tại cửa hàng), Sổ địa chỉ nhận hàng đa điểm, Đánh giá sản phẩm kèm tải ảnh thật.<br>- **Portal Quản trị & Cửa hàng (Admin & Staff Portal):** HQ Dashboard trực quan hóa biểu đồ doanh thu chi nhánh và cơ cấu đơn hàng (Chart.js); Giao diện CRUD Sản phẩm, Quản lý chi nhánh, Quản trị tồn kho, Quản lý phiếu điều chuyển kho liên chi nhánh (/admin/transfers), Sổ nhật ký kiểm toán tồn kho (/admin/inventory/logs); Staff Portal xử lý đơn hàng chi nhánh & Live Chat support. |
 
 ---
 
@@ -31,7 +31,7 @@
 | **2. Cấu trúc Project đúng chuẩn 3 tầng** | **0.5 đ** | Chuẩn Spring Boot 3-tier: Controller (Web & API) - Service - Repository - Entity/DTO, phân chia package mạch lạc. |
 | **3. Nghiệp vụ, Logic, Validation & Security** | **6.0 đ** | Đầy đủ 5 roles (Guest, User, Vendor/Store Manager, Admin, Shipper), xử lý validation đầy đủ (`jakarta.validation`), bảo mật Spring Security 6 + OTP kích hoạt qua Email/Terminal. |
 | **4. Giao diện Đẹp, Thân thiện & Responsive** | **1.0 đ** | Template Bootstrap 5.3 hiện đại, tối ưu di động, máy tính bảng và desktop, trải nghiệm mượt mà. |
-| **5. Tính năng Sáng tạo & Nâng cao** | **1.0 đ** | - Xác thực bảo mật kép với **JWT**.<br>- **WebSocket STOMP** thông báo đơn hàng realtime và Livechat tư vấn.<br>- Tích hợp lưu trữ CDN **Cloudinary**.<br>- Thanh toán trực tuyến **VNPAY Sandbox**.<br>- Hệ thống Quản lý **Chuỗi cửa hàng & Tồn kho đa chi nhánh (Multi-branch Inventory)**.<br>- **Điều chuyển kho liên chi nhánh** với quy trình duyệt & khóa chống Deadlock.<br>- **Sổ nhật ký kiểm toán tồn kho (Audit Trail)** & Chống đặt trùng đơn (**Checkout Idempotency**).<br>- **Kiểm thử tự động (Automated Testing)** đạt chuẩn với JUnit 5 & H2 Database. |
+| **5. Tính năng Sáng tạo & Nâng cao** | **1.0 đ** | - Xác thực bảo mật kép với **JWT** & Spring Security 6.<br>- **WebSocket STOMP** thông báo đơn hàng realtime và Livechat tư vấn.<br>- Tích hợp lưu trữ CDN **Cloudinary** & Cổng thanh toán **VNPAY Sandbox**.<br>- Hệ thống Quản lý **Chuỗi cửa hàng & Tồn kho đa chi nhánh (Multi-branch Inventory)**.<br>- **Điều chuyển kho liên chi nhánh** với quy trình duyệt & khóa bi quan (PESSIMISTIC_WRITE) chống Deadlock.<br>- **Sổ nhật ký kiểm toán tồn kho (Audit Trail)** & Chống đặt trùng đơn (**Checkout Idempotency**).<br>- **Logistics thông minh (Smart Order Routing):** Định tuyến đơn hàng tự động đến chi nhánh tối ưu theo cấp Quận/Huyện/Tỉnh và tồn kho sẵn có; Biểu phí ship động (Freeship $\ge 5M$).<br>- **Quản trị Giá vốn (COGS) & Lợi nhuận gộp (P&L):** Snapshot giá vốn lịch sử, tính toán lợi nhuận gộp và biên lợi nhuận (%) theo thời gian thực.<br>- **Đối soát dòng tiền COD (COD Cash Reconciliation):** Quản lý thu tiền mặt shipper và quy trình đối soát nộp quỹ chi nhánh.<br>- **Thuật toán tự động đề xuất điều chuyển kho:** Ghép đôi tự động chi nhánh thiếu hàng với chi nhánh thừa hàng dựa trên ngưỡng an toàn (safetyStock).<br>- **Bộ RESTful API chuẩn OpenAPI 3.0 & Swagger UI:** Tài liệu hóa tương tác tại /swagger-ui.html với Bearer JWT Authorize.<br>- **Kiểm thử tự động (Automated Testing):** 19/19 Unit & Integration Tests (100% Green). |
 | **6. Khả năng Báo cáo & Trả lời phản biện** | **0.5 đ** | Báo cáo chi tiết, video demo rõ mặt 3 thành viên, nắm vững source code và kiến trúc. |
 
 ---
@@ -122,13 +122,17 @@ graph TD
   - *Hình thức 1:* **Giao hàng tận nhà** (Chọn địa chỉ nhận hàng, chọn phương thức vận chuyển).
   - *Hình thức 2:* **Nhận tại chi nhánh (Store Pickup)** (Chọn chi nhánh cửa hàng thuận tiện nhất để ra nhận máy).
   - *Phương thức thanh toán:* COD (Thanh toán khi nhận hàng) hoặc VNPAY Sandbox (Cổng thanh toán thẻ ATM / QR code).
-- **Lịch sử đơn hàng (Order History):** Theo dõi đơn hàng theo 6 trạng thái chuẩn:
-  1. `NEW` (Đơn hàng mới)
-  2. `CONFIRMED` (Đã xác nhận)
-  3. `SHIPPING` (Đang giao hàng)
-  4. `DELIVERED` (Đã giao thành công)
-  5. `CANCELLED` (Đã hủy)
-  6. `RETURNED_REFUND` (Trả hàng - Hoàn tiền)
+- **Lịch sử đơn hàng (Order History):** Theo dõi đơn hàng theo 10 trạng thái chuẩn mực của chuỗi bán lẻ:
+  1. NEW (Chờ xác nhận)
+  2. CONFIRMED (Đã xác nhận)
+  3. READY_FOR_PICKUP (Sẵn sàng nhận tại cửa hàng)
+  4. SHIPPING (Đang giao hàng)
+  5. DELIVERY_FAILED (Giao không thành công - Hàng tạm giữ trên xe shipper)
+  6. RETURNING (Đang chuyển hoàn về kho)
+  7. RETURNED (Đã hoàn về kho - Thủ kho kiểm đếm thực tế và phục hồi tồn kho an toàn)
+  8. DELIVERED (Đã giao thành công / Đã nhận hàng)
+  9. CANCELLED (Đã hủy - Tự động hoàn kho & lượt dùng coupon)
+  10. RETURNED_REFUND (Đã hoàn tiền)
 - **Đánh giá & Bình luận sản phẩm:** Khách hàng chỉ được đánh giá các sản phẩm đã mua thành công; bình luận hỗ trợ nhập nội dung chi tiết (tối thiểu 50 ký tự) kèm tải ảnh thực tế (Cloudinary).
 - **Live Chat tư vấn:** Khung chat trực tuyến thời gian thực (WebSocket) trò chuyện với tư vấn viên chi nhánh.
 
@@ -151,11 +155,16 @@ graph TD
 - **Quản lý Mã giảm giá (Coupons):** Tạo và quản lý voucher khuyến mãi toàn hệ thống.
 - **Quản lý Đơn vị Vận chuyển:** Cấu hình các nhà vận chuyển và bảng phí giao hàng.
 - **Quản lý Banner Quảng cáo:** CRUD hình ảnh banner hiển thị ngoài trang chủ.
+- **Quản trị Tài chính & Giá vốn (Financial & COGS BI):** Theo dõi tổng doanh thu thuần, tổng giá vốn hàng bán (COGS), lợi nhuận gộp toàn chuỗi và phân bổ theo từng chi nhánh; Phân tích biên lợi nhuận gộp (%) giúp lãnh đạo ra quyết định kinh doanh.
+- **Cân bằng Tồn kho Thông minh (Smart Inventory Rebalance):** Cảnh báo các mặt hàng dưới ngưỡng an toàn (safetyStock); Hệ thống tự động đề xuất các lệnh điều chuyển từ kho thừa sang kho thiếu.
+- **Quản lý Đối soát COD (COD Cash Reconciliation):** Theo dõi dòng tiền mặt COD đang nằm ở shipper và xác nhận đối soát khi tiền được nộp vào quỹ chi nhánh.
 
 ### 4.5. Nhân viên Giao hàng (Shipper - Module Mở rộng)
 - Nhận danh sách các đơn hàng được gán đi giao thuộc chi nhánh.
 - Cập nhật trạng thái: Đang giao -> Đã giao thành công / Hủy đơn.
 - Thống kê đơn giao thành công và tiền COD cần nộp lại.
+- **Xác nhận giao hàng & Thu COD:** Shipper xác nhận giao thành công, tự động đồng bộ thu tiền mặt COD.
+- **Báo cáo giao hàng thất bại:** Ghi nhận lý do không giao được hàng; Áp dụng cơ chế bảo vệ tồn kho (Reverse Logistics Restock Guard) - không hoàn kho tự tiện khi hàng vẫn còn trên xe.
 
 ### 4.6. Hệ thống RESTful API & Swagger OpenAPI 3.0 (Tích hợp JWT)
 - **Chuẩn hóa API RESTful:** Hỗ trợ đầy đủ các phương thức HTTP (GET, POST, PUT, DELETE) với cấu trúc phản hồi chuẩn hóa ApiResponse<T>.
