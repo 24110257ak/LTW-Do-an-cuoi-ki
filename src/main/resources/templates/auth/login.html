@@ -42,7 +42,10 @@
                         </div>
                         <div class="input-group">
                             <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-muted"></i></span>
-                            <input type="password" name="password" class="form-control border-start-0" required placeholder="••••••••">
+                            <input type="password" name="password" id="passwordInput" class="form-control border-start-0 border-end-0" required placeholder="••••••••">
+                            <button class="btn btn-outline-secondary border-start-0 bg-light" type="button" id="togglePasswordBtn" onclick="togglePasswordVisibility()" title="Ẩn / Hiện mật khẩu">
+                                <i class="fa-solid fa-eye text-muted" id="togglePasswordIcon"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -117,9 +120,24 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    function togglePasswordVisibility() {
+        const pInput = document.getElementById('passwordInput');
+        const icon = document.getElementById('togglePasswordIcon');
+        if (!pInput || !icon) return;
+        if (pInput.type === 'password') {
+            pInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            pInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
     function fillLogin(u, p) {
         const uInput = document.querySelector('input[name="username"]');
-        const pInput = document.querySelector('input[name="password"]');
+        const pInput = document.getElementById('passwordInput');
         if (uInput && pInput) {
             uInput.value = u;
             pInput.value = p;

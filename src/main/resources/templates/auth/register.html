@@ -47,7 +47,12 @@
 
                     <div class="mb-4">
                         <label class="form-label small fw-semibold text-secondary">Mật khẩu *</label>
-                        <input type="password" th:field="*{password}" class="form-control" required placeholder="Tối thiểu 6 ký tự">
+                        <div class="input-group">
+                            <input type="password" th:field="*{password}" id="regPasswordInput" class="form-control border-end-0" required placeholder="Tối thiểu 6 ký tự">
+                            <button class="btn btn-outline-secondary border-start-0 bg-light" type="button" onclick="toggleRegPassword()" title="Ẩn / Hiện mật khẩu">
+                                <i class="fa-solid fa-eye text-muted" id="regToggleIcon"></i>
+                            </button>
+                        </div>
                         <div class="text-danger small mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
                     </div>
 
@@ -69,5 +74,19 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function toggleRegPassword() {
+        const input = document.getElementById('regPasswordInput');
+        const icon = document.getElementById('regToggleIcon');
+        if (!input || !icon) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+            input.type = 'password';
+            icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+    }
+</script>
 </body>
 </html>
