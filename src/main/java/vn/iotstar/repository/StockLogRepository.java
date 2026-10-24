@@ -18,10 +18,9 @@ public interface StockLogRepository extends JpaRepository<StockLog, Long> {
 
     List<StockLog> findByBranchBranchIdAndVariantVariantIdOrderByCreatedAtDesc(Integer branchId, Long variantId);
 
-    Page<StockLog> findByBranchBranchIdOrderByCreatedAtDesc(Integer branchId, Pageable pageable);
+    Page<StockLog> findByBranchBranchId(Integer branchId, Pageable pageable);
 
-    Page<StockLog> findByMovementTypeOrderByCreatedAtDesc(StockMovementType movementType, Pageable pageable);
+    Page<StockLog> findByMovementType(StockMovementType movementType, Pageable pageable);
 
-    Page<StockLog> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    Page<StockLog> findByBranchBranchIdAndMovementType(Integer branchId, StockMovementType movementType, Pageable pageable);
 }
-

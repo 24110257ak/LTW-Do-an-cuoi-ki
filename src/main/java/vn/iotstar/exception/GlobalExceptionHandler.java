@@ -1,6 +1,7 @@
 package vn.iotstar.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -24,9 +27,10 @@ public class GlobalExceptionHandler {
         return uri.startsWith("/api/") || (accept != null && accept.contains("application/json"));
     }
 
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public Object handleResourceNotFound(ResourceNotFoundException ex, HttpServletRequest request, Model model) {
-        log.warn("ResourceNotFoundException: {}", ex.getMessage());
+    @ExceptionHandler({ResourceNotFoundException.class, NoResourceFoundException.class, NoHandlerFoundException.class})
+    public Object handleResourceNotFound(Exception ex, HttpServletRequest request, HttpServletResponse response, Model model) {
+        log.warn("404 Not Found at {}: {}", request.getRequestURI(), ex.getMessage());
+        response.setStatus(HttpStatus.NOT_FOUND.value());
         if (isApiRequest(request)) {
             Map<String, Object> body = new HashMap<>();
             body.put("timestamp", LocalDateTime.now());
@@ -38,13 +42,14 @@ public class GlobalExceptionHandler {
         }
         model.addAttribute("status", 404);
         model.addAttribute("error", "Không tìm thấy trang");
-        model.addAttribute("message", ex.getMessage());
+        model.addAttribute("message", "Đường dẫn không tồn tại hoặc đã bị di chuyển.");
         return "error/404";
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public Object handleBadRequest(BadRequestException ex, HttpServletRequest request, Model model) {
+    public Object handleBadRequest(BadRequestException ex, HttpServletRequest request, HttpServletResponse response, Model model) {
         log.warn("BadRequestException: {}", ex.getMessage());
+        response.setStatus(HttpStatus.BAD_REQUEST.value());
         if (isApiRequest(request)) {
             Map<String, Object> body = new HashMap<>();
             body.put("timestamp", LocalDateTime.now());
@@ -61,12 +66,13 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public Object handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request, Model model) {
+    public Object handleValidationExceptions(MethodArgumentNotValidException ex, HttpServletRequest request, HttpServletResponse response, Model model) {
         Map<String, String> errors = new HashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
         }
         log.warn("Validation failed for {}: {}", request.getRequestURI(), errors);
+        response.setStatus(HttpStatus.BAD_REQUEST.value());
 
         if (isApiRequest(request)) {
             Map<String, Object> body = new HashMap<>();
@@ -84,8 +90,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public Object handleGenericException(Exception ex, HttpServletRequest request, Model model) {
+    public Object handleGenericException(Exception ex, HttpServletRequest request, HttpServletResponse response, Model model) {
         log.error("Unhandled Exception at {}: ", request.getRequestURI(), ex);
+        response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
         if (isApiRequest(request)) {
             Map<String, Object> body = new HashMap<>();
             body.put("timestamp", LocalDateTime.now());
@@ -101,4 +108,3 @@ public class GlobalExceptionHandler {
         return "error/500";
     }
 }
-

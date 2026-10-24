@@ -32,7 +32,7 @@ public class AdminInventoryController {
     private final ProductVariantRepository variantRepository;
     private final UserRepository userRepository;
 
-    @GetMapping("/logs")
+    @GetMapping({"", "/", "/logs"})
     public String viewLogs(@RequestParam(value = "branchId", required = false) Integer branchId,
                            @RequestParam(value = "movementType", required = false) StockMovementType movementType,
                            @RequestParam(value = "page", defaultValue = "0") int page,
@@ -74,4 +74,3 @@ public class AdminInventoryController {
         return "redirect:/admin/inventory/logs";
     }
 }
-

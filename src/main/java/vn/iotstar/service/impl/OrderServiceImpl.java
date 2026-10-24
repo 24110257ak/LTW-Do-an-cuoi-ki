@@ -535,6 +535,15 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<Order> getOrdersByShipper(Long shipperId, OrderStatus status, Pageable pageable) {
+        if (status != null) {
+            return orderRepository.findByShipperUserIdAndStatus(shipperId, status, pageable);
+        }
+        return orderRepository.findByShipperUserId(shipperId, pageable);
+    }
+
+    @Override
     @Transactional
     public void updateOrderStatus(Long orderId, OrderStatus newStatus, String note) {
         Order order = orderRepository.findById(orderId)

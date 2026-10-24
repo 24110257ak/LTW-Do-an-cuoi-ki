@@ -97,26 +97,26 @@
                                 <tr th:each="log : ${logsPage.content}">
                                     <td class="ps-3 small text-muted" th:text="${#temporals.format(log.createdAt, 'dd/MM/yyyy HH:mm:ss')}"></td>
                                     <td>
-                                        <span class="badge bg-light text-dark border" th:text="${log.branch.branchName}">Q.1</span>
+                                        <span class="badge bg-light text-dark border" th:text="${log.branch != null ? log.branch.branchName : 'Trung tâm'}">Q.1</span>
                                     </td>
                                     <td>
-                                        <div class="fw-semibold small" th:text="${log.variant.product.productName}">Tên SP</div>
-                                        <div class="text-muted small" th:text="'SKU: ' + ${log.variant.sku}"></div>
+                                        <div class="fw-semibold small" th:text="${log.variant != null && log.variant.product != null ? log.variant.product.productName : 'Sản phẩm'}">Tên SP</div>
+                                        <div class="text-muted small" th:text="'SKU: ' + ${log.variant != null ? log.variant.sku : '-'}"></div>
                                     </td>
                                     <td>
-                                        <span th:if="${log.movementType.name() == 'SALE'}" class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                        <span th:if="${log.movementType != null && log.movementType.name() == 'SALE'}" class="badge bg-danger-subtle text-danger border border-danger-subtle">
                                             <i class="bi bi-cart-dash me-1"></i> Bán hàng
                                         </span>
-                                        <span th:if="${log.movementType.name() == 'RETURN'}" class="badge bg-success-subtle text-success border border-success-subtle">
+                                        <span th:if="${log.movementType != null && log.movementType.name() == 'RETURN'}" class="badge bg-success-subtle text-success border border-success-subtle">
                                             <i class="bi bi-arrow-return-left me-1"></i> Hoàn hàng
                                         </span>
-                                        <span th:if="${log.movementType.name() == 'TRANSFER_OUT'}" class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
+                                        <span th:if="${log.movementType != null && log.movementType.name() == 'TRANSFER_OUT'}" class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle">
                                             <i class="bi bi-box-arrow-up me-1"></i> Xuất chuyển kho
                                         </span>
-                                        <span th:if="${log.movementType.name() == 'TRANSFER_IN'}" class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
+                                        <span th:if="${log.movementType != null && log.movementType.name() == 'TRANSFER_IN'}" class="badge bg-info-subtle text-info-emphasis border border-info-subtle">
                                             <i class="bi bi-box-arrow-in-down me-1"></i> Nhập chuyển kho
                                         </span>
-                                        <span th:if="${log.movementType.name() == 'ADJUSTMENT'}" class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                        <span th:if="${log.movementType != null && log.movementType.name() == 'ADJUSTMENT'}" class="badge bg-primary-subtle text-primary border border-primary-subtle">
                                             <i class="bi bi-sliders me-1"></i> Kiểm kê / Điều chỉnh
                                         </span>
                                     </td>

@@ -22,6 +22,7 @@ public interface OrderService {
     Page<Order> getOrdersByBranch(Integer branchId, Pageable pageable);
     Page<Order> getOrdersByBranchAndStatus(Integer branchId, OrderStatus status, Pageable pageable);
     Page<Order> getOrdersByStatus(OrderStatus status, Pageable pageable);
+    Page<Order> getOrdersByShipper(Long shipperId, OrderStatus status, Pageable pageable);
     void updateOrderStatus(Long orderId, OrderStatus newStatus, String note);
     void markAsPaid(Long orderId, String vnpayTxnRef);
 

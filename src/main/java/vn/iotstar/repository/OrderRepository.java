@@ -24,6 +24,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Page<Order> findByBranchBranchIdAndStatus(Integer branchId, OrderStatus status, Pageable pageable);
     Page<Order> findByStatus(OrderStatus status, Pageable pageable);
     Page<Order> findByShipperUserId(Long shipperId, Pageable pageable);
+    Page<Order> findByShipperUserIdAndStatus(Long shipperId, OrderStatus status, Pageable pageable);
+    long countByShipperUserId(Long shipperId);
+    long countByShipperUserIdAndStatus(Long shipperId, OrderStatus status);
     boolean existsByOrderCode(String orderCode);
 
     long countByStatus(OrderStatus status);

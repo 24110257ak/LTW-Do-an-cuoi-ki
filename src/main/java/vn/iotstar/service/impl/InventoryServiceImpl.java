@@ -185,12 +185,15 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional(readOnly = true)
     public Page<StockLog> getStockLogsPaged(Integer branchId, StockMovementType movementType, Pageable pageable) {
+        if (branchId != null && movementType != null) {
+            return stockLogRepository.findByBranchBranchIdAndMovementType(branchId, movementType, pageable);
+        }
         if (branchId != null) {
-            return stockLogRepository.findByBranchBranchIdOrderByCreatedAtDesc(branchId, pageable);
+            return stockLogRepository.findByBranchBranchId(branchId, pageable);
         }
         if (movementType != null) {
-            return stockLogRepository.findByMovementTypeOrderByCreatedAtDesc(movementType, pageable);
+            return stockLogRepository.findByMovementType(movementType, pageable);
         }
-        return stockLogRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return stockLogRepository.findAll(pageable);
     }
 }
