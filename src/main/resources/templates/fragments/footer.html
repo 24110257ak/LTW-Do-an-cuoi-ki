@@ -167,6 +167,88 @@
             container.scrollTop = container.scrollHeight;
         }
     </script>
+
+    <!-- Back To Top Button -->
+    <button id="backToTopBtn" type="button" title="Cuộn lên đầu trang" onclick="window.scrollTo({top: 0, behavior: 'smooth'});">
+        <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <!-- Global Interactive UX & Animations Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. Back to Top Button & Sticky Navbar Blur
+            const backToTopBtn = document.getElementById('backToTopBtn');
+            const nav = document.querySelector('.navbar.sticky-top');
+
+            window.addEventListener('scroll', function() {
+                const scrollY = window.scrollY || document.documentElement.scrollTop;
+                if (backToTopBtn) {
+                    if (scrollY > 280) {
+                        backToTopBtn.classList.add('show');
+                    } else {
+                        backToTopBtn.classList.remove('show');
+                    }
+                }
+                if (nav) {
+                    if (scrollY > 40) {
+                        nav.classList.add('navbar-scrolled');
+                    } else {
+                        nav.classList.remove('navbar-scrolled');
+                    }
+                }
+            });
+
+            // 2. Material Click Ripple Effect on Buttons & Cards
+            document.body.addEventListener('click', function(e) {
+                const target = e.target.closest('.btn, .btn-esc, .card-product, .card-category-item, .quantity-stepper button');
+                if (!target) return;
+
+                const circle = document.createElement('span');
+                const diameter = Math.max(target.clientWidth, target.clientHeight);
+                const radius = diameter / 2;
+
+                const rect = target.getBoundingClientRect();
+                circle.style.width = circle.style.height = `${diameter}px`;
+                circle.style.left = `${e.clientX - rect.left - radius}px`;
+                circle.style.top = `${e.clientY - rect.top - radius}px`;
+                circle.classList.add('ripple-wave');
+
+                // Check light or dark
+                const isLightBtn = target.classList.contains('btn-light') || target.classList.contains('card-product') || target.classList.contains('card-category-item') || target.classList.contains('btn-stepper');
+                if (isLightBtn) {
+                    circle.classList.add('ripple-wave-dark');
+                }
+
+                const existingRipple = target.querySelector('.ripple-wave');
+                if (existingRipple) {
+                    existingRipple.remove();
+                }
+
+                target.style.position = target.style.position || 'relative';
+                target.appendChild(circle);
+
+                setTimeout(() => {
+                    circle.remove();
+                }, 600);
+            });
+
+            // 3. Top Progress Bar on Link Click
+            const topBar = document.getElementById('topProgressBar');
+            document.querySelectorAll('a[href]').forEach(function(anchor) {
+                anchor.addEventListener('click', function(e) {
+                    const href = this.getAttribute('href');
+                    if (href && !href.startsWith('#') && !href.startsWith('javascript:') && !this.hasAttribute('target')) {
+                        if (topBar) {
+                            topBar.style.opacity = '1';
+                            topBar.style.width = '30%';
+                            setTimeout(() => { topBar.style.width = '75%'; }, 150);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+
 </footer>
 </body>
 </html>

@@ -26,10 +26,12 @@
                          class="img-fluid h-100 object-fit-contain" alt="Product Image">
                 </div>
                 <!-- Thumbnail gallery strip -->
-                <div class="d-flex gap-2 justify-content-center mt-2 flex-wrap" th:if="${not #lists.isEmpty(product.images)}">
-                    <img th:each="img : ${product.images}" th:src="${img.imageUrl}"
-                         class="rounded border bg-light p-1" style="width: 64px; height: 64px; object-fit: contain; cursor: pointer;"
-                         onclick="document.getElementById('mainProductImage').src = this.src;">
+                <div class="d-flex gap-2 justify-content-center mt-3 flex-wrap" th:if="${not #lists.isEmpty(product.images)}">
+                    <img th:each="img, iter : ${product.images}" th:src="${img.imageUrl}"
+                         th:classappend="${iter.first ? 'border-primary ring-active' : ''}"
+                         class="thumbnail-item rounded-3 border bg-light p-1 transition-all"
+                         style="width: 68px; height: 68px; object-fit: contain; cursor: pointer; transition: all 0.25s ease;"
+                         onclick="selectMainImage(this);">
                 </div>
             </div>
         </div>
@@ -79,16 +81,26 @@
                         </div>
                     </div>
 
-                    <!-- Số lượng -->
+                    <!-- Số lượng hiển thị trực quan (Quantity Stepper) -->
                     <div class="d-flex align-items-center gap-3 mb-4">
-                        <label class="fw-bold small text-muted text-uppercase">Số lượng:</label>
-                        <input type="number" name="quantity" class="form-control text-center" value="1" min="1" max="10" style="width: 80px;">
+                        <label class="fw-bold small text-muted text-uppercase mb-0">Số lượng:</label>
+                        <div class="quantity-stepper shadow-sm">
+                            <button type="button" class="btn btn-stepper btn-minus" id="btnQtyMinus" aria-label="Giảm" disabled>
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <input type="number" id="inputQuantity" name="quantity" class="form-control form-control-sm stepper-input text-center fw-bold border-0 bg-transparent"
+                                   value="1" min="1" max="10" readonly style="width: 54px;">
+                            <button type="button" class="btn btn-stepper btn-plus" id="btnQtyPlus" aria-label="Tăng">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                        <span class="text-muted small" id="stockLimitHint"><i class="fa-solid fa-shield me-1 text-primary"></i>Tối đa 10 máy/đơn</span>
                     </div>
 
                     <!-- Nút mua hàng & Yêu thích -->
                     <div class="d-flex gap-2 mb-4">
-                        <button type="submit" class="btn btn-danger btn-lg flex-grow-1 fw-bold py-3 rounded-pill shadow-sm">
-                            <i class="fa-solid fa-cart-shopping me-2"></i> THÊM VÀO GIỎ HÀNG
+                        <button type="submit" class="btn btn-danger btn-lg flex-grow-1 fw-bold py-3 rounded-pill shadow btn-hover-lift" id="btnAddToCart">
+                            <i class="fa-solid fa-cart-plus me-2"></i> THÊM VÀO GIỎ HÀNG
                         </button>
                     </div>
                 </form>
@@ -193,15 +205,83 @@
 
 <div th:replace="~{fragments/footer :: footer}"></div>
 
+<style>
+    .thumbnail-item:hover {
+        transform: translateY(-2px);
+        border-color: #3b82f6 !important;
+        box-shadow: 0 4px 10px rgba(59, 130, 246, 0.25);
+    }
+    .thumbnail-item.ring-active {
+        border-color: #2563eb !important;
+        border-width: 2px !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+    }
+    .btn-check:checked + label {
+        border-color: #2563eb !important;
+        border-width: 2px !important;
+        background-color: rgba(37, 99, 235, 0.04) !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+</style>
 <script>
-    // Live update price when changing variants
+    // 1. Quantity Stepper Logic
+    const inputQty = document.getElementById('inputQuantity');
+    const btnMinus = document.getElementById('btnQtyMinus');
+    const btnPlus = document.getElementById('btnQtyPlus');
+
+    function updateStepperButtons() {
+        if (!inputQty || !btnMinus || !btnPlus) return;
+        const val = parseInt(inputQty.value) || 1;
+        btnMinus.disabled = (val <= 1);
+        btnPlus.disabled = (val >= 10);
+    }
+
+    if (btnMinus && btnPlus && inputQty) {
+        btnMinus.addEventListener('click', function() {
+            let val = parseInt(inputQty.value) || 1;
+            if (val > 1) {
+                inputQty.value = val - 1;
+                updateStepperButtons();
+            }
+        });
+
+        btnPlus.addEventListener('click', function() {
+            let val = parseInt(inputQty.value) || 1;
+            if (val < 10) {
+                inputQty.value = val + 1;
+                updateStepperButtons();
+            }
+        });
+
+        updateStepperButtons();
+    }
+
+    // 2. Live Update Price with Flash Animation
+    const displayPriceEl = document.getElementById('displayPrice');
     document.querySelectorAll('.variant-radio').forEach(function(radio) {
         radio.addEventListener('change', function() {
-            if (this.checked) {
-                document.getElementById('displayPrice').innerText = this.getAttribute('data-price');
+            if (this.checked && displayPriceEl) {
+                displayPriceEl.innerText = this.getAttribute('data-price');
+                displayPriceEl.classList.remove('price-flash');
+                void displayPriceEl.offsetWidth; // trigger reflow
+                displayPriceEl.classList.add('price-flash');
             }
         });
     });
+
+    // 3. Select Main Image from Thumbnails
+    function selectMainImage(thumb) {
+        const mainImg = document.getElementById('mainProductImage');
+        if (mainImg) {
+            mainImg.style.opacity = '0.5';
+            setTimeout(() => {
+                mainImg.src = thumb.src;
+                mainImg.style.opacity = '1';
+            }, 100);
+        }
+        document.querySelectorAll('.thumbnail-item').forEach(el => el.classList.remove('ring-active', 'border-primary'));
+        thumb.classList.add('ring-active', 'border-primary');
+    }
 </script>
 </body>
 </html>
