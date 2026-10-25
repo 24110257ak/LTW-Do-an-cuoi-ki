@@ -284,9 +284,6 @@
             const cards = Array.from(stage.querySelectorAll('.rolodex-card'));
             const prevBtn = document.getElementById('btnRolodexPrev');
             const nextBtn = document.getElementById('btnRolodexNext');
-            const autoplayBtn = document.getElementById('btnRolodexAutoplay');
-            const autoplayIcon = document.getElementById('rolodexAutoplayIcon');
-            const autoplayLabel = document.getElementById('rolodexAutoplayLabel');
             const dotsContainer = document.getElementById('rolodexIndicators');
 
             if (cards.length === 0) return;
@@ -427,20 +424,7 @@
                 startAutoplay();
             }
 
-            if (autoplayBtn) {
-                autoplayBtn.addEventListener('click', () => {
-                    isAutoplayActive = !isAutoplayActive;
-                    if (isAutoplayActive) {
-                        if (autoplayIcon) autoplayIcon.className = 'fa-solid fa-pause text-primary';
-                        if (autoplayLabel) autoplayLabel.innerText = 'Tự xoay';
-                        startAutoplay();
-                    } else {
-                        if (autoplayIcon) autoplayIcon.className = 'fa-solid fa-play text-muted';
-                        if (autoplayLabel) autoplayLabel.innerText = 'Tạm dừng';
-                        stopAutoplay();
-                    }
-                });
-            }
+
 
             stage.addEventListener('mouseenter', stopAutoplay);
             stage.addEventListener('mouseleave', () => { if (isAutoplayActive) startAutoplay(); });
