@@ -110,8 +110,9 @@
                     <h6 class="fw-bold text-dark mb-2 d-flex align-items-center">
                         <i class="fa-solid fa-store text-warning me-2"></i>Kiểm tra hàng tại 4 chi nhánh chuỗi ESC:
                     </h6>
-                    <div class="row g-2">
-                        <div class="col-md-6" th:each="inv : ${branchStock}">
+                    <div class="row g-2" id="branchStockContainer">
+                        <div class="col-md-6 branch-stock-card" th:each="inv : ${branchStock}"
+                             th:attr="data-variant-id=${inv.variant != null ? inv.variant.variantId : 'default'}">
                             <div class="p-2 bg-white rounded border small d-flex justify-content-between align-items-center">
                                 <div>
                                     <strong th:text="${inv.branch.branchName}">Chi nhánh Q.1</strong>
@@ -294,18 +295,41 @@
         updateStepperButtons();
     }
 
-    // 2. Live Update Price with Flash Animation
+    // 2. Live Update Price with Flash Animation & Dynamic Branch Stock Filter
     const displayPriceEl = document.getElementById('displayPrice');
+
+    function updateBranchStock(variantId) {
+        const cards = document.querySelectorAll('.branch-stock-card');
+        if (!cards.length) return;
+        cards.forEach(card => {
+            const vId = card.getAttribute('data-variant-id');
+            if (!variantId || vId === 'default' || vId === variantId.toString()) {
+                card.style.display = '';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
     document.querySelectorAll('.variant-radio').forEach(function(radio) {
         radio.addEventListener('change', function() {
-            if (this.checked && displayPriceEl) {
-                displayPriceEl.innerText = this.getAttribute('data-price');
-                displayPriceEl.classList.remove('price-flash');
-                void displayPriceEl.offsetWidth; // trigger reflow
-                displayPriceEl.classList.add('price-flash');
+            if (this.checked) {
+                if (displayPriceEl) {
+                    displayPriceEl.innerText = this.getAttribute('data-price');
+                    displayPriceEl.classList.remove('price-flash');
+                    void displayPriceEl.offsetWidth; // trigger reflow
+                    displayPriceEl.classList.add('price-flash');
+                }
+                updateBranchStock(this.value);
             }
         });
     });
+
+    // Run branch stock filter on initial load for currently checked variant
+    const initialVariant = document.querySelector('.variant-radio:checked');
+    if (initialVariant) {
+        updateBranchStock(initialVariant.value);
+    }
 
     // 3. Select Main Image from Thumbnails
     function selectMainImage(thumb) {

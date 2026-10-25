@@ -21,24 +21,15 @@
 
     <style>
         .category-grid {
-            display: grid;
-            grid-template-columns: repeat(7, minmax(0, 1fr));
-            gap: 0.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.85rem;
         }
-        @media (max-width: 1199.98px) {
-            .category-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-        }
-        @media (max-width: 767.98px) {
-            .category-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-        @media (max-width: 575.98px) {
-            .category-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .category-grid > div {
+            flex: 1 1 135px;
+            max-width: 175px;
+            min-width: 125px;
         }
         .card-category-item {
             background: #ffffff;
@@ -67,34 +58,20 @@
         }
     </style>
 
-    <!-- 1. 3D Circular Rolodex Showcase (Slider Vòng Tròn / Bán Nguyệt Rolodex Đột Phá) -->
-    <div class="rolodex-container mb-5 shadow-lg">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
-            <div>
-                <span class="badge bg-primary text-white px-3 py-1 rounded-pill small fw-bold mb-2 d-inline-flex align-items-center">
-                    <i class="fa-solid fa-atom fa-spin me-2" style="--fa-animation-duration: 9s;"></i> 3D CIRCULAR ROLODEX SHOWCASE
-                </span>
-                <h3 class="fw-bold text-white mb-1">
-                    Siêu Phẩm Công Nghệ Đỉnh Cao 2026
-                </h3>
-                <p class="text-white-50 small mb-0">Xoay bánh xe Rolodex 3D để khám phá thiết bị hàng đầu thế giới tại ESC Store</p>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-dark bg-opacity-75 border border-secondary text-white-50 px-3 py-2 rounded-pill small d-none d-sm-inline">
-                    <i class="fa-solid fa-computer-mouse me-1 text-primary"></i> Cuộn chuột hoặc vuốt để xoay
-                </span>
-                <div class="btn-group">
-                    <button type="button" class="btn btn-outline-light rounded-circle rolodex-nav-btn me-2" id="btnRolodexPrev" title="Xoay ngược chiều kim đồng hồ" aria-label="Trước">
-                        <i class="fa-solid fa-chevron-left"></i>
-                    </button>
-                    <button type="button" class="btn btn-outline-light rounded-circle rolodex-nav-btn" id="btnRolodexNext" title="Xoay theo chiều kim đồng hồ" aria-label="Sau">
-                        <i class="fa-solid fa-chevron-right"></i>
-                    </button>
-                </div>
-            </div>
+    <!-- 1. 3D Circular Rolodex Showcase (Full-Page Arc Section 1) -->
+    <div class="fullpage-arc-section rolodex-container mb-5 shadow-lg position-relative">
+        <!-- Clean minimalist title (No top-right buttons) -->
+        <div class="mb-2">
+            <span class="badge bg-primary text-white px-3 py-1 rounded-pill small fw-bold mb-2 d-inline-flex align-items-center">
+                <i class="fa-solid fa-atom fa-spin me-2" style="--fa-animation-duration: 9s;"></i> 3D CIRCULAR ROLODEX SHOWCASE
+            </span>
+            <h3 class="fw-bold text-white mb-1">
+                Siêu Phẩm Công Nghệ Đỉnh Cao 2026
+            </h3>
+            <p class="text-white-50 small mb-0">Khám phá các thiết bị công nghệ hàng đầu thế giới tại hệ thống ESC Store</p>
         </div>
 
-        <!-- Rolodex 3D Stage (Vũ đài xoay 3D) -->
+        <!-- Rolodex 3D Stage (Shifted down for optimal vertical balance) -->
         <div class="rolodex-stage" id="rolodexStage">
             <div th:each="product, iter : ${featuredProducts}" class="rolodex-card"
                  th:data-index="${iter.index}"
@@ -131,11 +108,21 @@
         </div>
 
         <!-- Dial Indicators (Chỉ báo góc xoay) -->
-        <div class="d-flex justify-content-center align-items-center gap-2 mt-3" id="rolodexIndicators"></div>
+        <div class="d-flex justify-content-center align-items-center gap-2 mt-2" id="rolodexIndicators"></div>
+
+        <!-- Minimalist Glowing Controls at Bottom Right -->
+        <div class="rolodex-bottom-controls">
+            <button type="button" class="btn rolodex-mini-btn" id="btnRolodexPrev" title="Xoay ngược chiều kim đồng hồ" aria-label="Trước">
+                <i class="fa-solid fa-arrow-left-long"></i>
+            </button>
+            <button type="button" class="btn rolodex-mini-btn" id="btnRolodexNext" title="Xoay theo chiều kim đồng hồ" aria-label="Sau">
+                <i class="fa-solid fa-arrow-right-long"></i>
+            </button>
+        </div>
     </div>
 
     <!-- 2. Danh mục nổi bật -->
-    <div class="mb-5">
+    <div class="fullpage-arc-section mb-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-bold mb-0 d-flex align-items-center">
                 <i class="fa-solid fa-layer-group text-primary me-2"></i>Danh Mục Thiết Bị Công Nghệ
@@ -159,7 +146,7 @@
     </div>
 
     <!-- 3. Top Sản phẩm BÁN CHẠY NHẤT (>10 sản phẩm theo yêu cầu đề bài) -->
-    <div class="mb-5">
+    <div class="fullpage-arc-section mb-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h4 class="fw-bold mb-0 text-danger d-flex align-items-center">
@@ -216,7 +203,7 @@
     </div>
 
     <!-- 4. Top Sản phẩm Nổi bật -->
-    <div class="mb-5">
+    <div class="fullpage-arc-section mb-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-bold mb-0 text-primary d-flex align-items-center">
                 <i class="fa-solid fa-award me-2"></i>Sản Phẩm Đang Được Quan Tâm
@@ -251,7 +238,7 @@
     </div>
 
     <!-- 5. Hệ thống 4 Chi nhánh chuỗi ESC -->
-    <div class="card bg-white border-0 shadow-sm rounded-4 p-4 mb-4">
+    <div class="fullpage-arc-section card bg-white border-0 shadow-sm rounded-4 p-4 mb-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-bold mb-0 text-dark">
                 <i class="fa-solid fa-shop text-warning me-2"></i>Hệ Thống Chi Nhánh Cửa Hàng ESC (Sẵn Hàng - Nhận Ngay)
