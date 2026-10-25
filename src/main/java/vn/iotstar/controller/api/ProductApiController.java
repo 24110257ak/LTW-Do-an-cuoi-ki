@@ -41,16 +41,7 @@ public class ProductApiController {
         Sort sort = "asc".equalsIgnoreCase(direction) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Product> result;
-        if (keyword != null && !keyword.isBlank()) {
-            result = productService.searchProducts(keyword, pageable);
-        } else if (categoryId != null) {
-            result = productService.getProductsByCategory(categoryId, pageable);
-        } else if (brandId != null) {
-            result = productService.getProductsByBrand(brandId, pageable);
-        } else {
-            result = productService.getProductsPaged(pageable);
-        }
+        Page<Product> result = productService.filterCustomerProducts(categoryId, brandId, keyword, pageable);
 
         return ResponseEntity.ok(ApiResponse.ok("Tra cứu sản phẩm thành công", result));
     }

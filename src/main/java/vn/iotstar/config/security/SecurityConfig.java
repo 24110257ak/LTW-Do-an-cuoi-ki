@@ -112,6 +112,9 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers("/ws/**", "/api/**")
                 )
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                )
                 .authorizeHttpRequests(auth -> auth
                         // Public assets & Swagger Documentation
                         .requestMatchers(

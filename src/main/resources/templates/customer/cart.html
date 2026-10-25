@@ -144,6 +144,39 @@
     </div>
 </div>
 
+<style>
+    .quantity-stepper {
+        background: #f1f5f9;
+        border: 2px solid #cbd5e1 !important;
+        border-radius: 50rem;
+        padding: 2px 4px;
+        transition: all 0.25s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+    .btn-stepper {
+        width: 30px; height: 30px; padding: 0;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: #ffffff; color: #0f172a;
+        border: 1.5px solid #94a3b8; border-radius: 50% !important;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        font-size: 0.8rem; font-weight: 700;
+        cursor: pointer;
+    }
+    .btn-stepper:hover:not(:disabled) {
+        background: #2563eb !important; color: #ffffff !important; border-color: #2563eb !important;
+        transform: scale(1.1);
+    }
+    .btn-stepper:disabled {
+        opacity: 0.35; cursor: not-allowed; background: #e2e8f0; border-color: #cbd5e1;
+    }
+    .stepper-input {
+        width: 44px !important; text-align: center; font-weight: 700; font-size: 0.95rem;
+        color: #0f172a; border: none !important; background: transparent !important;
+        box-shadow: none !important;
+    }
+</style>
 <div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

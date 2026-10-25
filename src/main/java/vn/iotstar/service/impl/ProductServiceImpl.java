@@ -28,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductVariantRepository productVariantRepository;
     private final ProductImageRepository productImageRepository;
     private final BranchInventoryRepository branchInventoryRepository;
+    private final vn.iotstar.repository.CategoryRepository categoryRepository;
 
     @Override
     public Page<Product> getProductsPaged(Pageable pageable) {
@@ -35,21 +36,43 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    public Page<Product> filterCustomerProducts(Integer categoryId, Integer brandId, String keyword, Pageable pageable) {
+        String cleanKeyword = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
+
+        java.util.List<Integer> categoryIds = new java.util.ArrayList<>();
+        boolean hasCategories = false;
+
+        if (categoryId != null) {
+            categoryRepository.findById(categoryId).ifPresent(cat -> {
+                categoryIds.add(cat.getCategoryId());
+                if (cat.getChildren() != null && !cat.getChildren().isEmpty()) {
+                    for (vn.iotstar.entity.Category child : cat.getChildren()) {
+                        if (Boolean.TRUE.equals(child.getIsActive())) {
+                            categoryIds.add(child.getCategoryId());
+                        }
+                    }
+                }
+            });
+            hasCategories = !categoryIds.isEmpty();
+        }
+
+        java.util.List<Integer> safeIds = hasCategories ? categoryIds : java.util.List.of(-1);
+        return productRepository.filterCustomerProducts(hasCategories, safeIds, brandId, cleanKeyword, pageable);
+    }
+
+    @Override
     public Page<Product> getProductsByCategory(Integer categoryId, Pageable pageable) {
-        return productRepository.findByCategoryCategoryIdAndIsActiveTrue(categoryId, pageable);
+        return filterCustomerProducts(categoryId, null, null, pageable);
     }
 
     @Override
     public Page<Product> getProductsByBrand(Integer brandId, Pageable pageable) {
-        return productRepository.findByBrandBrandIdAndIsActiveTrue(brandId, pageable);
+        return filterCustomerProducts(null, brandId, null, pageable);
     }
 
     @Override
     public Page<Product> searchProducts(String keyword, Pageable pageable) {
-        if (keyword == null || keyword.isBlank()) {
-            return productRepository.findAllByIsActiveTrue(pageable);
-        }
-        return productRepository.searchProducts(keyword.trim(), pageable);
+        return filterCustomerProducts(null, null, keyword, pageable);
     }
 
     @Override

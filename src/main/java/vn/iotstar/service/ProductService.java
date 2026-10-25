@@ -15,6 +15,7 @@ public interface ProductService {
     Page<Product> getProductsByCategory(Integer categoryId, Pageable pageable);
     Page<Product> getProductsByBrand(Integer brandId, Pageable pageable);
     Page<Product> searchProducts(String keyword, Pageable pageable);
+    Page<Product> filterCustomerProducts(Integer categoryId, Integer brandId, String keyword, Pageable pageable);
 
     List<Product> getFeaturedProducts();
     List<Product> getBestSellerProducts();

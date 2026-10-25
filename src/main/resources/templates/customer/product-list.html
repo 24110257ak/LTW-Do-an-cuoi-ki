@@ -7,60 +7,144 @@
 <div th:replace="~{fragments/header :: header-nav}"></div>
 
 <div class="container my-4">
-    <!-- Breadcrumb -->
+    <!-- Breadcrumb điều hướng -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Trang chủ</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Danh sách sản phẩm</li>
+            <li class="breadcrumb-item"><a th:href="@{/products}" class="text-decoration-none">Sản phẩm</a></li>
+            <li th:if="${selectedCategory != null && selectedCategory.parent != null}" class="breadcrumb-item">
+                <a th:href="@{/products(categoryId=${selectedCategory.parent.categoryId})}" class="text-decoration-none" th:text="${selectedCategory.parent.categoryName}">Danh mục cha</a>
+            </li>
+            <li th:if="${selectedCategory != null}" class="breadcrumb-item active" aria-current="page" th:text="${selectedCategory.categoryName}">Danh mục</li>
+            <li th:if="${selectedCategory == null && selectedBrand != null}" class="breadcrumb-item active" aria-current="page" th:text="${selectedBrand.brandName}">Hãng</li>
+            <li th:if="${selectedCategory == null && selectedBrand == null && (keyword == null || keyword.isBlank())}" class="breadcrumb-item active" aria-current="page">Tất cả</li>
         </ol>
     </nav>
 
     <div class="row g-4">
         <!-- Sidebar Bộ Lọc -->
         <div class="col-lg-3">
-            <div class="card border-0 shadow-sm rounded-4 p-3 mb-4">
-                <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-filter text-primary me-2"></i>Bộ Lọc Tìm Kiếm</h6>
+            <!-- Active Filters Box (Hiện khi có bộ lọc được kích hoạt) -->
+            <div th:if="${selectedCategory != null || selectedBrand != null || (keyword != null && !keyword.isBlank())}"
+                 class="card border-0 shadow-sm rounded-4 p-3 mb-3 bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small fw-bold text-uppercase text-muted"><i class="fa-solid fa-filter text-primary me-1"></i>Đang lọc</span>
+                    <a th:href="@{/products}" class="text-danger small text-decoration-none fw-semibold">
+                        <i class="fa-solid fa-rotate-left me-1"></i>Xóa hết
+                    </a>
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <!-- Category Tag -->
+                    <a th:if="${selectedCategory != null}"
+                       th:href="@{/products(brandId=${selectedBrandId},keyword=${keyword})}"
+                       class="badge bg-primary-subtle text-primary border border-primary-subtle text-decoration-none py-1 px-2 rounded-pill d-inline-flex align-items-center"
+                       title="Bỏ lọc danh mục này">
+                        <span><i class="fa-solid fa-tag me-1"></i><span th:text="${selectedCategory.categoryName}">Điện thoại</span></span>
+                        <i class="fa-solid fa-xmark ms-2"></i>
+                    </a>
+                    <!-- Brand Tag -->
+                    <a th:if="${selectedBrand != null}"
+                       th:href="@{/products(categoryId=${selectedCategoryId},keyword=${keyword})}"
+                       class="badge bg-info-subtle text-info-emphasis border border-info-subtle text-decoration-none py-1 px-2 rounded-pill d-inline-flex align-items-center"
+                       title="Bỏ lọc thương hiệu này">
+                        <span><i class="fa-solid fa-copyright me-1"></i><span th:text="${selectedBrand.brandName}">Apple</span></span>
+                        <i class="fa-solid fa-xmark ms-2"></i>
+                    </a>
+                    <!-- Keyword Tag -->
+                    <a th:if="${keyword != null && !keyword.isBlank()}"
+                       th:href="@{/products(categoryId=${selectedCategoryId},brandId=${selectedBrandId})}"
+                       class="badge bg-secondary-subtle text-dark border border-secondary-subtle text-decoration-none py-1 px-2 rounded-pill d-inline-flex align-items-center"
+                       title="Bỏ từ khóa tìm kiếm">
+                        <span><i class="fa-solid fa-magnifying-glass me-1"></i><span th:text="'&quot;' + ${keyword} + '&quot;'"></span></span>
+                        <i class="fa-solid fa-xmark ms-2"></i>
+                    </a>
+                </div>
+            </div>
 
-                <!-- Lọc Danh mục -->
+            <!-- Panel Lọc Danh Mục & Thương Hiệu -->
+            <div class="card border-0 shadow-sm rounded-4 p-3 mb-4 bg-white">
+                <h6 class="fw-bold text-dark mb-3 d-flex align-items-center">
+                    <i class="fa-solid fa-sliders text-primary me-2"></i>Bộ Lọc Tìm Kiếm
+                </h6>
+
+                <!-- Lọc Danh mục Phân Cấp (Hierarchical Category Tree) -->
                 <div class="mb-4">
-                    <label class="form-label fw-semibold small text-muted text-uppercase">Danh Mục</label>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-semibold small text-muted text-uppercase mb-0">Danh Mục</label>
+                        <a th:if="${selectedCategoryId != null}" th:href="@{/products(brandId=${selectedBrandId},keyword=${keyword})}"
+                           class="small text-danger text-decoration-none">Bỏ chọn</a>
+                    </div>
                     <div class="list-group list-group-flush small">
-                        <a th:href="@{/products}" class="list-group-item list-group-item-action border-0 px-2 py-1 rounded"
-                           th:classappend="${selectedCategoryId == null ? 'fw-bold text-primary bg-light' : 'text-dark'}">
-                            Tất cả danh mục
+                        <!-- Tất cả danh mục -->
+                        <a th:href="@{/products(brandId=${selectedBrandId},keyword=${keyword})}"
+                           class="list-group-item list-group-item-action border-0 px-2 py-2 rounded d-flex align-items-center justify-content-between"
+                           th:classappend="${selectedCategoryId == null ? 'fw-bold text-primary bg-primary-subtle' : 'text-dark'}">
+                            <span><i class="fa-solid fa-layer-group me-2 text-muted"></i>Tất cả danh mục</span>
+                            <span class="badge bg-secondary-subtle text-secondary rounded-pill" th:if="${selectedCategoryId == null}">Đang chọn</span>
                         </a>
-                        <a th:each="cat : ${categories}"
-                           th:href="@{/products(categoryId=${cat.categoryId},brandId=${selectedBrandId},keyword=${keyword})}"
-                           class="list-group-item list-group-item-action border-0 px-2 py-1 rounded"
-                           th:classappend="${selectedCategoryId == cat.categoryId ? 'fw-bold text-primary bg-light' : 'text-dark'}"
-                           th:text="${cat.categoryName}">Danh mục</a>
+
+                        <!-- Danh mục cha và các danh mục con -->
+                        <div th:each="rootCat : ${rootCategories}" class="mt-2">
+                            <!-- Link danh mục cha (Lọc tất cả sản phẩm thuộc cha + con) -->
+                            <a th:href="@{/products(categoryId=${rootCat.categoryId},brandId=${selectedBrandId},keyword=${keyword})}"
+                               class="list-group-item list-group-item-action border-0 px-2 py-1 rounded d-flex align-items-center justify-content-between fw-bold"
+                               th:classappend="${selectedCategoryId == rootCat.categoryId ? 'text-primary bg-primary-subtle' : 'text-dark'}">
+                                <span>
+                                    <i class="fa-solid fa-circle-dot me-2 text-primary" style="font-size: 0.65rem;"></i>
+                                    <span th:text="${rootCat.categoryName}">Điện thoại</span>
+                                </span>
+                            </a>
+
+                            <!-- Danh mục con thụt lề (Indented Subcategories) -->
+                            <div th:if="${rootCat.children != null && !rootCat.children.isEmpty()}" class="ps-3 border-start ms-3 my-1">
+                                <a th:each="child : ${rootCat.children}" th:if="${child.isActive}"
+                                   th:href="@{/products(categoryId=${child.categoryId},brandId=${selectedBrandId},keyword=${keyword})}"
+                                   class="list-group-item list-group-item-action border-0 px-2 py-1 rounded small d-flex align-items-center"
+                                   th:classappend="${selectedCategoryId == child.categoryId ? 'fw-bold text-primary bg-primary-subtle' : 'text-secondary'}">
+                                    <i class="fa-solid fa-chevron-right me-2 text-muted" style="font-size: 0.6rem;"></i>
+                                    <span th:text="${child.categoryName}">iPhone</span>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
+                <hr class="border-light-subtle my-3">
+
                 <!-- Lọc Thương hiệu -->
                 <div class="mb-4">
-                    <label class="form-label fw-semibold small text-muted text-uppercase">Thương Hiệu</label>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-semibold small text-muted text-uppercase mb-0">Thương Hiệu</label>
+                        <a th:if="${selectedBrandId != null}" th:href="@{/products(categoryId=${selectedCategoryId},keyword=${keyword})}"
+                           class="small text-danger text-decoration-none">Bỏ chọn</a>
+                    </div>
                     <div class="list-group list-group-flush small">
                         <a th:href="@{/products(categoryId=${selectedCategoryId},keyword=${keyword})}"
                            class="list-group-item list-group-item-action border-0 px-2 py-1 rounded"
-                           th:classappend="${selectedBrandId == null ? 'fw-bold text-primary bg-light' : 'text-dark'}">
+                           th:classappend="${selectedBrandId == null ? 'fw-bold text-primary bg-primary-subtle' : 'text-dark'}">
                             Tất cả hãng
                         </a>
                         <a th:each="b : ${brands}"
                            th:href="@{/products(brandId=${b.brandId},categoryId=${selectedCategoryId},keyword=${keyword})}"
-                           class="list-group-item list-group-item-action border-0 px-2 py-1 rounded"
-                           th:classappend="${selectedBrandId == b.brandId ? 'fw-bold text-primary bg-light' : 'text-dark'}"
-                           th:text="${b.brandName}">Hãng</a>
+                           class="list-group-item list-group-item-action border-0 px-2 py-1 rounded d-flex justify-content-between align-items-center"
+                           th:classappend="${selectedBrandId == b.brandId ? 'fw-bold text-primary bg-primary-subtle' : 'text-dark'}">
+                            <span th:text="${b.brandName}">Hãng</span>
+                        </a>
                     </div>
                 </div>
 
-                <!-- Chi nhánh còn hàng -->
+                <hr class="border-light-subtle my-3">
+
+                <!-- Hệ thống chi nhánh chuỗi cửa hàng ESC -->
                 <div>
-                    <label class="form-label fw-semibold small text-muted text-uppercase">Chi Nhánh Cửa Hàng</label>
+                    <label class="form-label fw-semibold small text-muted text-uppercase mb-2">Hệ Thống 4 Chi Nhánh</label>
                     <div class="small text-secondary">
-                        <div class="mb-1" th:each="br : ${branches}">
-                            <i class="fa-solid fa-store text-warning me-1"></i>
-                            <span th:text="${br.branchName}">Chi nhánh Q.1</span>
+                        <div class="mb-2 d-flex align-items-center" th:each="br : ${branches}">
+                            <i class="fa-solid fa-location-dot text-danger me-2"></i>
+                            <div>
+                                <div class="fw-semibold text-dark" th:text="${br.branchName}">Chi nhánh Q.1</div>
+                                <div class="text-muted" style="font-size: 0.75rem;" th:text="${br.district}">Quận 1, TP.HCM</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -69,25 +153,44 @@
 
         <!-- Cột Danh sách sản phẩm -->
         <div class="col-lg-9">
-            <!-- Header bar -->
-            <div class="d-flex justify-content-between align-items-center mb-4 bg-white p-3 rounded-4 shadow-sm">
+            <!-- Header bar & Sort Controls -->
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4 bg-white p-3 rounded-4 shadow-sm">
                 <div>
-                    <h5 class="fw-bold mb-0">
-                        <span th:if="${keyword != null && !keyword.isBlank()}">Kết quả tìm kiếm cho: "<strong th:text="${keyword}"></strong>"</span>
-                        <span th:unless="${keyword != null && !keyword.isBlank()}">Tất Cả Thiết Bị Công Nghệ</span>
+                    <h5 class="fw-bold mb-1">
+                        <span th:if="${keyword != null && !keyword.isBlank()}">
+                            Kết quả tìm kiếm cho: "<strong class="text-primary" th:text="${keyword}"></strong>"
+                        </span>
+                        <span th:unless="${keyword != null && !keyword.isBlank()}">
+                            <span th:if="${selectedCategory != null && selectedBrand != null}"
+                                  th:text="${selectedCategory.categoryName} + ' - Hãng ' + ${selectedBrand.brandName}">Điện thoại Apple</span>
+                            <span th:if="${selectedCategory != null && selectedBrand == null}"
+                                  th:text="${selectedCategory.categoryName}">Điện thoại</span>
+                            <span th:if="${selectedCategory == null && selectedBrand != null}"
+                                  th:text="'Thương hiệu ' + ${selectedBrand.brandName}">Thương hiệu Apple</span>
+                            <span th:if="${selectedCategory == null && selectedBrand == null}">Tất Cả Thiết Bị Công Nghệ</span>
+                        </span>
                     </h5>
-                    <small class="text-muted" th:text="'Tìm thấy ' + ${productPage.totalElements} + ' sản phẩm'"></small>
+                    <small class="text-muted">
+                        Tìm thấy <strong class="text-primary" th:text="${productPage.totalElements}">0</strong> sản phẩm
+                    </small>
                 </div>
+
                 <!-- Sắp xếp -->
                 <div class="d-flex align-items-center">
-                    <label class="small text-muted me-2 text-nowrap">Sắp xếp:</label>
+                    <label class="small text-muted me-2 text-nowrap"><i class="fa-solid fa-arrow-down-short-wide me-1"></i>Sắp xếp:</label>
                     <div class="btn-group btn-group-sm">
                         <a th:href="@{/products(categoryId=${selectedCategoryId},brandId=${selectedBrandId},keyword=${keyword},sortBy='basePrice',direction='asc')}"
-                           class="btn btn-outline-secondary">Giá tăng dần</a>
+                           class="btn" th:classappend="${sortBy == 'basePrice' && direction == 'asc' ? 'btn-primary' : 'btn-outline-secondary'}">
+                            Giá tăng dần
+                        </a>
                         <a th:href="@{/products(categoryId=${selectedCategoryId},brandId=${selectedBrandId},keyword=${keyword},sortBy='basePrice',direction='desc')}"
-                           class="btn btn-outline-secondary">Giá giảm dần</a>
+                           class="btn" th:classappend="${sortBy == 'basePrice' && direction == 'desc' ? 'btn-primary' : 'btn-outline-secondary'}">
+                            Giá giảm dần
+                        </a>
                         <a th:href="@{/products(categoryId=${selectedCategoryId},brandId=${selectedBrandId},keyword=${keyword},sortBy='totalSold',direction='desc')}"
-                           class="btn btn-outline-secondary">Bán chạy nhất</a>
+                           class="btn" th:classappend="${sortBy == 'totalSold' ? 'btn-primary' : 'btn-outline-secondary'}">
+                            Bán chạy nhất
+                        </a>
                     </div>
                 </div>
             </div>
@@ -123,25 +226,39 @@
                 </div>
             </div>
 
-            <div th:unless="${productPage.totalElements > 0}" class="text-center py-5 bg-white rounded-4 shadow-sm">
-                <i class="fa-solid fa-box-open fs-1 text-muted mb-3"></i>
-                <h5 class="fw-bold text-secondary">Không tìm thấy sản phẩm phù hợp</h5>
-                <p class="text-muted small">Vui lòng thử tìm kiếm với từ khóa hoặc bộ lọc khác.</p>
-                <a th:href="@{/products}" class="btn btn-primary btn-sm rounded-pill px-4">Xem tất cả sản phẩm</a>
+            <!-- Empty State khi không tìm thấy sản phẩm -->
+            <div th:unless="${productPage.totalElements > 0}" class="text-center py-5 bg-white rounded-4 shadow-sm p-4">
+                <div class="mb-3">
+                    <i class="fa-solid fa-filter-circle-xmark fs-1 text-muted" style="opacity: 0.6;"></i>
+                </div>
+                <h5 class="fw-bold text-dark mb-2">Không tìm thấy sản phẩm phù hợp</h5>
+                <p class="text-secondary small mb-4" style="max-width: 480px; margin: 0 auto;">
+                    Không có sản phẩm nào thỏa mãn điều kiện lọc hiện tại. Quý khách có thể thử chọn danh mục khác, bỏ chọn thương hiệu hoặc xem toàn bộ sản phẩm.
+                </p>
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    <a th:if="${selectedCategoryId != null && selectedBrandId != null}"
+                       th:href="@{/products(categoryId=${selectedCategoryId})}"
+                       class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                        <i class="fa-solid fa-layer-group me-1"></i>Chỉ lọc theo danh mục
+                    </a>
+                    <a th:href="@{/products}" class="btn btn-primary btn-sm rounded-pill px-4">
+                        <i class="fa-solid fa-rotate-left me-1"></i>Xóa tất cả bộ lọc
+                    </a>
+                </div>
             </div>
 
             <!-- Phân trang 20 sản phẩm/trang -->
             <nav th:if="${productPage.totalPages > 1}" class="mt-5" aria-label="Product pagination">
                 <ul class="pagination justify-content-center">
                     <li class="page-item" th:classappend="${productPage.first ? 'disabled' : ''}">
-                        <a class="page-link" th:href="@{/products(page=${currentPage - 1},size=${pageSize},categoryId=${selectedCategoryId},brandId=${selectedBrandId},keyword=${keyword})}">Trước</a>
+                        <a class="page-link" th:href="@{/products(page=${currentPage - 1},size=${pageSize},categoryId=${selectedCategoryId},brandId=${selectedBrandId},keyword=${keyword},sortBy=${sortBy},direction=${direction})}">Trước</a>
                     </li>
                     <li class="page-item" th:each="i : ${#numbers.sequence(0, productPage.totalPages - 1)}"
                         th:classappend="${i == currentPage ? 'active' : ''}">
-                        <a class="page-link" th:href="@{/products(page=${i},size=${pageSize},categoryId=${selectedCategoryId},brandId=${selectedBrandId},keyword=${keyword})}" th:text="${i + 1}">1</a>
+                        <a class="page-link" th:href="@{/products(page=${i},size=${pageSize},categoryId=${selectedCategoryId},brandId=${selectedBrandId},keyword=${keyword},sortBy=${sortBy},direction=${direction})}" th:text="${i + 1}">1</a>
                     </li>
                     <li class="page-item" th:classappend="${productPage.last ? 'disabled' : ''}">
-                        <a class="page-link" th:href="@{/products(page=${currentPage + 1},size=${pageSize},categoryId=${selectedCategoryId},brandId=${selectedBrandId},keyword=${keyword})}">Sau</a>
+                        <a class="page-link" th:href="@{/products(page=${currentPage + 1},size=${pageSize},categoryId=${selectedCategoryId},brandId=${selectedBrandId},keyword=${keyword},sortBy=${sortBy},direction=${direction})}">Sau</a>
                     </li>
                 </ul>
             </nav>

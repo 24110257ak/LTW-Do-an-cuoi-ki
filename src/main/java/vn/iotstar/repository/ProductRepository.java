@@ -26,8 +26,19 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
            "LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Product> searchProducts(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT p FROM Product p WHERE p.isActive = true AND " +
+           "(:hasCategories = false OR p.category.categoryId IN :categoryIds) AND " +
+           "(:brandId IS NULL OR p.brand.brandId = :brandId) AND " +
+           "(:keyword IS NULL OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Product> filterCustomerProducts(
+            @Param("hasCategories") boolean hasCategories,
+            @Param("categoryIds") List<Integer> categoryIds,
+            @Param("brandId") Integer brandId,
+            @Param("keyword") String keyword,
+            Pageable pageable);
+
     @Query("SELECT p FROM Product p WHERE " +
-           "(:categoryId IS NULL OR p.category.categoryId = :categoryId) AND " +
+           "(:categoryId IS NULL OR p.category.categoryId = :categoryId OR (p.category.parent IS NOT NULL AND p.category.parent.categoryId = :categoryId)) AND " +
            "(:brandId IS NULL OR p.brand.brandId = :brandId) AND " +
            "(:keyword IS NULL OR LOWER(p.productName) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Product> searchProductsAdmin(

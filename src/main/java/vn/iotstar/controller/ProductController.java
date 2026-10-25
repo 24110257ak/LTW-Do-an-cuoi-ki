@@ -38,26 +38,27 @@ public class ProductController {
         Sort sort = "asc".equalsIgnoreCase(direction) ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pageable = PageRequest.of(page, size, sort);
 
-        Page<Product> productPage;
-        if (keyword != null && !keyword.isBlank()) {
-            productPage = productService.searchProducts(keyword, pageable);
-        } else if (categoryId != null) {
-            productPage = productService.getProductsByCategory(categoryId, pageable);
-        } else if (brandId != null) {
-            productPage = productService.getProductsByBrand(brandId, pageable);
-        } else {
-            productPage = productService.getProductsPaged(pageable);
-        }
+        Page<Product> productPage = productService.filterCustomerProducts(categoryId, brandId, keyword, pageable);
 
         model.addAttribute("productPage", productPage);
+        model.addAttribute("rootCategories", categoryService.getRootCategories());
         model.addAttribute("categories", categoryService.getAllActiveCategories());
         model.addAttribute("brands", brandService.getAllActiveBrands());
         model.addAttribute("branches", branchService.getAllActiveBranches());
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedCategoryId", categoryId);
         model.addAttribute("selectedBrandId", brandId);
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("direction", direction);
         model.addAttribute("currentPage", page);
         model.addAttribute("pageSize", size);
+
+        if (categoryId != null) {
+            categoryService.getCategoryById(categoryId).ifPresent(c -> model.addAttribute("selectedCategory", c));
+        }
+        if (brandId != null) {
+            brandService.getBrandById(brandId).ifPresent(b -> model.addAttribute("selectedBrand", b));
+        }
 
         return "customer/product-list";
     }
