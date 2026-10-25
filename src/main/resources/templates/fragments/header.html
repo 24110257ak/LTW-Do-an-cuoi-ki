@@ -87,52 +87,278 @@
             user-select: none; pointer-events: none;
         }
 
-        /* Product Cards Hover */
+        /* ========================================================
+           1. PREMIUM HOVERING & 3D TILT ENGINE
+           ======================================================== */
         .card-product {
-            border: 1px solid #f1f5f9; border-radius: 16px;
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease;
-            background: #fff; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            border: 1px solid #e2e8f0;
+            border-radius: 18px;
+            background: #ffffff;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s ease;
+        }
+        .card-product::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 18px;
+            pointer-events: none;
+            opacity: 0;
+            background: radial-gradient(circle at var(--glare-x, 50%) var(--glare-y, 50%), rgba(59, 130, 246, 0.16), transparent 70%);
+            transition: opacity 0.3s ease;
+            z-index: 5;
         }
         .card-product:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 8px 10px -6px rgba(15, 23, 42, 0.04);
-            border-color: rgba(59, 130, 246, 0.35) !important;
+            border-color: rgba(37, 99, 235, 0.5) !important;
+            box-shadow: 0 22px 42px -10px rgba(37, 99, 235, 0.22), 0 0 22px rgba(59, 130, 246, 0.14) !important;
+        }
+        .card-product:hover::after {
+            opacity: 1;
         }
         .card-product img {
-            transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.4s ease;
         }
         .card-product:hover img {
-            transform: scale(1.06);
+            transform: translateY(-6px) scale(1.08);
+            filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.14));
         }
 
-        /* Banner Carousel Transitions */
-        #homeBannerCarousel .carousel-item {
-            transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease-in-out;
+        /* Category Item 3D Hover */
+        .card-category-item {
+            position: relative;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.15rem;
+            padding: 1.1rem 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+            overflow: hidden;
         }
-        #homeBannerCarousel .carousel-item img {
-            transition: transform 6s cubic-bezier(0.1, 0.9, 0.2, 1);
+        .card-category-item:hover {
+            transform: translateY(-6px) scale(1.03);
+            border-color: #2563eb !important;
+            box-shadow: 0 14px 28px rgba(37, 99, 235, 0.2) !important;
         }
-        #homeBannerCarousel .carousel-item.active img {
-            transform: scale(1.025);
+        .card-category-item img, .card-category-item i {
+            transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
         }
-        #homeBannerCarousel .carousel-indicators button {
-            width: 14px; height: 5px; border-radius: 4px; border: none;
-            background: rgba(255, 255, 255, 0.5); margin: 0 4px;
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        .card-category-item:hover img, .card-category-item:hover i {
+            transform: scale(1.15) rotate(-4deg);
         }
-        #homeBannerCarousel .carousel-indicators button.active {
-            width: 36px; background: #3b82f6; opacity: 1;
-        }
-        #homeBannerCarousel .carousel-control-prev,
-        #homeBannerCarousel .carousel-control-next {
-            width: 46px; height: 46px; top: 50%; transform: translateY(-50%);
-            background: rgba(15, 23, 42, 0.6); border-radius: 50%;
-            margin: 0 16px; backdrop-filter: blur(8px); opacity: 0.75;
+
+        /* Navbar Enhanced Hover Styles */
+        .navbar-brand-esc {
             transition: all 0.25s ease;
         }
-        #homeBannerCarousel .carousel-control-prev:hover,
-        #homeBannerCarousel .carousel-control-next:hover {
-            background: #2563eb; opacity: 1; transform: translateY(-50%) scale(1.12);
+        .navbar-brand-esc:hover {
+            transform: translateY(-1px);
+        }
+        .navbar-brand-esc i {
+            transition: transform 0.3s ease, filter 0.3s ease;
+        }
+        .navbar-brand-esc:hover i {
+            transform: scale(1.25) rotate(-12deg);
+            filter: drop-shadow(0 0 10px #fbbf24);
+        }
+        .navbar-nav .nav-link {
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            border-radius: 50rem;
+            padding: 6px 14px !important;
+            margin: 0 2px;
+        }
+        .navbar-nav .nav-link:hover {
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(8px);
+            transform: translateY(-2px);
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .nav-item .fa-cart-shopping {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .nav-link:hover .fa-cart-shopping {
+            transform: scale(1.2) rotate(-8deg);
+        }
+        @keyframes cartGlowPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { box-shadow: 0 0 0 5px rgba(239, 68, 68, 0); }
+        }
+        .badge.bg-danger {
+            animation: cartGlowPulse 2.2s infinite;
+        }
+        .search-input-group {
+            transition: all 0.3s ease;
+        }
+        .search-input-group:focus-within, .search-input-group:hover {
+            filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.45));
+        }
+
+        /* Shimmer Wave on Buttons */
+        .btn-shimmer, .btn-esc, .btn-primary, .btn-warning {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .btn-shimmer::before, .btn-esc::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -120%;
+            width: 70%;
+            height: 200%;
+            background: linear-gradient(
+                120deg,
+                transparent 0%,
+                rgba(255, 255, 255, 0.35) 50%,
+                transparent 100%
+            );
+            transform: rotate(25deg);
+            pointer-events: none;
+            transition: none;
+        }
+        .btn-shimmer:hover::before, .btn-esc:hover::before {
+            left: 190%;
+            transition: left 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .btn-shimmer:hover, .btn-esc:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+        }
+
+        /* ========================================================
+           2. 3D CIRCULAR CAROUSEL (ROLODEX / BÁN NGUYỆT)
+           ======================================================== */
+        .rolodex-container {
+            position: relative;
+            background: radial-gradient(circle at 50% 120%, #1e293b 0%, #0f172a 60%, #030712 100%);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            border-radius: 1.5rem;
+            padding: 2.2rem 1.5rem 1.5rem 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            perspective: 1200px;
+            user-select: none;
+        }
+        .rolodex-container::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 550px;
+            height: 320px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.25) 0%, transparent 70%);
+            pointer-events: none;
+            filter: blur(60px);
+        }
+        .rolodex-stage {
+            position: relative;
+            height: 430px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-style: preserve-3d;
+            cursor: grab;
+        }
+        .rolodex-stage:active {
+            cursor: grabbing;
+        }
+        .rolodex-card {
+            position: absolute;
+            width: 300px;
+            height: 395px;
+            top: 50%;
+            left: 50%;
+            margin-left: -150px;
+            margin-top: -197.5px;
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(18px);
+            border: 1.5px solid rgba(148, 163, 184, 0.25);
+            border-radius: 1.35rem;
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            transform-style: preserve-3d;
+            transition: transform 0.65s cubic-bezier(0.2, 0.9, 0.3, 1),
+                        opacity 0.65s ease,
+                        filter 0.65s ease,
+                        border-color 0.4s ease,
+                        box-shadow 0.4s ease;
+            will-change: transform, opacity;
+        }
+        .rolodex-card.active-center {
+            border-color: #3b82f6 !important;
+            box-shadow: 0 25px 55px -10px rgba(37, 99, 235, 0.55), 0 0 30px rgba(59, 130, 246, 0.35) !important;
+            background: linear-gradient(160deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
+        }
+        .rolodex-card .product-img-box {
+            height: 175px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.06) 0%, transparent 70%);
+            border-radius: 1rem;
+            margin-bottom: 0.75rem;
+            position: relative;
+        }
+        .rolodex-card .product-img-box img {
+            max-height: 160px;
+            max-width: 90%;
+            object-fit: contain;
+            filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.45));
+            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+        }
+        .rolodex-card.active-center:hover .product-img-box img {
+            transform: scale(1.1) translateY(-6px);
+        }
+        .rolodex-nav-btn {
+            width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .rolodex-nav-btn:hover {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #ffffff;
+            transform: scale(1.12);
+            box-shadow: 0 0 16px rgba(37, 99, 235, 0.6);
+        }
+        .rolodex-nav-btn:active {
+            transform: scale(0.95);
+        }
+        .rolodex-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.25);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .rolodex-dot.active {
+            width: 32px;
+            border-radius: 20px;
+            background: #3b82f6;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.8);
         }
 
         /* Back to top button */

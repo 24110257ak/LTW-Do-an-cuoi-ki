@@ -67,43 +67,71 @@
         }
     </style>
 
-    <!-- 1. Banner Carousel -->
-    <div id="homeBannerCarousel" class="carousel slide rounded-4 overflow-hidden shadow-sm mb-5" data-bs-ride="carousel" data-bs-interval="4500">
-        <div class="carousel-indicators" th:if="${not #lists.isEmpty(banners)}">
-            <button th:each="bn, stat : ${banners}" type="button" data-bs-target="#homeBannerCarousel"
-                    th:data-bs-slide-to="${stat.index}" th:classappend="${stat.first ? 'active' : ''}"></button>
-        </div>
-        <div class="carousel-inner" th:if="${not #lists.isEmpty(banners)}">
-            <div th:each="bn, stat : ${banners}" class="carousel-item" th:classappend="${stat.first ? 'active' : ''}" style="height: 380px; background-color: #0f172a;">
-                <a th:href="@{${bn.linkUrl != null ? bn.linkUrl : '/products'}}">
-                    <img th:src="@{${bn.imageUrl}}" class="d-block w-100 h-100" style="object-fit: cover; object-position: center;" th:alt="${bn.title}">
-                </a>
+    <!-- 1. 3D Circular Rolodex Showcase (Slider Vòng Tròn / Bán Nguyệt Rolodex Đột Phá) -->
+    <div class="rolodex-container mb-5 shadow-lg">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+            <div>
+                <span class="badge bg-primary text-white px-3 py-1 rounded-pill small fw-bold mb-2 d-inline-flex align-items-center">
+                    <i class="fa-solid fa-atom fa-spin me-2" style="--fa-animation-duration: 9s;"></i> 3D CIRCULAR ROLODEX SHOWCASE
+                </span>
+                <h3 class="fw-bold text-white mb-1">
+                    Siêu Phẩm Công Nghệ Đỉnh Cao 2026
+                </h3>
+                <p class="text-white-50 small mb-0">Xoay bánh xe Rolodex 3D để khám phá thiết bị hàng đầu thế giới tại ESC Store</p>
             </div>
-        </div>
-        <div class="carousel-inner" th:if="${#lists.isEmpty(banners)}">
-            <div class="carousel-item active" style="height: 380px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);">
-                <div class="d-flex flex-column justify-content-center align-items-center h-100 text-white text-center px-4">
-                    <span class="badge bg-warning text-dark px-3 py-2 fs-6 mb-3 rounded-pill fw-bold">🔥 SIÊU PHẨM MỚI 2026</span>
-                    <h1 class="display-5 fw-extrabold mb-3">iPhone 16 Pro Max & Galaxy S25 Ultra</h1>
-                    <p class="lead mb-4 max-w-600">Trải nghiệm đỉnh cao công nghệ với chip A18 Pro và Galaxy AI. Sẵn hàng tại tất cả 4 chi nhánh TP.HCM.</p>
-                    <a th:href="@{/products}" class="btn btn-warning btn-lg px-5 py-3 fw-bold rounded-pill shadow">Khám Phá Ngay <i class="fa-solid fa-arrow-right ms-2"></i></a>
-                </div>
-            </div>
-            <div class="carousel-item" style="height: 380px; background: linear-gradient(135deg, #065f46 0%, #10b981 100%);">
-                <div class="d-flex flex-column justify-content-center align-items-center h-100 text-white text-center px-4">
-                    <span class="badge bg-light text-success px-3 py-2 fs-6 mb-3 rounded-pill fw-bold">💻 LAPTOP GAMING & ĐỒ HỌA</span>
-                    <h1 class="display-5 fw-extrabold mb-3">MacBook Pro M4 & Asus ROG Zephyrus</h1>
-                    <p class="lead mb-4">Mạnh mẽ vượt trội, giảm ngay 15% khi thanh toán trực tuyến hoặc mua tại cửa hàng.</p>
-                    <a th:href="@{/products(categoryId=2)}" class="btn btn-light text-success btn-lg px-5 py-3 fw-bold rounded-pill shadow">Xem Laptop <i class="fa-solid fa-laptop ms-2"></i></a>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-dark bg-opacity-75 border border-secondary text-white-50 px-3 py-2 rounded-pill small d-none d-sm-inline">
+                    <i class="fa-solid fa-computer-mouse me-1 text-primary"></i> Cuộn chuột hoặc vuốt để xoay
+                </span>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-light rounded-circle rolodex-nav-btn me-2" id="btnRolodexPrev" title="Xoay ngược chiều kim đồng hồ" aria-label="Trước">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-light rounded-circle rolodex-nav-btn" id="btnRolodexNext" title="Xoay theo chiều kim đồng hồ" aria-label="Sau">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
                 </div>
             </div>
         </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#homeBannerCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon"></span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#homeBannerCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon"></span>
-        </button>
+
+        <!-- Rolodex 3D Stage (Vũ đài xoay 3D) -->
+        <div class="rolodex-stage" id="rolodexStage">
+            <div th:each="product, iter : ${featuredProducts}" class="rolodex-card"
+                 th:data-index="${iter.index}"
+                 th:data-slug="${product.slug}">
+                <div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle small fw-bold"
+                              th:text="${product.brand != null ? product.brand.brandName : 'ESC'}">APPLE</span>
+                        <span class="badge bg-danger rounded-pill small">🔥 FLAGSHIP</span>
+                    </div>
+
+                    <div class="product-img-box">
+                        <img th:src="${product.thumbnailUrl}" th:alt="${product.productName}">
+                    </div>
+
+                    <h5 class="fw-bold text-white mb-1 text-truncate" th:text="${product.productName}">iPhone 16 Pro Max</h5>
+                    <div class="small text-warning mb-2">
+                        <i class="fa-solid fa-star"></i>
+                        <span class="text-white-50 ms-1 fw-bold" th:text="${product.avgRating}">5.0</span>
+                        <span class="text-white-50" th:text="'(' + ${product.reviewCount} + ' đánh giá)'">(0)</span>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="d-flex justify-content-between align-items-baseline mb-3">
+                        <div class="text-white-50 small">Giá niêm yết:</div>
+                        <div class="fs-5 fw-bold text-warning" th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">34.990.000 đ</div>
+                    </div>
+                    <a th:href="@{'/products/' + ${product.slug}}" class="btn btn-primary w-100 rounded-pill py-2 fw-bold btn-shimmer">
+                        Khám Phá Ngay <i class="fa-solid fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dial Indicators (Chỉ báo góc xoay) -->
+        <div class="d-flex justify-content-center align-items-center gap-2 mt-3" id="rolodexIndicators"></div>
     </div>
 
     <!-- 2. Danh mục nổi bật -->
