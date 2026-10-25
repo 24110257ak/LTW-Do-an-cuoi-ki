@@ -313,7 +313,7 @@
             }
 
             function updateCards() {
-                const radius = window.innerWidth < 640 ? 190 : (window.innerWidth < 1024 ? 250 : 295);
+                const radius = window.innerWidth < 640 ? 190 : (window.innerWidth < 1024 ? 245 : 285);
                 const angleStep = 360 / total;
 
                 cards.forEach((card, idx) => {
@@ -330,7 +330,7 @@
                     if (isActive) {
                         card.classList.add('active-card');
                         card.classList.remove('inactive-card');
-                        card.style.zIndex = '30';
+                        card.style.zIndex = '50';
                         card.style.opacity = '1';
                         card.style.pointerEvents = 'auto';
                         card.setAttribute('aria-hidden', 'false');

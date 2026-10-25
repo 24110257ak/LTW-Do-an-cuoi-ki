@@ -341,10 +341,10 @@
         }
         .rolodex-stage {
             position: relative;
-            height: 380px;
+            height: 420px;
             width: 100%;
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
+            margin-top: 0.25rem;
+            margin-bottom: 0.25rem;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -356,12 +356,12 @@
         }
         .rolodex-card {
             position: absolute;
-            width: 255px;
-            height: 345px;
-            top: 50%;
+            width: 250px;
+            height: 340px;
+            top: 48%;
             left: 50%;
-            margin-left: -127.5px;
-            margin-top: -172.5px;
+            margin-left: -125px;
+            margin-top: -170px;
             background: rgba(15, 23, 42, 0.92);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
@@ -381,10 +381,10 @@
         }
         @media (min-width: 768px) {
             .rolodex-card {
-                width: 270px;
-                height: 360px;
-                margin-left: -135px;
-                margin-top: -180px;
+                width: 265px;
+                height: 355px;
+                margin-left: -132.5px;
+                margin-top: -177.5px;
             }
         }
         .rolodex-card.active-card {
@@ -420,6 +420,29 @@
             transform: scale(1.08) translateY(-4px);
         }
 
+        
+        .rolodex-controls-bar {
+            width: 100%;
+            padding-top: 0.5rem;
+            position: relative;
+            z-index: 20;
+            pointer-events: none;
+        }
+        .rolodex-controls-bar button,
+        .rolodex-controls-bar .rolodex-dot,
+        .rolodex-controls-bar .rolodex-nav-circle-btn {
+            pointer-events: auto;
+        }
+        .rolodex-card.active-card {
+            z-index: 50 !important;
+        }
+        .rolodex-card.active-card .btn-discover {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            position: relative;
+            z-index: 60 !important;
+        }
+        
         /* Discover Button with High-Visibility Glowing Hover */
         .btn-discover {
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
