@@ -36,7 +36,7 @@ buildNumber.properties
 *.iml
 *.iws
 *.ipr
-.vscode/
+*.vscode/
 .settings/
 .project
 .classpath
@@ -56,6 +56,8 @@ application-local.properties
 .env
 
 # Python scripts & local tools
+tools/
+scripts/
 *.py
 *.pyc
 __pycache__/

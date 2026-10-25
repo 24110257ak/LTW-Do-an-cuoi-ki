@@ -25,6 +25,12 @@
                     <img id="mainProductImage" th:src="${product.thumbnailUrl != null ? product.thumbnailUrl : 'https://res.cloudinary.com/demo/image/upload/sample.jpg'}"
                          class="img-fluid h-100 object-fit-contain" alt="Product Image">
                 </div>
+                <!-- Thumbnail gallery strip -->
+                <div class="d-flex gap-2 justify-content-center mt-2 flex-wrap" th:if="${not #lists.isEmpty(product.images)}">
+                    <img th:each="img : ${product.images}" th:src="${img.imageUrl}"
+                         class="rounded border bg-light p-1" style="width: 64px; height: 64px; object-fit: contain; cursor: pointer;"
+                         onclick="document.getElementById('mainProductImage').src = this.src;">
+                </div>
             </div>
         </div>
 

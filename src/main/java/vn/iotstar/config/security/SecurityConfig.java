@@ -126,6 +126,7 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
+                                "/uploads/**",
                                 "/webjars/**",
                                 "/ws/**",
                                 "/swagger-ui/**",
