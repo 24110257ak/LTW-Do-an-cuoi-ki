@@ -952,12 +952,13 @@ INSERT INTO product_images (product_id, image_url, display_order) VALUES
 -- -------------------------------------------------------------------------------
 -- CATEGORY_IMAGES - Cập nhật ảnh đại diện ngành hàng
 -- -------------------------------------------------------------------------------
-UPDATE categories SET image_url = N'/uploads/categories/dien-thoai.jpg' WHERE category_id = 1;
-UPDATE categories SET image_url = N'/uploads/categories/laptop.jpg' WHERE category_id = 2;
-UPDATE categories SET image_url = N'/uploads/categories/may-tinh-bang.jpg' WHERE category_id = 3;
-UPDATE categories SET image_url = N'/uploads/categories/am-thanh.jpg' WHERE category_id = 4;
-UPDATE categories SET image_url = N'/uploads/categories/dong-ho-thong-minh.jpg' WHERE category_id = 5;
-UPDATE categories SET image_url = N'/uploads/categories/phu-kien.jpg' WHERE category_id = 6;
+UPDATE categories SET image_url = N'/uploads/categories/dien-thoai.png' WHERE category_id = 1;
+UPDATE categories SET image_url = N'/uploads/categories/laptop.png' WHERE category_id = 2;
+UPDATE categories SET image_url = N'/uploads/categories/may-tinh-bang.png' WHERE category_id = 3;
+UPDATE categories SET image_url = N'/uploads/categories/phu-kien.png' WHERE category_id = 4;
+UPDATE categories SET image_url = N'/uploads/categories/smartwatch.png' WHERE category_id = 5;
+UPDATE categories SET image_url = N'/uploads/categories/tai-nghe.png' WHERE category_id = 6;
+UPDATE categories SET image_url = N'/uploads/categories/may-tinh-de-ban.png' WHERE category_id = 7;
 GO
 
 -- -------------------------------------------------------------------------------

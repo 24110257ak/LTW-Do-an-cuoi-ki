@@ -19,12 +19,59 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
+    <style>
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
+        }
+        @media (max-width: 991.98px) {
+            .category-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        @media (max-width: 575.98px) {
+            .category-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        .card-category-item {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1.1rem 0.5rem;
+            text-align: center;
+            transition: all 0.25s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .card-category-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.18);
+            border-color: #3b82f6;
+        }
+        .card-category-item img {
+            transition: transform 0.25s ease;
+        }
+        .card-category-item:hover img {
+            transform: scale(1.1);
+        }
+    </style>
+
     <!-- 1. Banner Carousel -->
-    <div id="homeBannerCarousel" class="carousel slide rounded-4 overflow-hidden shadow-sm mb-5" data-bs-ride="carousel">
+    <div id="homeBannerCarousel" class="carousel slide rounded-4 overflow-hidden shadow-sm mb-5" data-bs-ride="carousel" data-bs-interval="4500">
+        <div class="carousel-indicators" th:if="${not #lists.isEmpty(banners)}">
+            <button th:each="bn, stat : ${banners}" type="button" data-bs-target="#homeBannerCarousel"
+                    th:data-bs-slide-to="${stat.index}" th:classappend="${stat.first ? 'active' : ''}"></button>
+        </div>
         <div class="carousel-inner" th:if="${not #lists.isEmpty(banners)}">
             <div th:each="bn, stat : ${banners}" class="carousel-item" th:classappend="${stat.first ? 'active' : ''}" style="height: 380px; background-color: #0f172a;">
                 <a th:href="@{${bn.linkUrl != null ? bn.linkUrl : '/products'}}">
-                    <img th:src="@{${bn.imageUrl}}" class="d-block w-100 h-100" style="object-fit: cover; opacity: 0.9;" th:alt="${bn.title}">
+                    <img th:src="@{${bn.imageUrl}}" class="d-block w-100 h-100" style="object-fit: cover; object-position: center;" th:alt="${bn.title}">
                 </a>
             </div>
         </div>
@@ -56,23 +103,22 @@
 
     <!-- 2. Danh mục nổi bật -->
     <div class="mb-5">
-        <h4 class="fw-bold mb-4 d-flex align-items-center">
-            <i class="fa-solid fa-layer-group text-primary me-2"></i>Danh Mục Thiết Bị Công Nghệ
-        </h4>
-        <div class="row g-3">
-            <div class="col-6 col-md-4 col-lg-2" th:each="cat : ${rootCategories}">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold mb-0 d-flex align-items-center">
+                <i class="fa-solid fa-layer-group text-primary me-2"></i>Danh Mục Thiết Bị Công Nghệ
+            </h4>
+            <span class="text-muted small d-none d-md-inline">Khám phá 7 ngành hàng chính hãng tại ESC Store</span>
+        </div>
+        <div class="category-grid">
+            <div th:each="cat : ${rootCategories}">
                 <a th:href="@{/products(categoryId=${cat.categoryId})}" class="text-decoration-none">
-                    <div class="card card-product text-center p-3 h-100 border">
-                        <div class="fs-1 text-primary mb-2">
-                            <i th:if="${cat.slug == 'dien-thoai'}" class="fa-solid fa-mobile-screen-button"></i>
-                            <i th:if="${cat.slug == 'laptop'}" class="fa-solid fa-laptop"></i>
-                            <i th:if="${cat.slug == 'may-tinh-bang'}" class="fa-solid fa-tablet-screen-button"></i>
-                            <i th:if="${cat.slug == 'phu-kien'}" class="fa-solid fa-headphones"></i>
-                            <i th:if="${cat.slug == 'smartwatch'}" class="fa-solid fa-clock"></i>
-                            <i th:if="${cat.slug == 'tai-nghe'}" class="fa-solid fa-ear-listen"></i>
-                            <i th:if="${cat.slug == 'may-tinh-de-ban'}" class="fa-solid fa-desktop"></i>
+                    <div class="card-category-item">
+                        <div class="mb-2 d-flex align-items-center justify-content-center" style="height: 60px; width: 60px;">
+                            <img th:if="${cat.imageUrl != null}" th:src="${cat.imageUrl}" th:alt="${cat.categoryName}"
+                                 class="img-fluid" style="max-height: 56px; max-width: 56px; object-fit: contain;">
+                            <i th:unless="${cat.imageUrl != null}" class="fa-solid fa-box-open fs-2 text-primary"></i>
                         </div>
-                        <h6 class="fw-bold text-dark mb-0 small" th:text="${cat.categoryName}">Danh mục</h6>
+                        <h6 class="fw-bold text-dark mb-0 small text-center" th:text="${cat.categoryName}">Danh mục</h6>
                     </div>
                 </a>
             </div>
