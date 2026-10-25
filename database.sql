@@ -655,76 +655,76 @@ GO
 -- -------------------------------------------------------------------------------
 -- BRANDS
 -- -------------------------------------------------------------------------------
-INSERT INTO brands (brand_name, description) VALUES
-(N'Apple',      N'Thương hiệu công nghệ hàng đầu thế giới của Mỹ'),
-(N'Samsung',    N'Tập đoàn công nghệ đa quốc gia của Hàn Quốc'),
-(N'Asus',       N'Thương hiệu máy tính và thiết bị điện tử của Đài Loan'),
-(N'Dell',       N'Tập đoàn công nghệ của Mỹ, chuyên về máy tính cá nhân'),
-(N'Lenovo',     N'Tập đoàn công nghệ đa quốc gia của Trung Quốc'),
-(N'Sony',       N'Tập đoàn công nghệ và giải trí của Nhật Bản'),
-(N'Xiaomi',     N'Thương hiệu công nghệ của Trung Quốc'),
-(N'OPPO',       N'Thương hiệu điện thoại thông minh của Trung Quốc'),
-(N'MSI',        N'Thương hiệu laptop gaming hàng đầu của Đài Loan'),
-(N'LG',         N'Tập đoàn công nghệ và điện tử của Hàn Quốc');
+INSERT INTO brands (brand_name, logo_url, description) VALUES
+(N'Apple',      N'/uploads/brands/apple.png',   N'Thương hiệu công nghệ hàng đầu thế giới của Mỹ'),
+(N'Samsung',    N'/uploads/brands/samsung.png', N'Tập đoàn công nghệ đa quốc gia của Hàn Quốc'),
+(N'Asus',       N'/uploads/brands/asus.png',    N'Thương hiệu máy tính và thiết bị điện tử của Đài Loan'),
+(N'Dell',       N'/uploads/brands/dell.png',    N'Tập đoàn công nghệ của Mỹ, chuyên về máy tính cá nhân'),
+(N'Lenovo',     N'/uploads/brands/lenovo.png',  N'Thương hiệu ThinkPad và Legion đẳng cấp toàn cầu'),
+(N'Sony',       N'/uploads/brands/sony.png',    N'Tập đoàn công nghệ và giải trí của Nhật Bản'),
+(N'Xiaomi',     N'/uploads/brands/xiaomi.png',  N'Thương hiệu công nghệ của Trung Quốc'),
+(N'OPPO',       NULL,                           N'Thương hiệu điện thoại thông minh của Trung Quốc'),
+(N'MSI',        NULL,                           N'Thương hiệu laptop gaming hàng đầu của Đài Loan'),
+(N'LG',         NULL,                           N'Tập đoàn công nghệ và điện tử của Hàn Quốc');
 GO
 
 -- -------------------------------------------------------------------------------
 -- PRODUCTS (12 sản phẩm thực tế)
 -- -------------------------------------------------------------------------------
 SET IDENTITY_INSERT products ON;
-INSERT INTO products (product_id, product_name, slug, description, category_id, brand_id, base_price, is_active, is_featured) VALUES
+INSERT INTO products (product_id, product_name, slug, description, category_id, brand_id, thumbnail_url, base_price, is_active, is_featured) VALUES
 -- ĐIỆN THOẠI
 (1,  N'iPhone 16 Pro Max',
      N'iphone-16-pro-max',
      N'iPhone 16 Pro Max với chip A18 Pro, màn hình 6.9" Super Retina XDR, camera 48MP Camera Control, pin 33 giờ. Đỉnh cao của công nghệ smartphone 2024.',
-     11, 1, 34990000, 1, 1),
+     11, 1, N'/uploads/products/iphone-16-pro-max.png', 34990000, 1, 1),
 (2,  N'Samsung Galaxy S25 Ultra',
      N'samsung-galaxy-s25-ultra',
      N'Galaxy S25 Ultra mang đến trải nghiệm AI tích hợp Galaxy AI, Snapdragon 8 Elite, bút S Pen, camera 200MP, màn hình 6.9" Dynamic AMOLED 2X.',
-     12, 2, 31990000, 1, 1),
+     12, 2, N'/uploads/products/samsung-galaxy-s25-ultra.png', 31990000, 1, 1),
 (3,  N'iPhone 15',
      N'iphone-15',
      N'iPhone 15 với Dynamic Island, chip A16 Bionic, cổng USB-C, camera 48MP chính, màu sắc tươi sáng mới.',
-     11, 1, 22990000, 1, 0),
+     11, 1, N'/uploads/products/iphone-15.png', 22990000, 1, 0),
 (4,  N'Xiaomi 14 Ultra',
      N'xiaomi-14-ultra',
      N'Xiaomi 14 Ultra hợp tác Leica, Snapdragon 8 Gen 3, camera 1 inch 50MP, màn hình AMOLED 6.73".',
-     13, 7, 19990000, 1, 0),
+     13, 7, N'/uploads/products/xiaomi-14-ultra.png', 19990000, 1, 0),
 -- LAPTOP
 (5,  N'MacBook Pro 14 M4 Pro',
      N'macbook-pro-14-m4-pro',
      N'MacBook Pro 14 inch trang bị chip M4 Pro mạnh mẽ, màn hình Liquid Retina XDR 3024x1964, thời lượng pin lên đến 22 giờ.',
-     22, 1, 62990000, 1, 1),
+     22, 1, N'/uploads/products/macbook-pro-14-m4-pro.png', 62990000, 1, 1),
 (6,  N'Asus ROG Zephyrus G16 2024',
      N'asus-rog-zephyrus-g16-2024',
      N'ROG Zephyrus G16 2024 với Intel Core Ultra 9 185H, NVIDIA GeForce RTX 4090, màn hình OLED 2.5K 240Hz mỏng nhẹ đẳng cấp gaming.',
-     21, 3, 74990000, 1, 1),
+     21, 3, N'/uploads/products/asus-rog-zephyrus-g16.jpg', 74990000, 1, 1),
 (7,  N'Dell XPS 15 9530',
      N'dell-xps-15-9530',
      N'Dell XPS 15 với Intel Core i9-13900H, NVIDIA RTX 4060, màn hình OLED 3.5K cảm ứng, thiết kế nhôm sang trọng.',
-     23, 4, 55990000, 1, 0),
+     23, 4, N'/uploads/products/dell-xps-15-9530.jpg', 55990000, 1, 0),
 (8,  N'Lenovo ThinkPad X1 Carbon Gen 11',
      N'lenovo-thinkpad-x1-carbon-gen11',
      N'ThinkPad X1 Carbon siêu nhẹ 1.12kg, Intel Core i7-1365U, màn hình IPS 2.8K OLED, bảo mật doanh nghiệp hàng đầu.',
-     23, 5, 42990000, 1, 0),
+     23, 5, N'/uploads/products/lenovo-thinkpad-x1-carbon.jpg', 42990000, 1, 0),
 -- MÁY TÍNH BẢNG
 (9,  N'iPad Pro M4 11 inch',
      N'ipad-pro-m4-11-inch',
      N'iPad Pro với chip M4, màn hình Ultra Retina XDR OLED 11", mỏng nhất từ trước đến nay chỉ 5.1mm, hỗ trợ Apple Pencil Pro.',
-     3, 1, 23990000, 1, 1),
+     3, 1, N'/uploads/products/ipad-pro-m4-11-inch.jpg', 23990000, 1, 1),
 (10, N'Samsung Galaxy Tab S9 Ultra',
      N'samsung-galaxy-tab-s9-ultra',
      N'Galaxy Tab S9 Ultra màn hình Super AMOLED 14.6", Snapdragon 8 Gen 2, kháng nước IP68, kèm S Pen.',
-     3, 2, 28990000, 1, 0),
+     3, 2, N'/uploads/products/samsung-galaxy-tab-s9-ultra.jpg', 28990000, 1, 0),
 -- SMARTWATCH
 (11, N'Apple Watch Ultra 2',
      N'apple-watch-ultra-2',
      N'Apple Watch Ultra 2 với vỏ Titan, màn hình MicroLED sáng nhất 3000 nit, pin 60 giờ, đồng hồ thể thao chuyên nghiệp.',
-     5, 1, 21990000, 1, 1),
+     5, 1, N'/uploads/products/apple-watch-ultra-2.jpg', 21990000, 1, 1),
 (12, N'Samsung Galaxy Watch 7',
      N'samsung-galaxy-watch-7',
      N'Galaxy Watch 7 với BioActive Sensor thế hệ mới, Galaxy AI, đo đường huyết, pin 40 giờ chế độ tiết kiệm.',
-     5, 2, 8990000, 1, 0);
+     5, 2, N'/uploads/products/samsung-galaxy-watch-7.jpg', 8990000, 1, 0);
 SET IDENTITY_INSERT products OFF;
 GO
 
@@ -928,9 +928,36 @@ GO
 -- BANNERS
 -- -------------------------------------------------------------------------------
 INSERT INTO banners (title, image_url, link_url, display_order) VALUES
-(N'iPhone 16 Pro Max - Đỉnh cao mới', N'https://res.cloudinary.com/demo/image/upload/sample.jpg', N'/products/iphone-16-pro-max', 1),
-(N'Khuyến mãi Laptop tháng 10 - Giảm đến 15%', N'https://res.cloudinary.com/demo/image/upload/sample.jpg', N'/collections/laptop', 2),
-(N'MacBook Pro M4 - Sức mạnh vượt trội', N'https://res.cloudinary.com/demo/image/upload/sample.jpg', N'/products/macbook-pro-14-m4-pro', 3);
+(N'iPhone 16 Pro Max - Đỉnh cao mới', N'/uploads/banners/banner-iphone-16-pro-max.jpg', N'/products/iphone-16-pro-max', 1),
+(N'Khuyến mãi Laptop tháng 10 - Giảm đến 15%', N'/uploads/banners/banner-laptop-sale.jpg', N'/products?categoryId=2', 2),
+(N'MacBook Pro M4 - Sức mạnh vượt trội', N'/uploads/banners/banner-macbook-pro-m4.jpg', N'/products/macbook-pro-14-m4-pro', 3);
+
+-- -------------------------------------------------------------------------------
+-- PRODUCT_IMAGES - Thư viện ảnh sản phẩm
+-- -------------------------------------------------------------------------------
+INSERT INTO product_images (product_id, image_url, display_order) VALUES
+(1,  N'/uploads/products/iphone-16-pro-max.png', 1),
+(2,  N'/uploads/products/samsung-galaxy-s25-ultra.png', 1),
+(3,  N'/uploads/products/iphone-15.png', 1),
+(4,  N'/uploads/products/xiaomi-14-ultra.png', 1),
+(5,  N'/uploads/products/macbook-pro-14-m4-pro.png', 1),
+(6,  N'/uploads/products/asus-rog-zephyrus-g16.jpg', 1),
+(7,  N'/uploads/products/dell-xps-15-9530.jpg', 1),
+(8,  N'/uploads/products/lenovo-thinkpad-x1-carbon.jpg', 1),
+(9,  N'/uploads/products/ipad-pro-m4-11-inch.jpg', 1),
+(10, N'/uploads/products/samsung-galaxy-tab-s9-ultra.jpg', 1),
+(11, N'/uploads/products/apple-watch-ultra-2.jpg', 1),
+(12, N'/uploads/products/samsung-galaxy-watch-7.jpg', 1);
+
+-- -------------------------------------------------------------------------------
+-- CATEGORY_IMAGES - Cập nhật ảnh đại diện ngành hàng
+-- -------------------------------------------------------------------------------
+UPDATE categories SET image_url = N'/uploads/categories/dien-thoai.jpg' WHERE category_id = 1;
+UPDATE categories SET image_url = N'/uploads/categories/laptop.jpg' WHERE category_id = 2;
+UPDATE categories SET image_url = N'/uploads/categories/may-tinh-bang.jpg' WHERE category_id = 3;
+UPDATE categories SET image_url = N'/uploads/categories/am-thanh.jpg' WHERE category_id = 4;
+UPDATE categories SET image_url = N'/uploads/categories/dong-ho-thong-minh.jpg' WHERE category_id = 5;
+UPDATE categories SET image_url = N'/uploads/categories/phu-kien.jpg' WHERE category_id = 6;
 GO
 
 -- -------------------------------------------------------------------------------

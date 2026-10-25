@@ -21,7 +21,14 @@
 
     <!-- 1. Banner Carousel -->
     <div id="homeBannerCarousel" class="carousel slide rounded-4 overflow-hidden shadow-sm mb-5" data-bs-ride="carousel">
-        <div class="carousel-inner">
+        <div class="carousel-inner" th:if="${not #lists.isEmpty(banners)}">
+            <div th:each="bn, stat : ${banners}" class="carousel-item" th:classappend="${stat.first ? 'active' : ''}" style="height: 380px; background-color: #0f172a;">
+                <a th:href="@{${bn.linkUrl != null ? bn.linkUrl : '/products'}}">
+                    <img th:src="@{${bn.imageUrl}}" class="d-block w-100 h-100" style="object-fit: cover; opacity: 0.9;" th:alt="${bn.title}">
+                </a>
+            </div>
+        </div>
+        <div class="carousel-inner" th:if="${#lists.isEmpty(banners)}">
             <div class="carousel-item active" style="height: 380px; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);">
                 <div class="d-flex flex-column justify-content-center align-items-center h-100 text-white text-center px-4">
                     <span class="badge bg-warning text-dark px-3 py-2 fs-6 mb-3 rounded-pill fw-bold">🔥 SIÊU PHẨM MỚI 2026</span>
