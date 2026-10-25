@@ -195,18 +195,85 @@
         .badge.bg-danger {
             animation: cartGlowPulse 2.2s infinite;
         }
-        .search-input-group {
-            transition: all 0.3s ease;
-        }
-        .search-input-group:focus-within, .search-input-group:hover {
-            filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.45));
-        }
-
-        /* Shimmer Wave on Buttons */
-        .btn-shimmer, .btn-esc, .btn-primary, .btn-warning {
+                /* Shimmer Wave on Action Buttons */
+        .btn-shimmer, .btn-esc, .btn-primary {
             position: relative;
             overflow: hidden;
             transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* ========================================================
+           UNIFIED SEARCH BAR PILL & SPRING ICON ANIMATION
+           ======================================================== */
+        .esc-search-pill {
+            display: flex;
+            align-items: stretch;
+            background: #ffffff;
+            border-radius: 50px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border: 2px solid transparent;
+            transition: border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .esc-search-pill:focus-within {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.3), 0 4px 14px rgba(0, 0, 0, 0.12);
+        }
+        .esc-search-input {
+            border: none !important;
+            background: transparent !important;
+            padding: 0.55rem 1.25rem !important;
+            font-size: 0.9rem !important;
+            color: #0f172a !important;
+            box-shadow: none !important;
+            border-radius: 50px 0 0 50px !important;
+        }
+        .esc-search-input:focus {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        .esc-search-input::placeholder {
+            color: #64748b;
+            font-size: 0.88rem;
+        }
+        .esc-search-btn {
+            border: none !important;
+            outline: none !important;
+            background: #f59e0b !important;
+            color: #1e293b !important;
+            padding: 0 1.4rem !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 0 50px 50px 0 !important;
+            margin: 0 !important;
+            transform: none !important;
+            box-shadow: none !important;
+            transition: background-color 0.2s ease;
+        }
+        .esc-search-btn:hover {
+            background: #fbbf24 !important;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        .esc-search-btn .esc-search-icon {
+            font-size: 1.05rem;
+            color: #0f172a;
+            display: inline-block;
+            transform-origin: center center;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease, filter 0.2s ease;
+        }
+        /* Hiệu ứng nhắm trúng icon: xoay nhẹ và phóng to đàn hồi */
+        .esc-search-pill:hover .esc-search-icon,
+        .esc-search-btn:hover .esc-search-icon,
+        .esc-search-pill:focus-within .esc-search-icon {
+            transform: scale(1.28) rotate(-14deg);
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+            color: #000000;
+        }
+        .esc-search-btn:active .esc-search-icon {
+            transform: scale(0.92);
         }
         .btn-shimmer::before, .btn-esc::before {
             content: '';
@@ -274,9 +341,9 @@
         }
         .rolodex-stage {
             position: relative;
-            height: 440px;
+            height: 380px;
             width: 100%;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
             margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
@@ -289,17 +356,17 @@
         }
         .rolodex-card {
             position: absolute;
-            width: 290px;
-            height: 405px;
+            width: 255px;
+            height: 345px;
             top: 50%;
             left: 50%;
-            margin-left: -145px;
-            margin-top: -202.5px;
-            background: rgba(15, 23, 42, 0.9);
+            margin-left: -127.5px;
+            margin-top: -172.5px;
+            background: rgba(15, 23, 42, 0.92);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border-radius: 20px;
-            padding: 1.25rem;
+            border-radius: 18px;
+            padding: 1rem;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -314,10 +381,10 @@
         }
         @media (min-width: 768px) {
             .rolodex-card {
-                width: 310px;
-                height: 425px;
-                margin-left: -155px;
-                margin-top: -212.5px;
+                width: 270px;
+                height: 360px;
+                margin-left: -135px;
+                margin-top: -180px;
             }
         }
         .rolodex-card.active-card {
@@ -332,25 +399,63 @@
             opacity: 0.8;
         }
         .rolodex-card .product-img-box {
-            height: 175px;
+            height: 130px;
             width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
-            border-radius: 14px;
-            margin-bottom: 0.75rem;
+            border-radius: 12px;
+            margin-bottom: 0.5rem;
             position: relative;
         }
         .rolodex-card .product-img-box img {
-            max-height: 160px;
+            max-height: 115px;
             max-width: 90%;
             object-fit: contain;
-            filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.4));
+            filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.4));
             transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
         }
         .rolodex-card.active-card:hover .product-img-box img {
             transform: scale(1.08) translateY(-4px);
+        }
+
+        /* Discover Button with High-Visibility Glowing Hover */
+        .btn-discover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+            color: #ffffff !important;
+            border: 1px solid rgba(96, 165, 250, 0.45) !important;
+            border-radius: 50px !important;
+            padding: 0.48rem 1rem !important;
+            font-weight: 700 !important;
+            font-size: 0.85rem !important;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+            transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+            position: relative;
+            z-index: 10;
+            cursor: pointer;
+            text-decoration: none !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-discover i {
+            transition: transform 0.25s ease;
+        }
+        .rolodex-card.active-card .btn-discover:hover,
+        .btn-discover:hover {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+            border-color: #bfdbfe !important;
+            color: #ffffff !important;
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 0 24px rgba(59, 130, 246, 0.85), 0 6px 18px rgba(37, 99, 235, 0.5) !important;
+        }
+        .rolodex-card.active-card .btn-discover:hover i,
+        .btn-discover:hover i {
+            transform: translateX(4px);
+        }
+        .btn-discover:active {
+            transform: translateY(0) scale(0.97);
         }
         .rolodex-nav-circle-btn {
             width: 38px;
@@ -468,13 +573,14 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarContent">
-            <!-- Search Form -->
+            <!-- Search Form (Thanh tìm kiếm nguyên khối bo tròn - hiệu ứng đàn hồi trên icon) -->
             <form class="d-flex mx-lg-4 my-2 my-lg-0 flex-grow-1" th:action="@{/products}" method="get">
-                <div class="input-group">
-                    <input class="form-control search-input border-0 py-2" type="search" name="keyword"
-                           placeholder="Bạn tìm điện thoại, laptop, phụ kiện gì hôm nay?..." th:value="${keyword}">
-                    <button class="btn btn-warning text-dark px-4 fw-bold" type="submit" style="border-radius: 0 30px 30px 0;">
-                        <i class="fa-solid fa-magnifying-glass"></i>
+                <div class="esc-search-pill w-100">
+                    <input class="form-control esc-search-input" type="search" name="keyword"
+                           placeholder="Bạn tìm điện thoại, laptop, phụ kiện gì hôm nay?..." th:value="${keyword}"
+                           aria-label="Tìm kiếm sản phẩm">
+                    <button class="esc-search-btn" type="submit" aria-label="Tìm kiếm" title="Tìm kiếm">
+                        <i class="fa-solid fa-magnifying-glass esc-search-icon"></i>
                     </button>
                 </div>
             </form>

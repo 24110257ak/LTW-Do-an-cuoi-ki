@@ -104,8 +104,8 @@
                         <div class="text-white-50 small">Giá niêm yết:</div>
                         <div class="fs-5 fw-bold text-warning" th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">34.990.000 đ</div>
                     </div>
-                    <a th:href="@{'/products/' + ${product.slug}}" class="btn btn-primary w-100 rounded-pill py-2 fw-bold btn-shimmer">
-                        Khám Phá Ngay <i class="fa-solid fa-arrow-right ms-1"></i>
+                    <a th:href="@{'/products/' + ${product.slug}}" class="btn-discover w-100">
+                        Khám Phá Ngay <i class="fa-solid fa-arrow-right ms-2"></i>
                     </a>
                 </div>
             </div>

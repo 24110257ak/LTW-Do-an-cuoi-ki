@@ -313,7 +313,7 @@
             }
 
             function updateCards() {
-                const radius = window.innerWidth < 640 ? 220 : (window.innerWidth < 1024 ? 300 : 350);
+                const radius = window.innerWidth < 640 ? 190 : (window.innerWidth < 1024 ? 250 : 295);
                 const angleStep = 360 / total;
 
                 cards.forEach((card, idx) => {
@@ -369,13 +369,21 @@
             if (nextBtn) nextBtn.addEventListener('click', () => { next(); resetAutoplay(); });
             if (prevBtn) prevBtn.addEventListener('click', () => { prev(); resetAutoplay(); });
 
-            // Click card to bring to front
+            // Click card logic: Inactive rotates to front; Active navigates to product!
             cards.forEach((card, idx) => {
                 card.addEventListener('click', (e) => {
                     if (idx !== currentIndex) {
                         e.preventDefault();
                         rotateToIndex(idx);
                         resetAutoplay();
+                    } else {
+                        // If clicked anywhere on active card outside the anchor tag, navigate to product
+                        if (!e.target.closest('a')) {
+                            const slug = card.getAttribute('data-slug');
+                            if (slug) {
+                                window.location.href = '/products/' + slug;
+                            }
+                        }
                     }
                 });
             });
