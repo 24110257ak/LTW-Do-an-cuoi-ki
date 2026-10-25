@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
-<footer th:fragment="footer" class="fullpage-arc-section bg-dark text-white pt-5 pb-3 mt-5">
+<footer th:fragment="footer" class="bg-dark text-white pt-5 pb-3 mt-5">
     <div class="container">
         <div class="row g-4">
             <!-- Col 1: Giới thiệu hệ thống chuỗi -->
@@ -252,9 +252,6 @@
 
             // 5. 3D Circular Rolodex Carousel Engine
             initRolodexCarousel();
-
-            // 6. Full-Page Arc / Radial Curved Scroll Engine
-            initFullPageArcScroll();
         });
 
         // 3D Parallax Tilt Engine
@@ -279,7 +276,7 @@
             });
         }
 
-        // 3D Circular Rolodex Wheel Carousel Engine
+        // 3D Circular Rolodex Cylinder Carousel (Hardware Accelerated - from 3d_rolodex_showcase_admin_panel.html)
         function initRolodexCarousel() {
             const stage = document.getElementById('rolodexStage');
             if (!stage) return;
@@ -287,6 +284,9 @@
             const cards = Array.from(stage.querySelectorAll('.rolodex-card'));
             const prevBtn = document.getElementById('btnRolodexPrev');
             const nextBtn = document.getElementById('btnRolodexNext');
+            const autoplayBtn = document.getElementById('btnRolodexAutoplay');
+            const autoplayIcon = document.getElementById('rolodexAutoplayIcon');
+            const autoplayLabel = document.getElementById('rolodexAutoplayLabel');
             const dotsContainer = document.getElementById('rolodexIndicators');
 
             if (cards.length === 0) return;
@@ -295,15 +295,19 @@
             const total = cards.length;
             let isWheeling = false;
             let autoplayTimer = null;
+            let isAutoplayActive = true;
+            const autoplaySpeed = 4200; // 4.2s
 
-            // Render Rolodex Indicators
+            // Render Pagination Dots
             if (dotsContainer) {
                 dotsContainer.innerHTML = '';
                 cards.forEach((_, idx) => {
-                    const dot = document.createElement('div');
+                    const dot = document.createElement('button');
+                    dot.type = 'button';
                     dot.className = `rolodex-dot ${idx === 0 ? 'active' : ''}`;
-                    dot.setAttribute('title', `Chuyển tới mục ${idx + 1}`);
-                    dot.addEventListener('click', () => {
+                    dot.setAttribute('aria-label', `Sản phẩm ${idx + 1}`);
+                    dot.addEventListener('click', (e) => {
+                        e.stopPropagation();
                         rotateToIndex(idx);
                         resetAutoplay();
                     });
@@ -312,62 +316,35 @@
             }
 
             function updateCards() {
-                const stageWidth = stage.offsetWidth;
-                let radius = 460;
-                let angleStep = 36;
-                let zBase = -60;
+                const radius = window.innerWidth < 640 ? 220 : (window.innerWidth < 1024 ? 300 : 350);
+                const angleStep = 360 / total;
 
-                if (stageWidth < 576) {
-                    radius = 230;
-                    angleStep = 30;
-                    zBase = -40;
-                } else if (stageWidth < 992) {
-                    radius = 350;
-                    angleStep = 34;
-                    zBase = -50;
-                }
-
-                cards.forEach((card, i) => {
-                    let offset = i - currentIndex;
+                cards.forEach((card, idx) => {
+                    let offset = idx - currentIndex;
                     while (offset > total / 2) offset -= total;
                     while (offset < -total / 2) offset += total;
 
                     const angle = offset * angleStep;
-                    const rad = angle * (Math.PI / 180);
-                    const x = Math.sin(rad) * radius;
-                    const z = - (1 - Math.cos(rad)) * radius + (offset === 0 ? 80 : zBase);
-                    const rotateY = - angle * 0.85;
-                    const absOffset = Math.abs(offset);
+                    const isActive = (offset === 0);
 
-                    if (absOffset > 2.3) {
-                        card.style.opacity = '0';
-                        card.style.pointerEvents = 'none';
-                        card.style.transform = `translate3d(-50%, -50%, 0) translateX(${x.toFixed(1)}px) translateZ(${(z - 220).toFixed(1)}px) rotateY(${rotateY.toFixed(1)}deg) scale(0.6)`;
-                        card.style.zIndex = '1';
-                        card.classList.remove('active-center');
-                    } else {
-                        let opacity = 1;
-                        let scale = 1.05;
-                        if (absOffset === 1) {
-                            opacity = 0.82;
-                            scale = 0.86;
-                        } else if (absOffset === 2) {
-                            opacity = 0.42;
-                            scale = 0.72;
-                        }
+                    // Native CSS 3D Cylinder formula (from 3d_rolodex_showcase_admin_panel.html)
+                    card.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
 
-                        card.style.opacity = opacity.toString();
+                    if (isActive) {
+                        card.classList.add('active-card');
+                        card.classList.remove('inactive-card');
+                        card.style.zIndex = '30';
+                        card.style.opacity = '1';
                         card.style.pointerEvents = 'auto';
-                        card.style.transform = `translate3d(-50%, -50%, 0) translateX(${x.toFixed(1)}px) translateZ(${z.toFixed(1)}px) rotateY(${rotateY.toFixed(1)}deg) scale(${scale})`;
-                        card.style.zIndex = (100 - absOffset * 20).toString();
-
-                        if (offset === 0) {
-                            card.classList.add('active-center');
-                            card.setAttribute('aria-hidden', 'false');
-                        } else {
-                            card.classList.remove('active-center');
-                            card.setAttribute('aria-hidden', 'true');
-                        }
+                        card.setAttribute('aria-hidden', 'false');
+                    } else {
+                        card.classList.remove('active-card');
+                        card.classList.add('inactive-card');
+                        const isBack = Math.abs(offset) > 2.2;
+                        card.style.zIndex = Math.max(1, Math.round(20 - Math.abs(offset) * 5)).toString();
+                        card.style.opacity = isBack ? '0' : (Math.abs(offset) === 1 ? '0.82' : '0.45');
+                        card.style.pointerEvents = isBack ? 'none' : 'auto';
+                        card.setAttribute('aria-hidden', 'true');
                     }
                 });
 
@@ -380,7 +357,7 @@
             }
 
             function rotateToIndex(idx) {
-                currentIndex = (idx + total) % total;
+                currentIndex = (idx % total + total) % total;
                 updateCards();
             }
 
@@ -395,47 +372,7 @@
             if (nextBtn) nextBtn.addEventListener('click', () => { next(); resetAutoplay(); });
             if (prevBtn) prevBtn.addEventListener('click', () => { prev(); resetAutoplay(); });
 
-            // 1. Mouse Wheel Scroll Rotation (Lăn chuột xoay vòng tròn Rolodex)
-            stage.addEventListener('wheel', function(e) {
-                e.preventDefault();
-                if (isWheeling) return;
-                isWheeling = true;
-
-                if (e.deltaY > 0 || e.deltaX > 0) {
-                    next(); // Xoay theo chiều kim đồng hồ
-                } else {
-                    prev(); // Xoay ngược chiều kim đồng hồ
-                }
-                resetAutoplay();
-
-                setTimeout(() => {
-                    isWheeling = false;
-                }, 300);
-            }, { passive: false });
-
-            // 2. Touch / Mouse Pointer Drag Swipe
-            let startX = 0;
-            let isDragging = false;
-
-            stage.addEventListener('pointerdown', (e) => {
-                startX = e.clientX;
-                isDragging = true;
-                stopAutoplay();
-            });
-
-            window.addEventListener('pointerup', (e) => {
-                if (!isDragging) return;
-                isDragging = false;
-                const diffX = e.clientX - startX;
-                if (diffX < -35) {
-                    next();
-                } else if (diffX > 35) {
-                    prev();
-                }
-                resetAutoplay();
-            });
-
-            // 3. Click side card to rotate directly into center
+            // Click card to bring to front
             cards.forEach((card, idx) => {
                 card.addEventListener('click', (e) => {
                     if (idx !== currentIndex) {
@@ -446,83 +383,73 @@
                 });
             });
 
-            // 4. Autoplay every 4.8s
+            // Mouse wheel over stage only (does NOT intercept full page scroll)
+            stage.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                if (isWheeling) return;
+                isWheeling = true;
+                if (e.deltaY > 0 || e.deltaX > 0) {
+                    next();
+                } else {
+                    prev();
+                }
+                resetAutoplay();
+                setTimeout(() => { isWheeling = false; }, 320);
+            }, { passive: false });
+
+            // Pointer drag swipe
+            let startX = 0;
+            let isDragging = false;
+            stage.addEventListener('pointerdown', (e) => {
+                startX = e.clientX;
+                isDragging = true;
+                stopAutoplay();
+            });
+            window.addEventListener('pointerup', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                const diffX = e.clientX - startX;
+                if (diffX < -35) next();
+                else if (diffX > 35) prev();
+                resetAutoplay();
+            });
+
+            // Autoplay logic with pause toggle
             function startAutoplay() {
                 stopAutoplay();
-                autoplayTimer = setInterval(next, 4800);
+                if (!isAutoplayActive) return;
+                autoplayTimer = setInterval(next, autoplaySpeed);
             }
             function stopAutoplay() {
                 if (autoplayTimer) clearInterval(autoplayTimer);
             }
             function resetAutoplay() {
-                stopAutoplay();
                 startAutoplay();
             }
 
-            stage.addEventListener('mouseenter', stopAutoplay);
-            stage.addEventListener('mouseleave', startAutoplay);
-
-            window.addEventListener('resize', updateCards);
-
-            // Initial position
-            updateCards();
-            startAutoplay();
-        }
-
-        // Full-Page Arc / Radial Curved Scroll Engine
-        function initFullPageArcScroll() {
-            const sections = Array.from(document.querySelectorAll('.fullpage-arc-section'));
-            if (sections.length === 0) return;
-
-            let ticking = false;
-
-            function updateArcScroll() {
-                const vh = window.innerHeight;
-                const vCenter = vh * 0.5;
-
-                sections.forEach(sec => {
-                    const rect = sec.getBoundingClientRect();
-                    const secCenter = rect.top + rect.height * 0.5;
-                    const progress = (secCenter - vCenter) / (vh * 0.55);
-
-                    if (rect.bottom < -80 || rect.top > vh + 80) {
-                        return;
+            if (autoplayBtn) {
+                autoplayBtn.addEventListener('click', () => {
+                    isAutoplayActive = !isAutoplayActive;
+                    if (isAutoplayActive) {
+                        if (autoplayIcon) autoplayIcon.className = 'fa-solid fa-pause text-primary';
+                        if (autoplayLabel) autoplayLabel.innerText = 'Tự xoay';
+                        startAutoplay();
+                    } else {
+                        if (autoplayIcon) autoplayIcon.className = 'fa-solid fa-play text-muted';
+                        if (autoplayLabel) autoplayLabel.innerText = 'Tạm dừng';
+                        stopAutoplay();
                     }
-
-                    // 1. Tilt along the circular arc
-                    const rotX = Math.max(-18, Math.min(18, progress * 14)).toFixed(2);
-                    // 2. Depth recession into 3D arc
-                    const absP = Math.abs(progress);
-                    const transZ = (-Math.pow(absP, 1.5) * 95).toFixed(1);
-                    // 3. Radial scale
-                    const scale = Math.max(0.92, 1 - absP * 0.04).toFixed(3);
-                    // 4. Subtle arc lateral drift
-                    const rotZ = (progress * 0.7).toFixed(2);
-                    // 5. Opacity curve
-                    let opacity = 1;
-                    if (absP > 0.7) {
-                        opacity = Math.max(0.45, 1 - (absP - 0.7) * 0.9).toFixed(2);
-                    }
-
-                    sec.style.transform = `perspective(1400px) rotateX(${rotX}deg) rotateZ(${rotZ}deg) translateZ(${transZ}px) scale(${scale})`;
-                    sec.style.opacity = opacity;
                 });
             }
 
-            function onScroll() {
-                if (!ticking) {
-                    requestAnimationFrame(() => {
-                        updateArcScroll();
-                        ticking = false;
-                    });
-                    ticking = true;
-                }
-            }
+            stage.addEventListener('mouseenter', stopAutoplay);
+            stage.addEventListener('mouseleave', () => { if (isAutoplayActive) startAutoplay(); });
 
-            window.addEventListener('scroll', onScroll, { passive: true });
-            window.addEventListener('resize', onScroll, { passive: true });
+            window.addEventListener('resize', updateCards);
 
-            updateArcScroll();
+            // Initial render
+            updateCards();
+            startAutoplay();
         }
     </script>
 
