@@ -66,7 +66,7 @@
                                         <code class="text-primary" th:text="${cat.slug}">dien-thoai</code>
                                     </td>
                                     <td>
-                                        <i th:class="${cat.iconUrl != null ? cat.iconUrl : 'bi bi-folder'}" class="fs-5 text-secondary"></i>
+                                        <i th:classappend="${cat.imageUrl != null ? cat.imageUrl : 'bi bi-folder'}" class="fs-5 text-secondary"></i>
                                     </td>
                                     <td th:text="${cat.displayOrder}">1</td>
                                     <td>
@@ -114,7 +114,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Icon Bootstrap (Tùy chọn)</label>
-                        <input type="text" th:field="*{iconUrl}" class="form-control" placeholder="bi bi-smartwatch">
+                        <input type="text" th:field="*{imageUrl}" class="form-control" placeholder="bi bi-smartwatch">
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Thứ tự hiển thị</label>

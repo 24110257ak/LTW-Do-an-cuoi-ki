@@ -46,16 +46,14 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Đơn vị vận chuyển</th>
-                                    <th>Mã đối tác</th>
                                     <th>Cước phí tiêu chuẩn</th>
-                                    <th>Hotline hỗ trợ</th>
                                     <th>Trạng thái</th>
                                     <th class="text-end">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr th:if="${providers == null || providers.isEmpty()}">
-                                    <td colspan="7" class="text-center py-5 text-muted">Chưa có đơn vị vận chuyển nào.</td>
+                                    <td colspan="5" class="text-center py-5 text-muted">Chưa có đơn vị vận chuyển nào.</td>
                                 </tr>
                                 <tr th:each="p : ${providers}">
                                     <td th:text="${p.providerId}">1</td>
@@ -63,13 +61,7 @@
                                         <strong class="text-dark" th:text="${p.providerName}">Giao Hàng Nhanh (GHN)</strong>
                                     </td>
                                     <td>
-                                        <code class="text-primary" th:text="${p.providerCode}">GHN</code>
-                                    </td>
-                                    <td>
                                         <strong class="text-danger" th:text="${#numbers.formatDecimal(p.baseFee, 0, 'COMMA', 0, 'POINT')} + ' đ'">30,000 đ</strong>
-                                    </td>
-                                    <td>
-                                        <span class="text-muted" th:text="${p.hotline != null ? p.hotline : 'Chưa có'}">1900 1200</span>
                                     </td>
                                     <td>
                                         <form th:action="@{/admin/providers/{id}/toggle(id=${p.providerId})}" method="post" class="d-inline">
@@ -111,19 +103,9 @@
                         <label class="form-label fw-semibold">Tên đơn vị <span class="text-danger">*</span></label>
                         <input type="text" th:field="*{providerName}" class="form-control" placeholder="Ví dụ: Ninja Van, J&T Express..." required>
                     </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">Mã đối tác (Code) <span class="text-danger">*</span></label>
-                            <input type="text" th:field="*{providerCode}" class="form-control text-uppercase" placeholder="JT" required>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label fw-semibold">Cước phí tiêu chuẩn (VNĐ)</label>
-                            <input type="number" th:field="*{baseFee}" class="form-control" value="30000" min="0" required>
-                        </div>
-                    </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Hotline CSKH</label>
-                        <input type="text" th:field="*{hotline}" class="form-control" placeholder="1900 1234">
+                        <label class="form-label fw-semibold">Cước phí tiêu chuẩn (VNĐ)</label>
+                        <input type="number" th:field="*{baseFee}" class="form-control" value="30000" min="0" required>
                     </div>
                 </div>
                 <div class="modal-footer">
