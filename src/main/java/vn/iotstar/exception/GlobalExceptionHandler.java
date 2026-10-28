@@ -1,5 +1,6 @@
 package vn.iotstar.exception;
 
+import org.springframework.security.access.AccessDeniedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,7 @@ public class GlobalExceptionHandler {
     private boolean isApiRequest(HttpServletRequest request) {
         String uri = request.getRequestURI();
         String accept = request.getHeader("Accept");
-        return uri.startsWith("/api/") || (accept != null && accept.contains("application/json"));
+        return (uri.startsWith("/api/") || uri.startsWith("/chat/api/")) || (accept != null && accept.contains("application/json"));
     }
 
     @ExceptionHandler({ResourceNotFoundException.class, NoResourceFoundException.class, NoHandlerFoundException.class})
@@ -87,6 +88,18 @@ public class GlobalExceptionHandler {
         model.addAttribute("error", "Dữ liệu không hợp lệ");
         model.addAttribute("message", errors.values().stream().findFirst().orElse("Vui lòng kiểm tra lại thông tin"));
         return "error/400";
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public Object handleAccessDenied(AccessDeniedException ex,
+                                   HttpServletRequest request, HttpServletResponse response, Model model) {
+        response.setStatus(HttpStatus.FORBIDDEN.value());
+        if (isApiRequest(request)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of(
+                    "status", 403, "error", "Forbidden", "message", ex.getMessage(), "path", request.getRequestURI()));
+        }
+        model.addAttribute("message", ex.getMessage());
+        return "error/403";
     }
 
     @ExceptionHandler(Exception.class)

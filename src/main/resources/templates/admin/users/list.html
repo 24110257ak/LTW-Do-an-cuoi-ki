@@ -65,6 +65,7 @@
                                     <th>Tên đăng nhập & Email</th>
                                     <th>Số điện thoại</th>
                                     <th>Vai trò</th>
+                                    <th>Chi nhánh phụ trách</th>
                                     <th>Xác thực</th>
                                     <th>Trạng thái</th>
                                     <th class="text-end">Phân quyền</th>
@@ -72,7 +73,7 @@
                             </thead>
                             <tbody>
                                 <tr th:if="${userPage.content.isEmpty()}">
-                                    <td colspan="8" class="text-center py-5 text-muted">Không tìm thấy tài khoản nào.</td>
+                                    <td colspan="9" class="text-center py-5 text-muted">Không tìm thấy tài khoản nào.</td>
                                 </tr>
                                 <tr th:each="u : ${userPage.content}">
                                     <td th:text="${u.userId}">1</td>
@@ -90,6 +91,16 @@
                                               th:text="${u.role.roleName}">
                                             CUSTOMER
                                         </span>
+                                    </td>
+                                    <td>
+                                        <form th:if="${u.role.roleName == 'STAFF'}" th:action="@{/admin/users/{id}/branch(id=${u.userId})}" method="post" class="d-flex gap-1">
+                                            <select name="branchId" class="form-select form-select-sm" aria-label="Chi nhánh phụ trách">
+                                                <option value="">Chưa phân công (khóa quyền quản lý)</option>
+                                                <option th:each="b : ${staffAssignmentBranches}" th:value="${b.branchId}" th:text="${b.branchName}" th:selected="${u.branch != null && u.branch.branchId == b.branchId}"></option>
+                                            </select>
+                                            <button class="btn btn-outline-primary btn-sm" type="submit">Lưu</button>
+                                        </form>
+                                        <span th:unless="${u.role.roleName == 'STAFF'}" class="text-muted">—</span>
                                     </td>
                                     <td>
                                         <span th:if="${u.isVerified}" class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-check-lg"></i> Đã xác thực OTP</span>

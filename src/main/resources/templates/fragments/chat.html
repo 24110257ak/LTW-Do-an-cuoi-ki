@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<body>
+    <section th:fragment="panel(inbox)" class="tc-chat" data-techchat
+        th:attr="data-inbox=${inbox},data-branch-id=${chatBranchId},data-view=${inbox ? 'inbox' : 'branches'}">
+        <div th:if="${!inbox}" data-chat="branchPicker" class="tc-branch-picker">
+            <div class="tc-picker-heading"><strong>Bạn muốn tư vấn ở đâu?</strong>
+                <p>Chọn chi nhánh để bắt đầu hoặc tiếp tục trò chuyện.</p>
+            </div>
+            <div data-chat="branchList" class="tc-branch-list">
+                <p class="tc-empty">Đang tải chi nhánh…</p>
+            </div>
+        </div>
+        <nav th:if="${!inbox}" data-chat="navigation" class="tc-widget-nav" aria-label="Điều hướng trò chuyện" hidden>
+            <button data-chat="back" type="button" class="tc-text-button">← Chi nhánh</button>
+        </nav>
+        <div class="tc-chat-toolbar">
+            <label th:hidden="${inbox and !chatCanSelectBranch}">Chi nhánh tư vấn <select data-chat="branch" aria-label="Chi nhánh tư vấn"></select></label>
+            <button data-chat="new" type="button" class="btn btn-primary btn-sm">Bắt đầu tư vấn</button>
+            <span data-chat="connection" class="tc-connection" role="status">Đang kết nối…</span>
+        </div>
+        <p data-chat="error" class="tc-error" role="alert" hidden></p>
+        <div data-chat="layout" class="tc-chat-layout">
+            <aside data-chat="sessionPanel" class="tc-conversations">
+                <div class="tc-list-heading">Cuộc trò chuyện <button data-chat="refresh" class="btn btn-sm btn-light"
+                        type="button" aria-label="Làm mới danh sách">↻</button></div>
+                <div data-chat="sessions" class="tc-session-list"></div>
+                <button data-chat="moreSessions" type="button" class="tc-text-button" hidden>Xem thêm cuộc trò
+                    chuyện</button>
+            </aside>
+            <div data-chat="conversation" class="tc-conversation">
+                <header class="tc-conversation-heading">
+                    <div><strong data-chat="title">Chọn cuộc trò chuyện</strong><small data-chat="subtitle">Tin nhắn chỉ
+                            hiển thị cho khách và nhân viên được phân quyền.</small></div>
+                    <div class="tc-actions"><button data-chat="claim" type="button"
+                            class="btn btn-outline-primary btn-sm" hidden>Tiếp nhận</button><button data-chat="close"
+                            type="button" class="btn btn-outline-secondary btn-sm" hidden>Kết thúc</button></div>
+                </header>
+                <button data-chat="older" type="button" class="tc-text-button" hidden>Tải tin nhắn trước</button>
+                <div data-chat="messages" class="tc-message-list" role="log" aria-live="polite"
+                    aria-label="Lịch sử trò chuyện">
+                    <p class="tc-empty">Chọn chi nhánh và bắt đầu tư vấn. Lịch sử của bạn sẽ được lưu lại.</p>
+                </div>
+                <form data-chat="form" class="tc-composer">
+                    <label class="visually-hidden" for="techChatInput">Nội dung tin nhắn</label>
+                    <textarea id="techChatInput" data-chat="input" maxlength="2000" rows="2"
+                        placeholder="Nhập tin nhắn… (Enter để gửi, Shift+Enter để xuống dòng)" disabled></textarea>
+                    <button data-chat="send" type="submit" class="btn btn-primary" disabled>Gửi</button>
+                </form>
+                <small data-chat="hint" class="tc-composer-hint">Tối đa 2.000 ký tự. Tin nhắn được lưu khi gửi thành
+                    công.</small>
+            </div>
+        </div>
+    </section>
+    <div th:fragment="customer-widget">
+        <link rel="stylesheet" th:href="@{/css/chat.css}">
+        <div class="tc-widget" sec:authorize="isAnonymous() or hasRole('CUSTOMER')">
+            <div id="techChatPopup" class="tc-widget-popup" hidden>
+                <header class="tc-widget-header">
+                    <div><strong>Tư vấn TechChain</strong><small>Kết nối với chi nhánh bạn chọn</small></div><button
+                        type="button" data-chat-toggle aria-label="Đóng hộp chat">×</button>
+                </header>
+                <div sec:authorize="isAnonymous()" class="tc-login">
+                    <h5>Bạn cần tư vấn?</h5>
+                    <p>Đăng nhập để gửi tin riêng cho cửa hàng và xem lại lịch sử trò chuyện.</p><a
+                        th:href="@{/auth/login}" class="btn btn-primary">Đăng nhập để chat</a>
+                </div>
+                <div class="tc-widget-content" sec:authorize="hasRole('CUSTOMER')">
+                    <div th:replace="~{fragments/chat :: panel(false)}"></div>
+                </div>
+            </div>
+            <button type="button" data-chat-toggle class="tc-widget-toggle" aria-controls="techChatPopup"
+                aria-expanded="false" aria-label="Mở tư vấn chi nhánh" title="Tư vấn cửa hàng"><span
+                    aria-hidden="true">💬</span></button>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+        <script th:src="@{/js/chat.js}" defer></script>
+    </div>
+</body>
+
+</html>

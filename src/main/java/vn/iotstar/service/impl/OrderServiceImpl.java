@@ -1,5 +1,6 @@
 package vn.iotstar.service.impl;
 
+import vn.iotstar.service.BranchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -31,6 +32,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
+    private final BranchService branchService;
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
     private final CartService cartService;
@@ -329,6 +331,7 @@ public class OrderServiceImpl implements OrderService {
     public Order shipperConfirmDelivered(Long orderId, Long shipperUserId, String note) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", orderId));
+        branchService.checkStaffBranchAccess(order.getBranch() == null ? null : order.getBranch().getBranchId());
 
         if (order.getStatus() == OrderStatus.DELIVERED) {
             return order;
@@ -366,6 +369,7 @@ public class OrderServiceImpl implements OrderService {
     public Order reportDeliveryFailed(Long orderId, String note) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", orderId));
+        branchService.checkStaffBranchAccess(order.getBranch() == null ? null : order.getBranch().getBranchId());
 
         order.setStatus(OrderStatus.DELIVERY_FAILED);
         String reason = note != null ? note : "Khách hàng không nghe máy / hẹn lại";
@@ -381,6 +385,7 @@ public class OrderServiceImpl implements OrderService {
     public Order confirmReturnedToWarehouse(Long orderId, Long warehouseStaffUserId, String conditionNote) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", orderId));
+        branchService.checkStaffBranchAccess(order.getBranch() == null ? null : order.getBranch().getBranchId());
 
         OrderStatus oldStatus = order.getStatus();
         order.setStatus(OrderStatus.RETURNED);
@@ -419,6 +424,7 @@ public class OrderServiceImpl implements OrderService {
     public Order reconcileCodPayment(Long orderId, Long accountantUserId, String transactionRef) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", orderId));
+        branchService.checkStaffBranchAccess(order.getBranch() == null ? null : order.getBranch().getBranchId());
 
         if (order.getPaymentMethod() != PaymentMethod.COD) {
             throw new BadRequestException("Đơn hàng này không thuộc diện thanh toán khi nhận hàng (COD)!");
@@ -446,7 +452,10 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<Order> getPendingCodReconciliationOrders() {
-        return orderRepository.findByCodCollectedTrueAndCodReconciledFalseOrderByCreatedAtAsc();
+        var orders = orderRepository.findByCodCollectedTrueAndCodReconciledFalseOrderByCreatedAtAsc();
+        if (!branchService.isCurrentStaff()) return orders;
+        Integer branchId = branchService.getStaffBranchId();
+        return orders.stream().filter(o -> o.getBranch() != null && branchId.equals(o.getBranch().getBranchId())).toList();
     }
 
     @Override
@@ -456,12 +465,18 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Optional<Order> getOrderByCode(String orderCode) {
-        return orderRepository.findByOrderCode(orderCode);
+        return orderRepository.findByOrderCode(orderCode).map(order -> {
+            branchService.checkStaffBranchAccess(order.getBranch() == null ? null : order.getBranch().getBranchId());
+            return order;
+        });
     }
 
     @Override
     public Optional<Order> getOrderById(Long orderId) {
-        return orderRepository.findById(orderId);
+        return orderRepository.findById(orderId).map(order -> {
+            branchService.checkStaffBranchAccess(order.getBranch() == null ? null : order.getBranch().getBranchId());
+            return order;
+        });
     }
 
     @Override
@@ -469,6 +484,7 @@ public class OrderServiceImpl implements OrderService {
     public void cancelOrder(Long userId, Long orderId, String reason) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", orderId));
+        branchService.checkStaffBranchAccess(order.getBranch() == null ? null : order.getBranch().getBranchId());
 
         if (!order.getUser().getUserId().equals(userId)) {
             throw new BadRequestException("Bạn không có quyền thao tác trên đơn hàng này!");
@@ -513,16 +529,19 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<Order> getAllOrders(Pageable pageable) {
+        if (branchService.isCurrentStaff()) return getOrdersByBranch(branchService.getStaffBranchId(), pageable);
         return orderRepository.findAll(pageable);
     }
 
     @Override
     public Page<Order> getOrdersByBranch(Integer branchId, Pageable pageable) {
+        branchService.checkStaffBranchAccess(branchId);
         return orderRepository.findByBranchBranchId(branchId, pageable);
     }
 
     @Override
     public Page<Order> getOrdersByBranchAndStatus(Integer branchId, OrderStatus status, Pageable pageable) {
+        branchService.checkStaffBranchAccess(branchId);
         if (status == null) {
             return orderRepository.findByBranchBranchId(branchId, pageable);
         }
@@ -531,6 +550,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Page<Order> getOrdersByStatus(OrderStatus status, Pageable pageable) {
+        if (branchService.isCurrentStaff()) return getOrdersByBranchAndStatus(branchService.getStaffBranchId(), status, pageable);
         return orderRepository.findByStatus(status, pageable);
     }
 
@@ -548,6 +568,7 @@ public class OrderServiceImpl implements OrderService {
     public void updateOrderStatus(Long orderId, OrderStatus newStatus, String note) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", orderId));
+        branchService.checkBranchAccess(order.getBranch() == null ? null : order.getBranch().getBranchId());
 
         OrderStatus oldStatus = order.getStatus();
         order.setStatus(newStatus);
@@ -606,6 +627,7 @@ public class OrderServiceImpl implements OrderService {
     public void markAsPaid(Long orderId, String vnpayTxnRef) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Đơn hàng", "id", orderId));
+        branchService.checkStaffBranchAccess(order.getBranch() == null ? null : order.getBranch().getBranchId());
 
         order.setPaymentStatus(PaymentStatus.PAID);
         order.setVnpayTxnRef(vnpayTxnRef);
@@ -614,46 +636,55 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public BigDecimal getTotalRevenue() {
+        if (branchService.isCurrentStaff()) return getBranchRevenue(branchService.getStaffBranchId());
         return orderRepository.sumTotalRevenue();
     }
 
     @Override
     public BigDecimal getBranchRevenue(Integer branchId) {
+        branchService.checkStaffBranchAccess(branchId);
         return orderRepository.sumRevenueByBranch(branchId);
     }
 
     @Override
     public long countOrdersByStatus(OrderStatus status) {
+        if (branchService.isCurrentStaff()) return countBranchOrdersByStatus(branchService.getStaffBranchId(), status);
         return orderRepository.countByStatus(status);
     }
 
     @Override
     public long countTotalOrders() {
+        if (branchService.isCurrentStaff()) return countBranchOrders(branchService.getStaffBranchId());
         return orderRepository.count();
     }
 
     @Override
     public long countBranchOrders(Integer branchId) {
+        branchService.checkStaffBranchAccess(branchId);
         return orderRepository.countByBranchBranchId(branchId);
     }
 
     @Override
     public long countBranchOrdersByStatus(Integer branchId, OrderStatus status) {
+        branchService.checkStaffBranchAccess(branchId);
         return orderRepository.countByBranchBranchIdAndStatus(branchId, status);
     }
 
     @Override
     public List<Order> getRecentOrders() {
+        if (branchService.isCurrentStaff()) return getRecentBranchOrders(branchService.getStaffBranchId());
         return orderRepository.findTop10ByOrderByCreatedAtDesc();
     }
 
     @Override
     public List<Order> getRecentBranchOrders(Integer branchId) {
+        branchService.checkStaffBranchAccess(branchId);
         return orderRepository.findTop10ByBranchBranchIdOrderByCreatedAtDesc(branchId);
     }
 
     @Override
     public Page<Order> searchOrdersAdmin(Integer branchId, OrderStatus status, String keyword, Pageable pageable) {
+        branchService.checkStaffBranchAccess(branchId);
         String cleanKeyword = (keyword != null && !keyword.isBlank()) ? keyword.trim() : null;
         return orderRepository.searchOrdersAdmin(branchId, status, cleanKeyword, pageable);
     }

@@ -6,7 +6,9 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "chat_messages")
+@Table(name = "chat_messages", uniqueConstraints = 
+        @UniqueConstraint( name = "uq_chat_message_client", columnNames = {"session_id", "client_message_id"})
+)
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Builder
 public class ChatMessage {
@@ -31,5 +33,8 @@ public class ChatMessage {
     @Column(name = "sent_at", nullable = false, updatable = false)
     @Builder.Default
     private LocalDateTime sentAt = LocalDateTime.now();
+
+    @Column(name = "client_message_id", nullable = false, length = 64, columnDefinition = "nvarchar(64) not null")
+    private String clientMessageId;
 }
 
