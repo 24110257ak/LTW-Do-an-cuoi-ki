@@ -1,0 +1,21 @@
+[Báo cáo sửa lỗi] - Module: Quản lý Nhà cung cấp (Providers) 
+
+1. Mô tả lỗi:
+
+Trang admin/providers/list.html bị lỗi sập (TemplateInputException).
+
+Nguyên nhân: File giao diện HTML gọi sai tên biến (gọi p.providerCode và p.hotline) không khớp với thiết kế của DeliveryProvider Entity ở Backend.
+
+2. Chi tiết các file đã sửa:
+
+src/main/resources/templates/admin/providers/list.html
+
+3. Thay đổi cụ thể (Changelog):
+
+Đổi biến providerCode thành providerId cho khớp khóa chính.
+
+Xóa cột và thẻ input gọi biến hotline (vì Entity không có trường dữ liệu này) để ngăn chặn lỗi sập trang.
+
+Đánh giá ảnh hưởng: An toàn. Chỉ điều chỉnh giao diện hiển thị, không thay đổi logic Database. Đã test hiển thị thành công.
+
+
