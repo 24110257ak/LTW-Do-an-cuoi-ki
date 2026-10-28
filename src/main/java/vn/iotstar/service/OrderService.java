@@ -15,6 +15,7 @@ import java.util.Optional;
 public interface OrderService {
     Order placeOrder(Long userId, CheckoutRequest request);
     Page<Order> getOrdersByUser(Long userId, Pageable pageable);
+    Page<Order> getOrdersByUserAndStatus(Long userId, OrderStatus status, Pageable pageable);
     Optional<Order> getOrderByCode(String orderCode);
     Optional<Order> getOrderById(Long orderId);
     void cancelOrder(Long userId, Long orderId, String reason);

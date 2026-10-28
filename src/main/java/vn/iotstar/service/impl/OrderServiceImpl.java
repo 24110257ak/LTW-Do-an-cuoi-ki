@@ -464,6 +464,11 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    public Page<Order> getOrdersByUserAndStatus(Long userId, OrderStatus status, Pageable pageable) {
+        return orderRepository.findByUserUserIdAndStatus(userId, status, pageable);
+    }
+
+    @Override
     public Optional<Order> getOrderByCode(String orderCode) {
         return orderRepository.findByOrderCode(orderCode).map(order -> {
             branchService.checkStaffBranchAccess(order.getBranch() == null ? null : order.getBranch().getBranchId());

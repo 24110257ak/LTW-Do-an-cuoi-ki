@@ -621,10 +621,11 @@
                     </a>
                 </li>
                 <!-- Cart Link -->
-                <li class="nav-item me-3">
+                <li class="nav-item me-3 pe-1">
                     <a class="nav-link text-white fw-semibold position-relative px-2" th:href="@{/cart}">
                         <i class="fa-solid fa-cart-shopping fs-5"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                              id="headerCartBadge"
                               style="font-size: 0.65rem;"
                               th:text="${session.cartCount != null ? session.cartCount : '0'}">0</span>
                     </a>

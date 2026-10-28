@@ -6,8 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import vn.iotstar.entity.User;
+import vn.iotstar.enums.OrderStatus;
+import vn.iotstar.repository.UserRepository;
 import vn.iotstar.service.CloudinaryService;
 
 import java.nio.file.Files;
@@ -27,6 +32,9 @@ public class SystemFixesIntegrationTest {
 
     @Autowired
     private CloudinaryService cloudinaryService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     @DisplayName("Admin Inventory Logs renders 200 without duplicate ORDER BY SQL error")
@@ -64,6 +72,37 @@ public class SystemFixesIntegrationTest {
         mockMvc.perform(get("/shipper"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("shipper/orders"));
+    }
+
+    @Test
+    @DisplayName("Customer Order History with status filter filters correctly")
+    void testCustomerOrderHistoryWithStatusFilter() throws Exception {
+        User customer = userRepository.findByUsername("customer1").orElse(null);
+        if (customer != null) {
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(customer, null, customer.getAuthorities())
+            );
+        }
+        mockMvc.perform(get("/orders").param("status", "SHIPPING"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("customer/order-history"))
+                .andExpect(model().attribute("selectedStatus", OrderStatus.SHIPPING))
+                .andExpect(model().attributeExists("orderPage"));
+    }
+
+    @Test
+    @DisplayName("Customer Cart renders with cartCount and session cartCount populated")
+    void testCustomerCartCountPopulation() throws Exception {
+        User customer = userRepository.findByUsername("customer1").orElse(null);
+        if (customer != null) {
+            SecurityContextHolder.getContext().setAuthentication(
+                    new UsernamePasswordAuthenticationToken(customer, null, customer.getAuthorities())
+            );
+        }
+        mockMvc.perform(get("/cart"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("customer/cart"))
+                .andExpect(model().attributeExists("cartCount", "itemCount", "cartItems"));
     }
 
     @Test

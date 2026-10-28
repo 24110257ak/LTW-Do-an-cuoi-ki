@@ -121,8 +121,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public int getCartItemCount(Long userId) {
-        List<CartItem> items = getCartItems(userId);
-        return items.stream().mapToInt(CartItem::getQuantity).sum();
+        return cartItemRepository.countTotalQuantityByUserId(userId);
     }
 
     @Override
