@@ -1,21 +1,20 @@
-[Báo cáo sửa lỗi] - Module: Quản lý Nhà cung cấp (Providers) 
+[Báo cáo sửa lỗi] 
 
-1. Mô tả lỗi:
+### [Fix] - Quản lý Nhà cung cấp (list.html)
 
-Trang admin/providers/list.html bị lỗi sập (TemplateInputException).
+- **Lỗi (Bug):** Sập trang danh sách nhà cung cấp (TemplateInputException).
+- **Nguyên nhân:** File HTML gọi sai tên biến (`providerCode` và `hotline`) không tồn tại trong Entity `DeliveryProvider`.
+- **Giải pháp (Fix):** Đổi `providerCode` thành `providerId` và xóa các thẻ/cột gọi biến thừa `hotline` trên giao diện.
 
-Nguyên nhân: File giao diện HTML gọi sai tên biến (gọi p.providerCode và p.hotline) không khớp với thiết kế của DeliveryProvider Entity ở Backend.
+### [Fix] - Tính năng Đăng ký (UserServiceImpl.java)
 
-2. Chi tiết các file đã sửa:
+- **Lỗi (Bug):** Xả rác dữ liệu vào bảng Users và Carts.
+- **Nguyên nhân:** Hệ thống lưu thẳng dữ liệu xuống Database trước khi người dùng xác thực OTP.
+- **Giải pháp (Fix):** Dùng ConcurrentHashMap làm bộ nhớ tạm (RAM). Chỉ thực thi lệnh save() xuống DB khi nhập OTP hợp lệ.
 
-src/main/resources/templates/admin/providers/list.html
+### [Fix] - Lỗ hổng bảo mật rò rỉ dữ liệu Chi nhánh (StaffController.java)
 
-3. Thay đổi cụ thể (Changelog):
-
-Đổi biến providerCode thành providerId cho khớp khóa chính.
-
-Xóa cột và thẻ input gọi biến hotline (vì Entity không có trường dữ liệu này) để ngăn chặn lỗi sập trang.
-
-Đánh giá ảnh hưởng: An toàn. Chỉ điều chỉnh giao diện hiển thị, không thay đổi logic Database. Đã test hiển thị thành công.
-
-
+- **Lỗi (Bug):** Nhân viên (Staff) tự do truy cập chéo dữ liệu của chi nhánh khác. Lỗi mặc định load sai chi nhánh (vào branch2 nhưng load dữ liệu nhánh 1).
+- **Nguyên nhân:** Hàm getActiveBranchId dùng if-else dò chuỗi username thủ công thay vì truy vấn cột branch_id trong Database; API switch-branch cho phép đổi ID chi nhánh thả cửa.
+- **Giải pháp (Fix):** Inject UserService để get chính xác branch_id từ Entity User. Chặn (Block) hoàn toàn API /switch-branch, ép Role-Based Access Control tuyệt đối ở tầng Backend.
+** Inject UserService để get chính xác branch_id từ DB. Chặn API switch-branch, đồng thời xóa bỏ hoàn toàn dropdown chuyển chi nhánh ở giao diện (Fragment Topbar) để đồng bộ trải nghiệm.

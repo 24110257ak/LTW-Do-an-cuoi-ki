@@ -13,10 +13,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.iotstar.entity.Branch;
 import vn.iotstar.entity.BranchInventory;
 import vn.iotstar.entity.Order;
+import vn.iotstar.entity.User;
 import vn.iotstar.enums.OrderStatus;
 import vn.iotstar.service.BranchService;
 import vn.iotstar.service.InventoryService;
 import vn.iotstar.service.OrderService;
+import vn.iotstar.service.UserService;
 
 import java.util.List;
 
@@ -28,32 +30,36 @@ public class StaffController {
     private final OrderService orderService;
     private final BranchService branchService;
     private final InventoryService inventoryService;
+    private final UserService userService; // Đã thêm UserService để query Database
 
-    private Integer getActiveBranchId(HttpSession session, Authentication authentication) {
-        Integer branchId = (Integer) session.getAttribute("staffBranchId");
-        if (branchId == null) {
-            String username = authentication != null ? authentication.getName().toLowerCase() : "";
-            if (username.contains("q1")) branchId = 1;
-            else if (username.contains("td")) branchId = 3;
-            else if (username.contains("hn")) branchId = 2;
-            else if (username.contains("dn")) branchId = 4;
-            else branchId = 1;
-            session.setAttribute("staffBranchId", branchId);
+    // HÀM MỚI: Bắt buộc lấy ID chi nhánh gốc từ Database của nhân viên
+    private Integer getActiveBranchId(Authentication authentication) {
+        String username = authentication.getName();
+        User user = userService.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tài khoản nhân viên!"));
+
+        // Nếu tài khoản được admin gắn đúng branch_id, lấy chính xác ID đó
+        if (user.getBranch() != null) {
+            return user.getBranch().getBranchId();
         }
-        return branchId;
+        
+        // Fallback an toàn (tránh sập web) nếu admin quên gắn chi nhánh
+        return 1; 
     }
 
+    // VÔ HIỆU HÓA HOÀN TOÀN TÍNH NĂNG CHUYỂN CHI NHÁNH
     @PostMapping("/switch-branch")
     public String switchBranch(@RequestParam("branchId") Integer branchId,
-                               HttpSession session,
+                               RedirectAttributes redirectAttributes,
                                @RequestHeader(value = "referer", required = false) String referer) {
-        session.setAttribute("staffBranchId", branchId);
+        // Cố tình bắn request lên cũng không cho đổi, đá ngược về trang cũ
+        redirectAttributes.addFlashAttribute("errorMessage", "Cảnh báo bảo mật: Bạn không có quyền xem dữ liệu của chi nhánh khác!");
         return "redirect:" + (referer != null ? referer : "/staff/orders");
     }
 
     @GetMapping({"", "/dashboard"})
-    public String staffDashboard(HttpSession session, Authentication auth, Model model) {
-        Integer branchId = getActiveBranchId(session, auth);
+    public String staffDashboard(Authentication auth, Model model) {
+        Integer branchId = getActiveBranchId(auth); // Gọi hàm mới an toàn
         Branch currentBranch = branchService.getBranchById(branchId).orElse(null);
 
         model.addAttribute("currentBranch", currentBranch);
@@ -75,9 +81,9 @@ public class StaffController {
             @RequestParam(value = "status", required = false) String statusStr,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "15") int size,
-            HttpSession session, Authentication auth, Model model) {
+            Authentication auth, Model model) {
 
-        Integer branchId = getActiveBranchId(session, auth);
+        Integer branchId = getActiveBranchId(auth);
         Branch currentBranch = branchService.getBranchById(branchId).orElse(null);
 
         OrderStatus status = null;
@@ -99,9 +105,9 @@ public class StaffController {
     }
 
     @GetMapping("/orders/{id}")
-    public String orderDetail(@PathVariable("id") Long id, HttpSession session, Authentication auth, Model model) {
+    public String orderDetail(@PathVariable("id") Long id, Authentication auth, Model model) {
         Order order = orderService.getOrderById(id).orElseThrow();
-        Integer branchId = getActiveBranchId(session, auth);
+        Integer branchId = getActiveBranchId(auth);
 
         model.addAttribute("order", order);
         model.addAttribute("currentBranch", branchService.getBranchById(branchId).orElse(null));
@@ -122,8 +128,8 @@ public class StaffController {
     }
 
     @GetMapping("/inventory")
-    public String branchInventory(HttpSession session, Authentication auth, Model model) {
-        Integer branchId = getActiveBranchId(session, auth);
+    public String branchInventory(Authentication auth, Model model) {
+        Integer branchId = getActiveBranchId(auth);
         Branch currentBranch = branchService.getBranchById(branchId).orElse(null);
 
         List<BranchInventory> inventoryList = inventoryService.getInventoryByBranch(branchId);
@@ -138,10 +144,10 @@ public class StaffController {
     public String updateInventory(
             @RequestParam("variantId") Long variantId,
             @RequestParam("quantity") Integer quantity,
-            HttpSession session, Authentication auth,
+            Authentication auth,
             RedirectAttributes redirectAttributes) {
 
-        Integer branchId = getActiveBranchId(session, auth);
+        Integer branchId = getActiveBranchId(auth);
         inventoryService.updateStock(branchId, variantId, quantity);
 
         redirectAttributes.addFlashAttribute("successMessage", "Cập nhật số lượng tồn kho thành công!");

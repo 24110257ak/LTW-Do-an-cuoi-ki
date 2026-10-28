@@ -144,13 +144,6 @@
                 </div>
             </div>
 
-            <!-- Branch switch form (if branches present) -->
-            <form th:if="${branches != null && !branches.isEmpty()}" th:action="@{/staff/switch-branch}" method="post" class="d-flex align-items-center m-0">
-                <select name="branchId" class="form-select form-select-sm" onchange="this.form.submit()">
-                    <option th:each="b : ${branches}" th:value="${b.branchId}" th:text="${b.branchName}" th:selected="${currentBranch != null && currentBranch.branchId == b.branchId}">Chi nhánh</option>
-                </select>
-            </form>
-
             <!-- Store Front Link -->
             <a th:href="@{/}" target="_blank" class="btn btn-outline-secondary btn-sm" title="Mở trang bán hàng">
                 <i class="bi bi-box-arrow-up-right me-1"></i> Xem Website
