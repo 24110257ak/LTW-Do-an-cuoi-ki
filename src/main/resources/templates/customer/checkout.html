@@ -71,18 +71,28 @@
                                 <label class="form-label small fw-semibold">Số điện thoại nhận hàng *</label>
                                 <input type="tel" class="form-control" th:field="*{receiverPhone}" placeholder="0901234567" required>
                             </div>
+                            
                             <div class="col-md-4">
-                                <label class="form-label small fw-semibold">Tỉnh / Thành phố *</label>
-                                <input type="text" class="form-control" th:field="*{province}" value="TP. Hồ Chí Minh" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-semibold">Quận / Huyện *</label>
-                                <input type="text" class="form-control" th:field="*{district}" placeholder="Quận 1" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label small fw-semibold">Phường / Xã *</label>
-                                <input type="text" class="form-control" th:field="*{ward}" placeholder="Phường Bến Nghé" required>
-                            </div>
+    <label class="form-label small fw-semibold">Tỉnh / Thành phố *</label>
+    <select class="form-select" th:field="*{province}" id="province" required>
+        <option value="">-- Chọn Tỉnh/Thành --</option>
+    </select>
+</div>
+<div class="col-md-4">
+    <label class="form-label small fw-semibold">Quận / Huyện *</label>
+    <select class="form-select" th:field="*{district}" id="district" required>
+        <option value="">-- Chọn Quận/Huyện --</option>
+    </select>
+</div>
+<div class="col-md-4">
+    <label class="form-label small fw-semibold">Phường / Xã *</label>
+    <select class="form-select" th:field="*{ward}" id="ward" required>
+        <option value="">-- Chọn Phường/Xã --</option>
+    </select>
+</div>
+                            
+                            
+                            
                             <div class="col-12">
                                 <label class="form-label small fw-semibold">Số nhà, tên đường chi tiết *</label>
                                 <input type="text" class="form-control" th:field="*{street}" placeholder="12 Lê Lợi" required>
@@ -225,6 +235,67 @@
     typeDelivery.addEventListener('change', updateOrderTypeView);
     typePickup.addEventListener('change', updateOrderTypeView);
     updateOrderTypeView();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const host = "https://provinces.open-api.vn/api/";
+    const provinceSelect = document.getElementById("province");
+    const districtSelect = document.getElementById("district");
+    const wardSelect = document.getElementById("ward");
+
+    // 1. Tải danh sách Tỉnh/Thành phố
+    fetch(host + "?depth=1")
+        .then(response => response.json())
+        .then(data => {
+            let html = '<option value="">-- Chọn Tỉnh/Thành --</option>';
+            data.forEach(item => {
+                // Gán value là TÊN để truyền về cho Backend khớp logic chuỗi
+                html += `<option value="${item.name}" data-code="${item.code}">${item.name}</option>`;
+            });
+            provinceSelect.innerHTML = html;
+        });
+
+    // 2. Tải danh sách Quận/Huyện khi chọn Tỉnh
+    provinceSelect.addEventListener("change", function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const provCode = selectedOption.getAttribute("data-code");
+        if (!provCode) {
+            districtSelect.innerHTML = '<option value="">-- Chọn Quận/Huyện --</option>';
+            wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+            return;
+        }
+        fetch(host + "p/" + provCode + "?depth=2")
+            .then(response => response.json())
+            .then(data => {
+                let html = '<option value="">-- Chọn Quận/Huyện --</option>';
+                data.districts.forEach(item => {
+                    html += `<option value="${item.name}" data-code="${item.code}">${item.name}</option>`;
+                });
+                districtSelect.innerHTML = html;
+                wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+            });
+    });
+
+    // 3. Tải danh sách Phường/Xã khi chọn Quận
+    districtSelect.addEventListener("change", function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const distCode = selectedOption.getAttribute("data-code");
+        if (!distCode) {
+            wardSelect.innerHTML = '<option value="">-- Chọn Phường/Xã --</option>';
+            return;
+        }
+        fetch(host + "d/" + distCode + "?depth=2")
+            .then(response => response.json())
+            .then(data => {
+                let html = '<option value="">-- Chọn Phường/Xã --</option>';
+                data.wards.forEach(item => {
+                    html += `<option value="${item.name}">${item.name}</option>`;
+                });
+                wardSelect.innerHTML = html;
+            });
+    });
+});
 </script>
 </body>
 </html>

@@ -18,3 +18,10 @@
 - **Nguyên nhân:** Hàm getActiveBranchId dùng if-else dò chuỗi username thủ công thay vì truy vấn cột branch_id trong Database; API switch-branch cho phép đổi ID chi nhánh thả cửa.
 - **Giải pháp (Fix):** Inject UserService để get chính xác branch_id từ Entity User. Chặn (Block) hoàn toàn API /switch-branch, ép Role-Based Access Control tuyệt đối ở tầng Backend.
 ** Inject UserService để get chính xác branch_id từ DB. Chặn API switch-branch, đồng thời xóa bỏ hoàn toàn dropdown chuyển chi nhánh ở giao diện (Fragment Topbar) để đồng bộ trải nghiệm.
+
+### [Fix] - Dữ liệu địa chỉ rác & Lỗi định tuyến đơn (checkout.html)
+
+- **Lỗi (Bug):** UI cho phép nhập Tỉnh/Quận tự do (free-text). Dữ liệu rác làm sai lệch thuật toán tính phí ship và Smart Routing ở Backend.
+- **Nguyên nhân:** Thiếu chuẩn hóa dữ liệu địa chính trên giao diện đặt hàng.
+- **Giải pháp (Hotfix):** Tích hợp public API Hành chính VN. Chuyển Input thành Select Box phụ thuộc, ép truyền value chuẩn để map chính xác với logic của Backend.
+- **🚨 Nợ kỹ thuật (Tech Debt - Future Work):** Hệ thống hiện chưa có cơ chế Tách đơn hàng (Split Order). Nếu không chi nhánh nào đủ 100% món hàng, thuật toán đang ép đơn hàng về Chi nhánh 1, dẫn đến nguy cơ sai lệch tồn kho vật lý.
