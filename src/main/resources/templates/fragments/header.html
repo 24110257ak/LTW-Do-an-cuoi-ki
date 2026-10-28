@@ -621,17 +621,18 @@
                     </a>
                 </li>
                 <!-- Cart Link -->
-                <li class="nav-item me-2">
-                    <a class="nav-link text-white fw-semibold position-relative" th:href="@{/cart}">
+                <li class="nav-item me-3">
+                    <a class="nav-link text-white fw-semibold position-relative px-2" th:href="@{/cart}">
                         <i class="fa-solid fa-cart-shopping fs-5"></i>
-                        <span class="position-absolute top-1 start-100 translate-middle badge rounded-pill bg-danger"
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                              style="font-size: 0.65rem;"
                               th:text="${session.cartCount != null ? session.cartCount : '0'}">0</span>
                     </a>
                 </li>
 
                 <!-- User Dropdown (Authenticated) -->
-                <li class="nav-item dropdown" sec:authorize="isAuthenticated()">
-                    <a class="nav-link dropdown-toggle text-white d-flex align-items-center fw-semibold" href="#" role="button" data-bs-toggle="dropdown">
+                <li class="nav-item dropdown ms-lg-2" sec:authorize="isAuthenticated()">
+                    <a class="nav-link dropdown-toggle text-white d-flex align-items-center fw-semibold" href="javascript:void(0)" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fa-solid fa-circle-user fs-4 me-1 text-warning"></i>
                         <span sec:authentication="name">Tài khoản</span>
                     </a>
