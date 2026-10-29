@@ -16,7 +16,7 @@
 | STT | Mã sinh viên | Họ và tên | Vai trò | Phân công Module đảm nhận | Tỷ lệ đóng góp |
 | :---: | :---: | :--- | :---: | :--- | :---: |
 | **1** | 24110292 | **Mai Huy Nhật** | **Nhóm trưởng** | Hệ thống Real-time Live Chat & WebSocket STOMP; Dual Security Filter Chain (JWT & Session); Quản trị Admin Dashboard; Thống kê doanh thu Chart.js. | **33.3%** |
-| **2** | 24110257 | **Trần Vũ Anh Khoa** | Thành viên | Cơ chế Banner 3D Rolodex Cylindrical Geometry; Tối ưu hóa bộ lọc sản phẩm đa thuộc tính (Dynamic Filter Specifications); Quản lý Giỏ hàng (Cart) & Tra cứu tồn kho chi nhánh; Giao diện Cửa hàng (Storefront). | **33.3%** |
+| **2** | 24110257 | **Trần Vũ Anh Khoa** | Thành viên | Cơ chế Banner 3D Rolodex Cylindrical Geometry & Dải Banner Marketing 2D; Tối ưu hóa bộ lọc sản phẩm đa thuộc tính (Dynamic Filter Specifications); Quản lý Giỏ hàng (Cart) & Tra cứu tồn kho chi nhánh; Giao diện Cửa hàng (Storefront). | **33.3%** |
 | **3** | 24110304 | **Đặng Nhật Phúc** | Thành viên | Quy trình Đăng ký OTP qua In-Memory RAM Cache (ConcurrentHashMap); Tích hợp API Hành chính VN 3 cấp tại Checkout; Thuật toán Smart Order Routing; Phân hệ Nhân viên chi nhánh; Đóng gói Dockerfile & Cloud Deployment Render. | **33.3%** |
 
 ---
@@ -201,7 +201,8 @@ main (Phiên bản phát hành chính thức, mốc Fallback an toàn, sẵn sà
         ├── refactor/reorganize-controllers     (Phase 10: Tái cấu trúc chuẩn hóa Controller theo từng domain: admin, api, shipper, staff, customer)
         ├── fix/Phuc                            (PR #1 - Phase 11: Đăng ký OTP qua RAM Cache ConcurrentHashMap, API Hành chính VN 3 cấp & Khóa quyền Staff)
         ├── feature/add-chat                    (PR #2 - Phase 12: Hệ thống Real-time Live Chat STOMP WebSocket, CSDL 27 bảng, Idempotency clientMessageId)
-        └── docs/final-report                   (Phase 13: Báo cáo Word 72 trang, Docker Multi-stage & Cloud Render PaaS Deployment)
+        ├── feature/middle-promo-banner         (Phase 14: Tích hợp Dải Banner Khuyến mãi 2D đồng bộ Admin Banners & Cloudinary CDN)
+        └── docs/final-report                   (Phase 15: Báo cáo Word 72 trang, Docker Multi-stage & Cloud Render PaaS Deployment)
 ```
 
 ### 5.1. Bảng theo dõi các nhánh chức năng thực tế trên GitHub:
@@ -221,7 +222,8 @@ main (Phiên bản phát hành chính thức, mốc Fallback an toàn, sẵn sà
 | **12** | `refactor/reorganize-controllers` | Cả nhóm | Phase 10 | Tái cấu trúc package controller gọn gàng theo domain (`admin`, `api`, `shipper`, `staff`, `customer`). | ✅ Đã merge vào `dev` |
 | **13** | `fix/Phuc` | Đặng Nhật Phúc | Phase 11 (PR #1) | Bộ nhớ tạm RAM Cache (ConcurrentHashMap) cho đăng ký OTP, tích hợp API Hành chính VN 3 cấp tại checkout, khóa quyền chi nhánh Staff. | ✅ Đã merge vào `dev` (PR #1) |
 | **14** | `feature/add-chat` | Mai Huy Nhật | Phase 12 (PR #2) | Hệ thống Live Chat STOMP WebSocket thời gian thực, lưu trữ 27 bảng CSDL, chống gửi trùng `clientMessageId`, phân quyền chi nhánh. | ✅ Đã merge vào `dev` (PR #2) |
-| **15** | `docs/final-report` | Cả nhóm | Phase 13 | Báo cáo chi tiết `.docx` (72 trang), hướng dẫn cài đặt, đóng gói Dockerfile và bộ hồ sơ nghiệm thu. | ✅ Đã merge vào `dev` & `main` |
+| **15** | `feature/middle-promo-banner` | Trần Vũ Anh Khoa | Phase 14 | Tích hợp Dải Banner Khuyến mãi 2D đồng bộ thời gian thực với phân hệ Admin Banners và Cloudinary CDN. | ✅ Đã merge vào `dev` |
+| **16** | `docs/final-report` | Cả nhóm | Phase 15 | Báo cáo chi tiết `.docx` (72 trang), hướng dẫn cài đặt, đóng gói Dockerfile và bộ hồ sơ nghiệm thu. | ✅ Đã merge vào `dev` & `main` |
 
 ### 5.2. Quy trình Quản lý Pull Request, Giải quyết Xung đột & Đồng bộ Nhánh:
 1. **Quy trình Pull Request chuẩn mực:** Mọi tính năng mới đều được phát triển trên nhánh riêng biệt (`feature/*` hoặc `fix/*`), kiểm thử độc lập trước khi mở Pull Request vào `dev`.

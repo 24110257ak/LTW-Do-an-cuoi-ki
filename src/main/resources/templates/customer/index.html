@@ -152,6 +152,50 @@
         </div>
     </div>
 
+    <!-- 2.5 Dải Banner Chiến Dịch Khuyến Mãi (Marketing Campaign Carousel) -->
+    <!-- Đồng bộ thời gian thực với phân hệ Quản trị Admin Banners & Cloudinary CDN -->
+    <div th:if="${banners != null && !banners.isEmpty()}" class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0 text-dark d-flex align-items-center">
+                <i class="fa-solid fa-bullhorn text-danger me-2"></i>Sự Kiện & Chương Trình Khuyến Mãi
+            </h5>
+            <span class="text-muted small d-none d-md-inline">Ưu đãi độc quyền cập nhật từ Ban Quản trị ESC Store</span>
+        </div>
+        
+        <div id="promoCampaignCarousel" class="carousel slide shadow-sm rounded-4 overflow-hidden position-relative" data-bs-ride="carousel" data-bs-interval="4500">
+            <!-- Carousel Indicators -->
+            <div class="carousel-indicators mb-2" th:if="${#lists.size(banners) > 1}">
+                <button th:each="bn, iter : ${banners}" type="button"
+                        data-bs-target="#promoCampaignCarousel"
+                        th:data-bs-slide-to="${iter.index}"
+                        th:classappend="${iter.first ? 'active' : ''}"
+                        th:attr="aria-current=${iter.first ? 'true' : null}, aria-label='Banner ' + ${iter.count}"></button>
+            </div>
+
+            <!-- Carousel Slides -->
+            <div class="carousel-inner">
+                <div th:each="bn, iter : ${banners}" class="carousel-item" th:classappend="${iter.first ? 'active' : ''}">
+                    <a th:href="${bn.linkUrl != null && !bn.linkUrl.isBlank() ? bn.linkUrl : 'javascript:void(0)'}"
+                       class="d-block text-decoration-none">
+                        <img th:src="${bn.imageUrl}" class="d-block w-100 object-fit-cover"
+                             style="max-height: 280px; min-height: 160px;"
+                             th:alt="${bn.title != null ? bn.title : 'Khuyến mãi ESC Store'}">
+                    </a>
+                </div>
+            </div>
+
+            <!-- Controls (chỉ hiện khi có từ 2 banner trở lên) -->
+            <button th:if="${#lists.size(banners) > 1}" class="carousel-control-prev" type="button" data-bs-target="#promoCampaignCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon p-3 bg-dark bg-opacity-50 rounded-circle" aria-hidden="true"></span>
+                <span class="visually-hidden">Trước</span>
+            </button>
+            <button th:if="${#lists.size(banners) > 1}" class="carousel-control-next" type="button" data-bs-target="#promoCampaignCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon p-3 bg-dark bg-opacity-50 rounded-circle" aria-hidden="true"></span>
+                <span class="visually-hidden">Sau</span>
+            </button>
+        </div>
+    </div>
+
     <!-- 3. Top Sản phẩm BÁN CHẠY NHẤT (>10 sản phẩm theo yêu cầu đề bài) -->
     <div class="mb-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
