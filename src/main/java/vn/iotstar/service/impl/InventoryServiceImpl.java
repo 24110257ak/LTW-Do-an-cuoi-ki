@@ -1,5 +1,6 @@
 package vn.iotstar.service.impl;
 
+import vn.iotstar.service.BranchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class InventoryServiceImpl implements InventoryService {
 
+    private final BranchService branchService;
     private final BranchInventoryRepository inventoryRepository;
     private final BranchRepository branchRepository;
     private final ProductVariantRepository variantRepository;
@@ -28,17 +30,20 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public List<BranchInventory> getInventoryByBranch(Integer branchId) {
+        branchService.checkStaffBranchAccess(branchId);
         return inventoryRepository.findByBranchBranchId(branchId);
     }
 
     @Override
     public Optional<BranchInventory> getInventoryItem(Integer branchId, Long variantId) {
+        branchService.checkStaffBranchAccess(branchId);
         return inventoryRepository.findByBranchBranchIdAndVariantVariantId(branchId, variantId);
     }
 
     @Override
     @Transactional
     public void updateStock(Integer branchId, Long variantId, Integer newQuantity) {
+        branchService.checkBranchAccess(branchId);
         BranchInventory inventory = inventoryRepository
                 .findByBranchBranchIdAndVariantVariantId(branchId, variantId)
                 .orElseGet(() -> {
@@ -74,23 +79,29 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public List<BranchInventory> getStockDistribution(Long variantId) {
-        return inventoryRepository.findByVariantVariantId(variantId);
+        var inventory = inventoryRepository.findByVariantVariantId(variantId);
+        if (!branchService.isCurrentStaff()) return inventory;
+        Integer branchId = branchService.getStaffBranchId();
+        return inventory.stream().filter(i -> branchId.equals(i.getBranch().getBranchId())).toList();
     }
 
     @Override
     public long countLowStock(Integer branchId, int threshold) {
+        branchService.checkStaffBranchAccess(branchId);
         List<BranchInventory> list = inventoryRepository.findByBranchBranchId(branchId);
         return list.stream().filter(i -> i.getQuantity() > 0 && i.getQuantity() <= threshold).count();
     }
 
     @Override
     public long countOutOfStock(Integer branchId) {
+        branchService.checkStaffBranchAccess(branchId);
         List<BranchInventory> list = inventoryRepository.findByBranchBranchId(branchId);
         return list.stream().filter(i -> i.getQuantity() == 0).count();
     }
 
     @Override
     public long countTotalStockUnits(Integer branchId) {
+        branchService.checkStaffBranchAccess(branchId);
         List<BranchInventory> list = inventoryRepository.findByBranchBranchId(branchId);
         return list.stream().mapToLong(BranchInventory::getQuantity).sum();
     }
@@ -99,6 +110,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     public void adjustStock(Integer branchId, Long variantId, int delta, StockMovementType movementType,
                             User actor, String referenceCode, String note) {
+        branchService.checkStaffBranchAccess(branchId);
         if (delta == 0) {
             throw new IllegalArgumentException("Số lượng biến động không được bằng 0");
         }
@@ -156,6 +168,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional
     public void adminAdjustStock(Integer branchId, Long variantId, int delta, String reason, User actor) {
+        branchService.checkStaffBranchAccess(branchId);
         if (reason == null || reason.isBlank()) {
             throw new IllegalArgumentException("Vui lòng ghi rõ lý do kiểm kê / điều chỉnh tồn kho");
         }
@@ -165,6 +178,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional(readOnly = true)
     public int getAvailableQuantity(Integer branchId, Long variantId) {
+        branchService.checkStaffBranchAccess(branchId);
         return inventoryRepository.findByBranchBranchIdAndVariantVariantId(branchId, variantId)
                 .map(BranchInventory::getQuantity)
                 .orElse(0);
@@ -173,18 +187,24 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional(readOnly = true)
     public List<StockLog> getStockLogsByBranch(Integer branchId) {
+        branchService.checkStaffBranchAccess(branchId);
         return stockLogRepository.findByBranchBranchIdOrderByCreatedAtDesc(branchId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<StockLog> getStockLogsByVariant(Long variantId) {
-        return stockLogRepository.findByVariantVariantIdOrderByCreatedAtDesc(variantId);
+        var logs = stockLogRepository.findByVariantVariantIdOrderByCreatedAtDesc(variantId);
+        if (!branchService.isCurrentStaff()) return logs;
+        Integer branchId = branchService.getStaffBranchId();
+        return logs.stream().filter(l -> branchId.equals(l.getBranch().getBranchId())).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<StockLog> getStockLogsPaged(Integer branchId, StockMovementType movementType, Pageable pageable) {
+        if (branchService.isCurrentStaff() && branchId == null) branchId = branchService.getStaffBranchId();
+        branchService.checkStaffBranchAccess(branchId);
         if (branchId != null && movementType != null) {
             return stockLogRepository.findByBranchBranchIdAndMovementType(branchId, movementType, pageable);
         }

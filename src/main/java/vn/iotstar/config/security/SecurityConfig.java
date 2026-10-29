@@ -116,6 +116,8 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                 )
                 .authorizeHttpRequests(auth -> auth
+                        // Chat uses the form-login session and HTTP CSRF protection.
+                        .requestMatchers("/chat/api/**").hasAnyRole("CUSTOMER", "STAFF", "ADMIN")
                         // Public assets & Swagger Documentation
                         .requestMatchers(
                                 "/",
@@ -147,6 +149,9 @@ public class SecurityConfig {
                         .requestMatchers("/checkout/**", "/profile/**", "/orders/**", "/wishlist/**").authenticated()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(errors -> errors.defaultAuthenticationEntryPointFor(
+                        new org.springframework.security.web.authentication.HttpStatusEntryPoint(org.springframework.http.HttpStatus.UNAUTHORIZED),
+                        new org.springframework.security.web.util.matcher.AntPathRequestMatcher("/chat/api/**")))
                 .formLogin(form -> form
                         .loginPage("/auth/login")
                         .loginProcessingUrl("/auth/login")

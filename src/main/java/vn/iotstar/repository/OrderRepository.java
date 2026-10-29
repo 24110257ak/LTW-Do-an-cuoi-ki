@@ -20,6 +20,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     Optional<Order> findByUserUserIdAndCheckoutToken(Long userId, String checkoutToken);
     List<Order> findByUserUserIdOrderByCreatedAtDesc(Long userId);
     Page<Order> findByUserUserId(Long userId, Pageable pageable);
+    Page<Order> findByUserUserIdAndStatus(Long userId, OrderStatus status, Pageable pageable);
     Page<Order> findByBranchBranchId(Integer branchId, Pageable pageable);
     Page<Order> findByBranchBranchIdAndStatus(Integer branchId, OrderStatus status, Pageable pageable);
     Page<Order> findByStatus(OrderStatus status, Pageable pageable);

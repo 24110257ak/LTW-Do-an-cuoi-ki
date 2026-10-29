@@ -1,45 +1,27 @@
 package vn.iotstar.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.handler.annotation.*;
+import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 import vn.iotstar.dto.ChatDto;
-import vn.iotstar.entity.ChatMessage;
 import vn.iotstar.service.ChatService;
+import java.security.Principal;
+import java.util.Map;
 
-@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class ChatWebSocketController {
-
-    private final ChatService chatService;
-    private final SimpMessagingTemplate messagingTemplate;
-
+    private final ChatService chat;
     @MessageMapping("/chat.sendMessage")
-    public void sendMessage(@Payload ChatDto.MessageRequest request) {
-        log.info("Nhận tin nhắn WebSocket cho session: {}", request.getSessionId());
-
-        ChatMessage saved = chatService.saveMessage(request);
-
-        ChatDto.MessageResponse response = ChatDto.MessageResponse.builder()
-                .messageId(saved.getMessageId())
-                .sessionId(saved.getSession().getSessionId())
-                .senderId(saved.getSender().getUserId())
-                .senderName(saved.getSender().getFullName())
-                .senderRole(saved.getSender().getRole().getRoleName())
-                .content(saved.getContent())
-                .sentAt(saved.getSentAt())
-                .build();
-
-        // Gửi tới phòng chat của phiên (Session)
-        messagingTemplate.convertAndSend("/topic/chat/" + request.getSessionId(), response);
-
-        // Gửi thông báo tin mới tới chi nhánh (nếu có branchId)
-        if (request.getBranchId() != null) {
-            messagingTemplate.convertAndSend("/topic/branch-chat/" + request.getBranchId(), response);
-        }
+    public void send(Principal principal, @Valid @Payload ChatDto.MessageRequest request) {
+        // Principal comes from the authenticated handshake, never from STOMP native headers.
+        chat.sendMessage(principal == null ? null : principal.getName(), request);
+    }
+    @MessageExceptionHandler(Exception.class)
+    @SendToUser(value = "/queue/chat-errors", broadcast = false)
+    public Map<String, String> error(Exception exception) {
+        return Map.of("message", "Không gửi được tin nhắn. Vui lòng tải lại phiên và kiểm tra quyền truy cập.");
     }
 }

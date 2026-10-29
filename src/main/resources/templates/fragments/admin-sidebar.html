@@ -80,6 +80,10 @@
         </li>
     </ul>
 
+    <ul class="nav nav-pills flex-column mb-2" sec:authorize="hasAnyRole('ADMIN','STAFF')">
+        <li class="nav-item"><a th:href="@{/staff/chat}" class="nav-link text-white" th:classappend="${activeTab == 'staff-chat' ? 'active bg-primary' : ''}"><i class="bi bi-chat-dots me-2"></i> Hộp thư tư vấn</a></li>
+    </ul>
+
     <!-- Navigation links for STAFF (Branch Staff) -->
     <ul class="nav nav-pills flex-column mb-auto" sec:authorize="!hasRole('ADMIN') && hasRole('STAFF')">
         <li class="nav-item mb-1">
@@ -145,7 +149,7 @@
             </div>
 
             <!-- Branch switch form (if branches present) -->
-            <form th:if="${branches != null && !branches.isEmpty()}" th:action="@{/staff/switch-branch}" method="post" class="d-flex align-items-center m-0">
+            <form sec:authorize="hasRole('ADMIN')" th:if="${branches != null && !branches.isEmpty()}" th:action="@{/staff/switch-branch}" method="post" class="d-flex align-items-center m-0">
                 <select name="branchId" class="form-select form-select-sm" onchange="this.form.submit()">
                     <option th:each="b : ${branches}" th:value="${b.branchId}" th:text="${b.branchName}" th:selected="${currentBranch != null && currentBranch.branchId == b.branchId}">Chi nhánh</option>
                 </select>
@@ -176,15 +180,18 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", async function () {
+            if (document.querySelector('[data-techchat]')) return;
             try {
-                const socket = new SockJS('/ws');
-                const stompClient = Stomp.over(socket);
-                stompClient.debug = null; // Tắt debug log rác console
-
-                stompClient.connect({}, function (frame) {
+                const bootstrapResponse = await fetch('/chat/api/bootstrap', {headers: {'Accept':'application/json'}});
+                if (!bootstrapResponse.ok) return;
+                const chatConfig = await bootstrapResponse.json();
+                if (chatConfig.role !== 'ADMIN') return;
+                const stompClient = Stomp.over(new SockJS('/ws'));
+                stompClient.debug = null;
+                stompClient.connect({[chatConfig.csrfHeader]:chatConfig.csrfToken}, function (frame) {
                     // Lắng nghe kênh đơn hàng mới toàn chuỗi
-                    stompClient.subscribe('/topic/orders', function (message) {
+                    stompClient.subscribe('/topic/admin/orders', function (message) {
                         try {
                             const data = JSON.parse(message.body);
                             const toastEl = document.getElementById('liveOrderToast');

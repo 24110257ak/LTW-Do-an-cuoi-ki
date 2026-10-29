@@ -172,6 +172,21 @@
                 </div>
             </div>
         </div>
+
+        <!-- Pagination -->
+        <div th:if="${orderPage.totalPages > 1}" class="d-flex justify-content-center my-4">
+            <ul class="pagination pagination-sm shadow-sm">
+                <li class="page-item" th:classappend="${orderPage.first ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/orders(status=${selectedStatus != null ? selectedStatus.name() : null}, page=${orderPage.number - 1})}">Trước</a>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link" th:text="'Trang ' + (${orderPage.number} + 1) + ' / ' + ${orderPage.totalPages}">Trang 1 / 1</span>
+                </li>
+                <li class="page-item" th:classappend="${orderPage.last ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/orders(status=${selectedStatus != null ? selectedStatus.name() : null}, page=${orderPage.number + 1})}">Sau</a>
+                </li>
+            </ul>
+        </div>
     </div>
 
     <!-- Rỗng -->

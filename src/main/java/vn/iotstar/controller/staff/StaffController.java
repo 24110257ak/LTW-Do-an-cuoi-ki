@@ -1,5 +1,8 @@
 package vn.iotstar.controller.staff;
 
+import vn.iotstar.exception.BadRequestException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.access.AccessDeniedException;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -30,25 +33,28 @@ public class StaffController {
     private final InventoryService inventoryService;
 
     private Integer getActiveBranchId(HttpSession session, Authentication authentication) {
-        Integer branchId = (Integer) session.getAttribute("staffBranchId");
-        if (branchId == null) {
-            String username = authentication != null ? authentication.getName().toLowerCase() : "";
-            if (username.contains("q1")) branchId = 1;
-            else if (username.contains("td")) branchId = 3;
-            else if (username.contains("hn")) branchId = 2;
-            else if (username.contains("dn")) branchId = 4;
-            else branchId = 1;
-            session.setAttribute("staffBranchId", branchId);
+        if (!branchService.isCurrentAdmin()) {
+            session.removeAttribute("staffBranchId");
+            return branchService.getStaffBranchId();
         }
-        return branchId;
+        Integer selected = (Integer) session.getAttribute("staffBranchId");
+        if (selected != null && branchService.getBranchById(selected)
+                .filter(b -> Boolean.TRUE.equals(b.getIsActive())).isPresent()) return selected;
+        return branchService.getAllActiveBranches().stream().findFirst()
+                .orElseThrow(() -> new AccessDeniedException("Chưa có chi nhánh đang hoạt động"))
+                .getBranchId();
     }
 
     @PostMapping("/switch-branch")
-    public String switchBranch(@RequestParam("branchId") Integer branchId,
-                               HttpSession session,
-                               @RequestHeader(value = "referer", required = false) String referer) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public String switchBranch(@RequestParam("branchId") Integer branchId, HttpSession session) {
+        if (!branchService.isCurrentAdmin()) {
+            throw new AccessDeniedException("Chỉ admin được đổi chi nhánh quản lý");
+        }
+        branchService.getBranchById(branchId).filter(b -> Boolean.TRUE.equals(b.getIsActive()))
+                .orElseThrow(() -> new BadRequestException("Chi nhánh không tồn tại hoặc đã ngừng hoạt động"));
         session.setAttribute("staffBranchId", branchId);
-        return "redirect:" + (referer != null ? referer : "/staff/orders");
+        return "redirect:/staff/orders";
     }
 
     @GetMapping({"", "/dashboard"})
@@ -57,7 +63,7 @@ public class StaffController {
         Branch currentBranch = branchService.getBranchById(branchId).orElse(null);
 
         model.addAttribute("currentBranch", currentBranch);
-        model.addAttribute("branches", branchService.getAllActiveBranches());
+        model.addAttribute("branches", branchService.isCurrentAdmin() ? branchService.getAllActiveBranches() : List.of());
         model.addAttribute("newOrdersCount", orderService.countBranchOrdersByStatus(branchId, OrderStatus.NEW));
         model.addAttribute("confirmedOrdersCount", orderService.countBranchOrdersByStatus(branchId, OrderStatus.CONFIRMED));
         model.addAttribute("shippingOrdersCount", orderService.countBranchOrdersByStatus(branchId, OrderStatus.SHIPPING));
@@ -91,7 +97,7 @@ public class StaffController {
                 branchId, status, PageRequest.of(page, size, Sort.by("createdAt").descending()));
 
         model.addAttribute("currentBranch", currentBranch);
-        model.addAttribute("branches", branchService.getAllActiveBranches());
+        model.addAttribute("branches", branchService.isCurrentAdmin() ? branchService.getAllActiveBranches() : List.of());
         model.addAttribute("orderPage", orderPage);
         model.addAttribute("selectedStatus", statusStr != null ? statusStr.toUpperCase() : "ALL");
 
@@ -100,12 +106,12 @@ public class StaffController {
 
     @GetMapping("/orders/{id}")
     public String orderDetail(@PathVariable("id") Long id, HttpSession session, Authentication auth, Model model) {
-        Order order = orderService.getOrderById(id).orElseThrow();
         Integer branchId = getActiveBranchId(session, auth);
+        Order order = orderService.getOrderById(id).orElseThrow();
 
         model.addAttribute("order", order);
         model.addAttribute("currentBranch", branchService.getBranchById(branchId).orElse(null));
-        model.addAttribute("branches", branchService.getAllActiveBranches());
+        model.addAttribute("branches", branchService.isCurrentAdmin() ? branchService.getAllActiveBranches() : List.of());
         return "staff/order-detail";
     }
 
@@ -129,7 +135,7 @@ public class StaffController {
         List<BranchInventory> inventoryList = inventoryService.getInventoryByBranch(branchId);
 
         model.addAttribute("currentBranch", currentBranch);
-        model.addAttribute("branches", branchService.getAllActiveBranches());
+        model.addAttribute("branches", branchService.isCurrentAdmin() ? branchService.getAllActiveBranches() : List.of());
         model.addAttribute("inventoryList", inventoryList);
         return "staff/inventory";
     }

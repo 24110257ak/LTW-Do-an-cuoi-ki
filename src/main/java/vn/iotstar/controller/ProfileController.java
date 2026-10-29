@@ -112,7 +112,8 @@ public class ProfileController {
         User user = SecurityUtils.getCurrentUser().orElse(null);
         if (user == null) return "redirect:/auth/login";
 
-        Page<Order> orderPage = orderService.getOrdersByUser(user.getUserId(), PageRequest.of(page, size));
+        org.springframework.data.domain.PageRequest pageRequest = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+        Page<Order> orderPage = (status != null) ? orderService.getOrdersByUserAndStatus(user.getUserId(), status, pageRequest) : orderService.getOrdersByUser(user.getUserId(), pageRequest);
         model.addAttribute("orderPage", orderPage);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("orderStatuses", OrderStatus.values());
