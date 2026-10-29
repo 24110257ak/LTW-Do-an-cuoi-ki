@@ -13,8 +13,6 @@
 
 ## 👥 1. THÀNH VIÊN THỰC HIỆN & PHÂN CÔNG NHIỆM VỤ (NHÓM 24)
 
-*(Phần phân công nhiệm vụ chi tiết sẽ được cập nhật và hoàn thiện theo tiến độ thực tế)*
-
 | STT | Mã sinh viên | Họ và tên | Vai trò | Phân công Module đảm nhận | Tỷ lệ đóng góp |
 | :---: | :---: | :--- | :---: | :--- | :---: |
 | **1** | 24110292 | **Mai Huy Nhật** | **Nhóm trưởng** | Hệ thống Real-time Live Chat & WebSocket STOMP; Dual Security Filter Chain (JWT & Session); Quản trị Admin Dashboard; Thống kê doanh thu Chart.js. | **33.3%** |
@@ -31,7 +29,7 @@
 | **2. Cấu trúc Project đúng chuẩn 3 tầng** | **0.5 đ** | Chuẩn Spring Boot 3-tier: Controller (Web & API) - Service - Repository - Entity/DTO, phân chia package mạch lạc. |
 | **3. Nghiệp vụ, Logic, Validation & Security** | **6.0 đ** | Đầy đủ 5 roles (Guest, User, Vendor/Store Manager, Admin, Shipper), xử lý validation đầy đủ (`jakarta.validation`), bảo mật Spring Security 6 + OTP kích hoạt qua Email/Terminal. |
 | **4. Giao diện Đẹp, Thân thiện & Responsive** | **1.0 đ** | Template Bootstrap 5.3 hiện đại, tối ưu di động, máy tính bảng và desktop, trải nghiệm mượt mà. |
-| **5. Tính năng Sáng tạo & Nâng cao** | **1.0 đ** | - Xác thực bảo mật kép với **JWT** & Spring Security 6.<br>- **WebSocket STOMP** thông báo đơn hàng realtime và Livechat tư vấn.<br>- Tích hợp lưu trữ CDN **Cloudinary** & Cổng thanh toán **VNPAY Sandbox**.<br>- Hệ thống Quản lý **Chuỗi cửa hàng & Tồn kho đa chi nhánh (Multi-branch Inventory)**.<br>- **Điều chuyển kho liên chi nhánh** với quy trình duyệt & khóa bi quan (PESSIMISTIC_WRITE) chống Deadlock.<br>- **Sổ nhật ký kiểm toán tồn kho (Audit Trail)** & Chống đặt trùng đơn (**Checkout Idempotency**).<br>- **Logistics thông minh (Smart Order Routing):** Định tuyến đơn hàng tự động đến chi nhánh tối ưu theo cấp Quận/Huyện/Tỉnh và tồn kho sẵn có; Biểu phí ship động (Freeship $\ge 5M$).<br>- **Quản trị Giá vốn (COGS) & Lợi nhuận gộp (P&L):** Snapshot giá vốn lịch sử, tính toán lợi nhuận gộp và biên lợi nhuận (%) theo thời gian thực.<br>- **Đối soát dòng tiền COD (COD Cash Reconciliation):** Quản lý thu tiền mặt shipper và quy trình đối soát nộp quỹ chi nhánh.<br>- **Thuật toán tự động đề xuất điều chuyển kho:** Ghép đôi tự động chi nhánh thiếu hàng với chi nhánh thừa hàng dựa trên ngưỡng an toàn (safetyStock).<br>- **Bộ RESTful API chuẩn OpenAPI 3.0 & Swagger UI:** Tài liệu hóa tương tác tại /swagger-ui.html với Bearer JWT Authorize.<br>- **Cổng Giao vận Shipper chuyên dụng (Shipper Portal):** Giao diện riêng biệt tối ưu trên di động (/shipper/orders) giúp tài xế theo dõi tiền COD cần thu, nút gọi khách hàng 1-chạm, xác nhận giao thành công hoặc báo thất bại đối soát vào sổ quỹ chi nhánh.<br>- **Kiểm thử tự động (Automated Testing):** 26/26 Unit & Integration Tests (100% Green).<br>- **Kiến trúc Tải lên Động (Dynamic Hybrid Media Upload) & Đồ họa 3D E-Commerce:** Ánh xạ tài nguyên tĩnh (/uploads/**) theo giáo trình môn học (WebMvcConfigurer), cơ chế Hybrid thông minh (Cloudinary / Local Project Fallback), bộ tư liệu sản phẩm studio vuông 600x600 chuẩn hóa, đồ họa 3D danh mục chính hãng và hệ thống banner tiếp thị tỷ lệ 1:1 responsive.<br>- **Tối ưu trải nghiệm (UX) & Tường lửa Bảo mật:** Tính năng bật/tắt ẩn hiện mật khẩu (Show/Hide Password Toggle), cấu hình HttpFirewall tương thích URL Spring Boot Dashboard (//), phân loại lỗi 404/500 chuẩn mực, chống đặt đơn lặp `checkoutToken` (Idempotency), Tồn kho hiệu ứng FOMO bảo vệ dữ liệu chuỗi, Cảnh báo thu COD trực quan cho Staff, Chuẩn hóa mã băm BCrypt & Cơ chế 1-Click tự động điền form đăng nhập cho hội đồng chấm thi. |
+| **5. Tính năng Sáng tạo & Nâng cao** | **1.0 đ** | - Xác thực bảo mật kép với **JWT** & Spring Security 6.<br>- **WebSocket STOMP** thông báo đơn hàng realtime và Livechat tư vấn.<br>- Tích hợp lưu trữ CDN **Cloudinary** & Cổng thanh toán **VNPAY Sandbox**.<br>- Hệ thống Quản lý **Chuỗi cửa hàng & Tồn kho đa chi nhánh (Multi-branch Inventory)**.<br>- **Điều chuyển kho liên chi nhánh** với quy trình duyệt & khóa bi quan (PESSIMISTIC_WRITE) chống Deadlock.<br>- **Sổ nhật ký kiểm toán tồn kho (Audit Trail)** & Chống đặt trùng đơn (**Checkout Idempotency**).<br>- **Logistics thông minh (Smart Order Routing):** Định tuyến đơn hàng tự động đến chi nhánh tối ưu theo cấp Quận/Huyện/Tỉnh và tồn kho sẵn có; Biểu phí ship động (Freeship $\ge 5M$).<br>- **Quản trị Giá vốn (COGS) & Lợi nhuận gộp (P&L):** Snapshot giá vốn lịch sử, tính toán lợi nhuận gộp và biên lợi nhuận (%) theo thời gian thực.<br>- **Đối soát dòng tiền COD (COD Cash Reconciliation):** Quản lý thu tiền mặt shipper và quy trình đối soát nộp quỹ chi nhánh.<br>- **Thuật toán tự động đề xuất điều chuyển kho:** Ghép đôi tự động chi nhánh thiếu hàng với chi nhánh thừa hàng dựa trên ngưỡng an toàn (safetyStock).<br>- **Bộ RESTful API chuẩn OpenAPI 3.0 & Swagger UI:** Tài liệu hóa tương tác tại /swagger-ui.html với Bearer JWT Authorize.<br>- **Cổng Giao vận Shipper chuyên dụng (Shipper Portal):** Giao diện riêng biệt tối ưu trên di động (/shipper/orders) giúp tài xế theo dõi tiền COD cần thu, nút gọi khách hàng 1-chạm, xác nhận giao thành công hoặc báo thất bại đối soát vào sổ quỹ chi nhánh.<br>- **Kiểm thử tự động (Automated Testing):** 70+ Unit & Integration Tests Java + 14 Integration Tests JavaScript (100% Green).<br>- **Kiến trúc Tải lên Động (Dynamic Hybrid Media Upload) & Đồ họa 3D E-Commerce:** Ánh xạ tài nguyên tĩnh (/uploads/**) theo giáo trình môn học (WebMvcConfigurer), cơ chế Hybrid thông minh (Cloudinary / Local Project Fallback), bộ tư liệu sản phẩm studio vuông 600x600 chuẩn hóa, đồ họa 3D danh mục chính hãng và hệ thống banner tiếp thị tỷ lệ 1:1 responsive.<br>- **Tối ưu trải nghiệm (UX) & Tường lửa Bảo mật:** Tính năng bật/tắt ẩn hiện mật khẩu (Show/Hide Password Toggle), cấu hình HttpFirewall tương thích URL Spring Boot Dashboard (//), phân loại lỗi 404/500 chuẩn mực, chống đặt đơn lặp `checkoutToken` (Idempotency), Tồn kho hiệu ứng FOMO bảo vệ dữ liệu chuỗi, Cảnh báo thu COD trực quan cho Staff, Chuẩn hóa mã băm BCrypt & Cơ chế 1-Click tự động điền form đăng nhập cho hội đồng chấm thi. |
 | **6. Khả năng Báo cáo & Trả lời phản biện** | **0.5 đ** | Báo cáo chi tiết, video demo rõ mặt 3 thành viên, nắm vững source code và kiến trúc. |
 
 ---
@@ -143,7 +141,7 @@ graph TD
   - Tiếp nhận đơn hàng giao từ chi nhánh hoặc đơn khách hẹn nhận tại chi nhánh.
   - Cập nhật trạng thái: Đơn mới -> Xác nhận -> Đang giao -> Đã giao / Hủy đơn.
   - Nhận thông báo **Realtime (WebSocket STOMP)** chuông và toast nổi tức thì ngay khi có khách đặt đơn mới tại chi nhánh.
-- **Chuyển đổi Chi nhánh làm việc:** Nhân viên có thể linh hoạt chuyển chi nhánh để kiểm tra tồn kho và đơn hàng tương ứng.
+- **Bảo mật Phân quyền Chi nhánh Nghiêm ngặt (RBAC):** Nhân viên (Staff) được gán cố định và chỉ được phép quản lý kho, tiếp nhận đơn và tư vấn chat tại đúng chi nhánh trực thuộc trong CSDL; hệ thống chặn tuyệt đối hành vi chuyển chi nhánh tùy tiện để tránh rò rỉ dữ liệu chuỗi.
 - **Live Chat Support:** Tiếp nhận tin nhắn tư vấn từ khách hàng và phản hồi trực tiếp thời gian thực.
 
 ### 4.4. Quản trị viên Toàn chuỗi (Admin / HQ Manager)
@@ -184,37 +182,55 @@ graph TD
 
 ## 🌿 5. CHIẾN LƯỢC PHÂN NHÁNH GIT (GIT FLOW STRATEGY)
 
-Để đảm bảo đạt điểm tối đa tiêu chí *"Quản lý, phân công nhiệm vụ các thành viên và có quá trình commit Github"* (1.0 điểm), nhóm triển khai mô hình Git Flow bài bản, minh bạch với các nhánh thực tế đã hoàn thiện trên Repository:
+Để đảm bảo đạt điểm tối đa tiêu chí *"Quản lý, phân công nhiệm vụ các thành viên và có quá trình commit Github"* (1.0 điểm), nhóm triển khai mô hình Git Flow bài bản, minh bạch với các nhánh thực tế đã hoàn thiện và đồng bộ 100% trên Repository GitHub:
 
 ```text
-main (Phiên bản phát hành chính thức, mã nguồn hoàn chỉnh sẵn sàng chấm điểm)
+main (Phiên bản phát hành chính thức, mốc Fallback an toàn, sẵn sàng chấm điểm & Deploy)
   │
   └── dev (Nhánh tích hợp tổng thể - Integration Branch)
         │
-        ├── feature/database-and-entity         (Phase 1: Khởi tạo CSDL 27 bảng, JPA Entities, Enums & Seed Data)
-        ├── feature/security-jwt-and-email-otp  (Phase 2: Spring Security 6 kép, JWT Filter, OTP Email/Terminal, Repositories & Cloudinary)
-        ├── feature/customer-and-public-portal  (Phase 3: Trang chủ, Catalog 20 sp/trang, Chi tiết, Tra cứu kho, Giỏ hàng, Checkout, Review, Wishlist)
-        ├── feature/admin-and-staff-portal      (Phase 4 & 5: HQ Admin Dashboard, Quản lý sản phẩm, Staff Portal chi nhánh, Kho hàng, WebSocket STOMP & Live Chat)
-        ├── docs/final-report                   (Phase 6: Hoàn thiện Báo cáo tổng thể, Setup Guide, Chuẩn hóa tài liệu)
-        ├── feature/inventory-transfer-and-audit-log (Phase 7: Điều chuyển kho liên chi nhánh, Audit Trail, Khóa bi quan, Idempotency & Bộ Test tự động)
-        ├── feature/smart-logistics-and-cogs    (Phase 8: Logistics thông minh, Smart Routing, Giá vốn COGS, Lợi nhuận gộp & Đối soát COD)
-        └── feature/rest-api-and-swagger-jwt    (Phase 9: Hệ thống RESTful API chuẩn OpenAPI 3.0 với xác thực Bearer JWT & Swagger UI)
+        ├── feature/database-and-entity         (Phase 1: Khởi tạo CSDL 27 bảng, 16 JPA Entities, 8 Enums & Seed Data mẫu)
+        ├── feature/security-jwt-and-email-otp  (Phase 2: Spring Security 6 kép, JWT Filter, OTP Email/Terminal & Cloudinary CDN)
+        ├── feature/customer-and-public-portal  (Phase 3: Storefront, Catalog 20 sp/trang, Tra cứu tồn kho chi nhánh, Giỏ hàng & Checkout)
+        ├── feature/admin-and-staff-portal      (Phase 4: HQ Admin Dashboard, Quản trị sản phẩm/biến thể, Staff Portal chi nhánh)
+        ├── feature/inventory-transfer-and-audit-log (Phase 5: Điều chuyển kho liên chi nhánh, Audit Trail, Khóa bi quan PESSIMISTIC_WRITE)
+        ├── feature/smart-logistics-and-cogs    (Phase 6: Smart Order Routing, Giá vốn COGS, Lợi nhuận gộp P&L & Đối soát dòng tiền COD)
+        ├── feature/rest-api-and-swagger-jwt    (Phase 7: Bộ RESTful API chuẩn OpenAPI 3.0 với xác thực Bearer JWT & Swagger UI)
+        ├── feature/product-media-assets        (Phase 8: Chuẩn hóa media sản phẩm chính hãng, ảnh vuông 600x600 & banner sự kiện)
+        ├── feature/interactive-ux-animations   (Phase 9: Sân khấu 3D Rolodex Cylindrical Geometry, Category grid bo góc & Live Search)
+        ├── refactor/reorganize-controllers     (Phase 10: Tái cấu trúc chuẩn hóa Controller theo từng domain: admin, api, shipper, staff, customer)
+        ├── fix/Phuc                            (PR #1 - Phase 11: Đăng ký OTP qua RAM Cache ConcurrentHashMap, API Hành chính VN 3 cấp & Khóa quyền Staff)
+        ├── feature/add-chat                    (PR #2 - Phase 12: Hệ thống Real-time Live Chat STOMP WebSocket, CSDL 27 bảng, Idempotency clientMessageId)
+        └── docs/final-report                   (Phase 13: Báo cáo Word 72 trang, Docker Multi-stage & Cloud Render PaaS Deployment)
 ```
 
-### Bảng theo dõi các nhánh chức năng thực tế trên GitHub:
-| STT | Tên nhánh (Branch Name) | Giai đoạn (Phase) | Nội dung công việc thực tế | Trạng thái tích hợp |
-| :---: | :--- | :---: | :--- | :---: |
-| **1** | `main` | Production | Mã nguồn chính thức, chạy ổn định, sẵn sàng báo cáo chấm điểm. | ✅ Đã đồng bộ |
-| **2** | `dev` | Integration | Nhánh trung gian tích hợp các tính năng trước khi đưa vào `main`. | ✅ Đã đồng bộ |
-| **3** | `feature/database-and-entity` | Phase 1 | CSDL SQL Server 27 bảng, 16 Entities, 8 Enums, seed data mẫu. | ✅ Đã merge vào `dev` |
-| **4** | `feature/security-jwt-and-email-otp` | Phase 2 | Spring Security 6 kép, JWT, OTP (Email + Terminal mode), Cloudinary CDN. | ✅ Đã merge vào `dev` |
-| **5** | `feature/customer-and-public-portal` | Phase 3 | Portal khách hàng: Catalog 20 sp/trang, Bộ lọc, Giỏ hàng, Checkout, Tra cứu kho. | ✅ Đã merge vào `dev` |
-| **6** | `feature/admin-and-staff-portal` | Phase 4 & 5 | Admin & Staff Portal, Tồn kho đa chi nhánh, WebSocket STOMP & Live Chat. | ✅ Đã merge vào `dev` |
-| **7** | `docs/final-report` | Phase 6 | Báo cáo chi tiết, tài liệu hướng dẫn và hồ sơ nghiệm thu đồ án. | ✅ Đã merge vào `dev` |
-| **8** | `feature/inventory-transfer-and-audit-log` | Phase 7 | Điều chuyển kho liên chi nhánh, Sổ nhật ký kiểm toán (Audit Trail), Khóa bi quan, Chống đặt trùng đơn (Idempotency) & 9 Test cases tự động. | ✅ Đã merge vào `main` |
-| **9** | `feature/smart-logistics-and-cogs` | Phase 8 | Định tuyến logistics thông minh, Giá vốn COGS, Lợi nhuận gộp P&L, Thu hồi hoàn kho an toàn & Đối soát COD. | ✅ Đã merge vào `main` |
-| **10** | `feature/rest-api-and-swagger-jwt` | Phase 9 | Bộ RESTful API chuẩn OpenAPI 3.0 với xác thực Bearer JWT & Swagger UI tương tác trực tiếp. | ✅ Đã merge vào `main` |
-| **11** | `feature/ux-and-data-security` | Phase 10 | Tinh chỉnh UX & Bảo mật: Bind checkoutToken chống double-click, nhãn tồn kho FOMO, cảnh báo COD Staff, chuẩn hóa mã băm BCrypt & 1-Click Login test. | ✅ Đã merge vào `dev` |
+### 5.1. Bảng theo dõi các nhánh chức năng thực tế trên GitHub:
+| STT | Tên nhánh (Branch Name) | Thành viên phụ trách | Giai đoạn (Phase) | Nội dung công việc thực tế | Trạng thái tích hợp |
+| :---: | :--- | :---: | :---: | :--- | :---: |
+| **1** | `main` | Cả nhóm | Production / Fallback | Nhánh chính thức, chứa mã nguồn hoàn chỉnh, cấu hình Dockerfile và là mốc fallback triển khai đám mây an toàn. | ✅ Đồng bộ 100% với `dev` |
+| **2** | `dev` | Cả nhóm | Integration | Nhánh trung tâm tích hợp toàn bộ tính năng, giải quyết xung đột trước khi mirror sang `main`. | ✅ Đồng bộ 100% với `main` |
+| **3** | `feature/database-and-entity` | Trần Vũ Anh Khoa | Phase 1 | CSDL SQL Server 27 bảng, 16 JPA Entities, 8 Enums và dữ liệu khởi tạo. | ✅ Đã merge vào `dev` |
+| **4** | `feature/security-jwt-and-email-otp` | Mai Huy Nhật | Phase 2 | Spring Security 6, JWT Filter, OTP Email/Terminal, Cloudinary CDN. | ✅ Đã merge vào `dev` |
+| **5** | `feature/customer-and-public-portal` | Trần Vũ Anh Khoa | Phase 3 | Portal khách hàng: Catalog 20 sp/trang, Bộ lọc đa tiêu chí, Giỏ hàng, Checkout, Tra cứu kho. | ✅ Đã merge vào `dev` |
+| **6** | `feature/admin-and-staff-portal` | Mai Huy Nhật | Phase 4 | Admin Dashboard, Quản trị biến thể sản phẩm, Phân bổ tồn kho 4 chi nhánh. | ✅ Đã merge vào `dev` |
+| **7** | `feature/inventory-transfer-and-audit-log` | Đặng Nhật Phúc | Phase 5 | Điều chuyển kho liên chi nhánh, Audit Trail, Khóa bi quan, Idempotency & Bộ test tự động. | ✅ Đã merge vào `dev` |
+| **8** | `feature/smart-logistics-and-cogs` | Đặng Nhật Phúc | Phase 6 | Định tuyến logistics thông minh, Giá vốn COGS, Lợi nhuận gộp P&L, Hoàn kho an toàn & Đối soát COD. | ✅ Đã merge vào `dev` |
+| **9** | `feature/rest-api-and-swagger-jwt` | Mai Huy Nhật | Phase 7 | Bộ RESTful API chuẩn OpenAPI 3.0 với xác thực Bearer JWT & Swagger UI tương tác trực tiếp. | ✅ Đã merge vào `dev` |
+| **10** | `feature/product-media-assets` | Trần Vũ Anh Khoa | Phase 8 | Thu thập và chuẩn hóa media sản phẩm chính hãng (TGDD, CellphoneS, FPT Shop), ảnh vuông 600x600. | ✅ Đã merge vào `dev` |
+| **11** | `feature/interactive-ux-animations` | Trần Vũ Anh Khoa | Phase 9 | Khung trình diễn 3D Rolodex Cylindrical Geometry, Category grid bo tròn, hiệu ứng đàn hồi tìm kiếm. | ✅ Đã merge vào `dev` |
+| **12** | `refactor/reorganize-controllers` | Cả nhóm | Phase 10 | Tái cấu trúc package controller gọn gàng theo domain (`admin`, `api`, `shipper`, `staff`, `customer`). | ✅ Đã merge vào `dev` |
+| **13** | `fix/Phuc` | Đặng Nhật Phúc | Phase 11 (PR #1) | Bộ nhớ tạm RAM Cache (ConcurrentHashMap) cho đăng ký OTP, tích hợp API Hành chính VN 3 cấp tại checkout, khóa quyền chi nhánh Staff. | ✅ Đã merge vào `dev` (PR #1) |
+| **14** | `feature/add-chat` | Mai Huy Nhật | Phase 12 (PR #2) | Hệ thống Live Chat STOMP WebSocket thời gian thực, lưu trữ 27 bảng CSDL, chống gửi trùng `clientMessageId`, phân quyền chi nhánh. | ✅ Đã merge vào `dev` (PR #2) |
+| **15** | `docs/final-report` | Cả nhóm | Phase 13 | Báo cáo chi tiết `.docx` (72 trang), hướng dẫn cài đặt, đóng gói Dockerfile và bộ hồ sơ nghiệm thu. | ✅ Đã merge vào `dev` & `main` |
+
+### 5.2. Quy trình Quản lý Pull Request, Giải quyết Xung đột & Đồng bộ Nhánh:
+1. **Quy trình Pull Request chuẩn mực:** Mọi tính năng mới đều được phát triển trên nhánh riêng biệt (`feature/*` hoặc `fix/*`), kiểm thử độc lập trước khi mở Pull Request vào `dev`.
+2. **Xử lý xung đột code (Conflict Resolution) thực tế:**
+   - Khi sáp nhập PR #1 (`fix/Phuc`) và PR #2 (`feature/add-chat`), xung đột phát sinh tại `StaffController.java` (giữa cơ chế khóa quyền chi nhánh theo Database của Phúc và các endpoint hỗ trợ chat của Nhật) và `admin-sidebar.html`.
+   - Nhóm đã tiến hành phân tích mã nguồn chi tiết, kết hợp cả hai giải pháp: giữ nguyên cơ chế bảo mật khóa cứng chi nhánh nhân viên từ DB, đồng thời tích hợp đầy đủ menu và luồng chat tư vấn, bảo đảm 100% test cases đều vượt qua (All tests green).
+3. **Chiến lược Đồng bộ Song song `dev` ↔ `main`:**
+   - Nhánh `dev` là môi trường tích hợp liên tục và kiểm thử các bản vá hệ thống (System Fixes: SQL Server TDS queries, đồng bộ badge giỏ hàng, bộ lọc trạng thái đơn hàng).
+   - Nhánh `main` được đồng bộ 1-1 (Fast-forward) với `dev`, chứa đầy đủ tệp `Dockerfile` đa tầng để đóng vai trò làm **mốc Fallback an toàn tuyệt đối** khi triển khai tự động lên nền tảng đám mây Cloud PaaS (Render.com).
 
 ---
 
