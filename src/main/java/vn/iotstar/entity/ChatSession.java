@@ -40,5 +40,17 @@ public class ChatSession {
 
     @Column(name = "closed_at")
     private LocalDateTime closedAt;
+
+    @Column(name = "last_message_at", nullable = false)
+    @Builder.Default
+    private LocalDateTime lastMessageAt = LocalDateTime.now();
+
+    @Column(name = "customer_last_read_id", nullable = false)
+    @Builder.Default
+    private Long customerLastReadId = 0L;
+
+    @Column (name = "staff_last_read_id", nullable = false)
+    @Builder.Default
+    private Long staffLastReadId = 0L;
 }
 

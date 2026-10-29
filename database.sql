@@ -471,13 +471,16 @@ GO
 -- BẢNG 21: CHAT_SESSIONS - Phiên Live Chat
 -- ==================================================================================
 CREATE TABLE chat_sessions (
-    session_id  BIGINT IDENTITY(1,1) PRIMARY KEY,
-    customer_id BIGINT NOT NULL,
-    branch_id   INT NOT NULL,
-    staff_id    BIGINT NULL,                           -- Staff tiếp nhận
-    status      NVARCHAR(20) NOT NULL DEFAULT 'OPEN', -- OPEN | CLOSED
-    created_at  DATETIME NOT NULL DEFAULT GETDATE(),
-    closed_at   DATETIME NULL,
+    session_id             BIGINT IDENTITY(1,1) PRIMARY KEY,
+    customer_id            BIGINT NOT NULL,
+    branch_id              INT NOT NULL,
+    staff_id               BIGINT NULL,                           -- Staff tiếp nhận
+    status                 NVARCHAR(20) NOT NULL DEFAULT 'OPEN', -- OPEN | CLOSED
+    created_at             DATETIME NOT NULL DEFAULT GETDATE(),
+    closed_at              DATETIME NULL,
+    last_message_at        DATETIME NOT NULL DEFAULT GETDATE(),
+    customer_last_read_id  BIGINT NOT NULL DEFAULT 0,
+    staff_last_read_id     BIGINT NOT NULL DEFAULT 0,
     CONSTRAINT fk_cs_customer FOREIGN KEY (customer_id) REFERENCES users(user_id),
     CONSTRAINT fk_cs_branch FOREIGN KEY (branch_id) REFERENCES branches(branch_id),
     CONSTRAINT fk_cs_staff FOREIGN KEY (staff_id) REFERENCES users(user_id)
@@ -488,11 +491,13 @@ GO
 -- BẢNG 22: CHAT_MESSAGES - Tin nhắn Live Chat (WebSocket STOMP)
 -- ==================================================================================
 CREATE TABLE chat_messages (
-    message_id  BIGINT IDENTITY(1,1) PRIMARY KEY,
-    session_id  BIGINT NOT NULL,
-    sender_id   BIGINT NOT NULL,
-    content     NVARCHAR(2000) NOT NULL,
-    sent_at     DATETIME NOT NULL DEFAULT GETDATE(),
+    message_id         BIGINT IDENTITY(1,1) PRIMARY KEY,
+    session_id         BIGINT NOT NULL,
+    sender_id          BIGINT NOT NULL,
+    content            NVARCHAR(2000) NOT NULL,
+    sent_at            DATETIME NOT NULL DEFAULT GETDATE(),
+    client_message_id  NVARCHAR(64) NOT NULL,
+    CONSTRAINT uq_chat_message_client UNIQUE (session_id, client_message_id),
     CONSTRAINT fk_cm_session FOREIGN KEY (session_id) REFERENCES chat_sessions(session_id) ON DELETE CASCADE,
     CONSTRAINT fk_cm_sender FOREIGN KEY (sender_id) REFERENCES users(user_id)
 );

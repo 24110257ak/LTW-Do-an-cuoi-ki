@@ -30,9 +30,11 @@
                 <div class="small fw-bold" th:text="${shipper != null ? shipper.fullName : 'Tài xế'}">Hoàng Minh Đức</div>
                 <div class="text-white-50" style="font-size: 0.75rem;" th:text="${shipper != null ? shipper.phone : ''}">0906789012</div>
             </div>
-            <a th:href="@{/auth/logout}" class="btn btn-outline-light btn-sm rounded-pill px-3">
-                <i class="fa-solid fa-right-from-bracket me-1"></i> Đăng xuất
-            </a>
+            <form th:action="@{/auth/logout}" method="post" class="m-0">
+                <button type="submit" class="btn btn-outline-light btn-sm fw-bold">
+                    <i class="fa-solid fa-right-from-bracket me-1"></i> Đăng xuất
+                </button>
+            </form>
         </div>
     </div>
 </nav>
