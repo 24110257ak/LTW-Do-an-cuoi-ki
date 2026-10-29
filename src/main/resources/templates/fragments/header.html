@@ -627,7 +627,7 @@
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
                               id="headerCartBadge"
                               style="font-size: 0.65rem;"
-                              th:text="${session.cartCount != null ? session.cartCount : '0'}">0</span>
+                              th:classappend="${(session.cartCount == null or session.cartCount <= 0) and (cartCount == null or cartCount <= 0)} ? 'd-none' : ''" th:text="${cartCount != null ? cartCount : (session.cartCount != null ? session.cartCount : 0)}">0</span>
                     </a>
                 </li>
 

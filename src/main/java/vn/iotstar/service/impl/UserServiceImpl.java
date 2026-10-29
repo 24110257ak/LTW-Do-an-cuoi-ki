@@ -27,7 +27,9 @@ import vn.iotstar.service.OtpService;
 import vn.iotstar.service.UserService;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
@@ -42,43 +44,40 @@ public class UserServiceImpl implements UserService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
+    // BỘ NHỚ TẠM (RAM) LƯU TRỮ THÔNG TIN ĐĂNG KÝ CHƯA XÁC THỰC OTP
+    private final Map<String, RegisterRequest> pendingRegistrations = new ConcurrentHashMap<>();
+
     @Override
-    @Transactional
     public UserSummaryResponse register(RegisterRequest request) {
+        String email = request.getEmail().trim().toLowerCase();
+
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new BadRequestException("Tên đăng nhập đã được sử dụng!");
         }
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(email)) {
             throw new BadRequestException("Địa chỉ email đã được sử dụng!");
         }
         if (request.getPhone() != null && !request.getPhone().isBlank() && userRepository.existsByPhone(request.getPhone())) {
             throw new BadRequestException("Số điện thoại đã được đăng ký!");
         }
 
-        Role customerRole = roleRepository.findByRoleName("CUSTOMER")
-                .orElseGet(() -> roleRepository.save(Role.builder().roleName("CUSTOMER").build()));
+        // 1. CHỈ LƯU TẠM VÀO BỘ NHỚ RAM, TUYỆT ĐỐI KHÔNG LƯU VÀO DATABASE
+        pendingRegistrations.put(email, request);
 
-        User user = User.builder()
+        // 2. Tạo và gửi mã OTP qua email (5 phút)
+        otpService.generateAndSendOtp(email, OtpPurpose.REGISTER);
+
+        // 3. Trả về thông tin giả định (chưa có ID) để API không bị lỗi
+        return UserSummaryResponse.builder()
+                .userId(null) // Chưa lưu DB nên chưa có ID
                 .username(request.getUsername().trim())
-                .email(request.getEmail().trim().toLowerCase())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .email(email)
                 .fullName(request.getFullName().trim())
                 .phone(request.getPhone() != null ? request.getPhone().trim() : null)
-                .role(customerRole)
+                .role("CUSTOMER")
                 .isActive(true)
                 .isVerified(false)
                 .build();
-
-        user = userRepository.save(user);
-
-        // Tạo giỏ hàng rỗng cho user
-        Cart cart = Cart.builder().user(user).build();
-        cartRepository.save(cart);
-
-        // Tạo và gửi mã OTP qua email (5 phút)
-        otpService.generateAndSendOtp(user.getEmail(), OtpPurpose.REGISTER);
-
-        return toSummaryResponse(user);
     }
 
     @Override
@@ -86,16 +85,53 @@ public class UserServiceImpl implements UserService {
     public boolean verifyAccount(String email, String otpCode) {
         boolean verified = otpService.verifyOtp(email, otpCode, OtpPurpose.REGISTER);
         if (verified) {
-            User user = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new ResourceNotFoundException("Người dùng", "email", email));
-            user.setIsVerified(true);
-            userRepository.save(user);
+            // Kiểm tra xem user có đang nằm trong bộ nhớ tạm (đăng ký mới) không
+            RegisterRequest pendingRequest = pendingRegistrations.get(email);
+            
+            if (pendingRequest != null) {
+                // LÚC NÀY MỚI LƯU VÀO DATABASE VÌ OTP ĐÃ ĐÚNG
+                Role customerRole = roleRepository.findByRoleName("CUSTOMER")
+                        .orElseGet(() -> roleRepository.save(Role.builder().roleName("CUSTOMER").build()));
+
+                User user = User.builder()
+                        .username(pendingRequest.getUsername().trim())
+                        .email(email)
+                        .password(passwordEncoder.encode(pendingRequest.getPassword()))
+                        .fullName(pendingRequest.getFullName().trim())
+                        .phone(pendingRequest.getPhone() != null ? pendingRequest.getPhone().trim() : null)
+                        .role(customerRole)
+                        .isActive(true)
+                        .isVerified(true) // Đã verify OTP thành công
+                        .build();
+
+                user = userRepository.save(user);
+
+                // Tạo giỏ hàng cho user
+                Cart cart = Cart.builder().user(user).build();
+                cartRepository.save(cart);
+
+                // Xóa rác khỏi bộ nhớ tạm
+                pendingRegistrations.remove(email);
+            } else {
+                // Fallback: Xử lý cho luồng tài khoản cũ (đã có trong DB nhưng chưa verify)
+                User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new ResourceNotFoundException("Người dùng", "email", email));
+                user.setIsVerified(true);
+                userRepository.save(user);
+            }
         }
         return verified;
     }
 
     @Override
     public void resendOtp(String email) {
+        // Ưu tiên kiểm tra trong RAM trước (tài khoản đang chờ xác thực)
+        if (pendingRegistrations.containsKey(email)) {
+            otpService.generateAndSendOtp(email, OtpPurpose.REGISTER);
+            return;
+        }
+
+        // Nếu không có trong RAM, kiểm tra trong DB
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Người dùng", "email", email));
         if (Boolean.TRUE.equals(user.getIsVerified())) {
