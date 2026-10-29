@@ -15,11 +15,11 @@
 
 *(Phần phân công nhiệm vụ chi tiết sẽ được cập nhật và hoàn thiện theo tiến độ thực tế)*
 
-| STT | Mã sinh viên | Họ và tên | Vai trò | Phân công Module |
-| :---: | :---: | :--- | :---: | :--- |
-| **1** | 24110257 | **Trần Vũ Anh Khoa** | Thành viên | *(Cập nhật sau)* |
-| **2** | 24110292 | **Mai Huy Nhật** | **Nhóm trưởng** | *(Cập nhật sau)* |
-| **3** | 24110304 | **Đặng Nhật Phúc** | Thành viên | *(Cập nhật sau)* |
+| STT | Mã sinh viên | Họ và tên | Vai trò | Phân công Module đảm nhận | Tỷ lệ đóng góp |
+| :---: | :---: | :--- | :---: | :--- | :---: |
+| **1** | 24110292 | **Mai Huy Nhật** | **Nhóm trưởng** | Hệ thống Real-time Live Chat & WebSocket STOMP; Dual Security Filter Chain (JWT & Session); Quản trị Admin Dashboard; Thống kê doanh thu Chart.js. | **33.3%** |
+| **2** | 24110257 | **Trần Vũ Anh Khoa** | Thành viên | Cơ chế Banner 3D Rolodex Cylindrical Geometry; Tối ưu hóa bộ lọc sản phẩm đa thuộc tính (Dynamic Filter Specifications); Quản lý Giỏ hàng (Cart) & Tra cứu tồn kho chi nhánh; Giao diện Cửa hàng (Storefront). | **33.3%** |
+| **3** | 24110304 | **Đặng Nhật Phúc** | Thành viên | Quy trình Đăng ký OTP qua In-Memory RAM Cache (ConcurrentHashMap); Tích hợp API Hành chính VN 3 cấp tại Checkout; Thuật toán Smart Order Routing; Phân hệ Nhân viên chi nhánh; Đóng gói Dockerfile & Cloud Deployment Render. | **33.3%** |
 
 ---
 
@@ -280,6 +280,25 @@ java -jar target/electronics-chain-store-1.0.0-SNAPSHOT.jar
 
 > 💡 **Tính năng tiện ích 1-Click Login:** Tại trang đăng nhập (`http://localhost:8080/auth/login`), thầy cô hoặc người chấm bài chỉ cần **bấm chuột trực tiếp vào bất kỳ dòng tài khoản mẫu nào trong bảng**, hệ thống sẽ tự động điền ngay Tên đăng nhập và Mật khẩu vào form để đăng nhập tức thì mà không cần gõ phím!
 
+### Bước 6: Đóng gói Docker & Triển khai Đám mây (Render Cloud Deployment)
+
+Dự án đã tích hợp sẵn file `Dockerfile` đa tầng (Multi-stage build) tối ưu hóa kích thước image siêu nhẹ với Alpine JRE 17 (~150MB):
+
+**Chạy bằng Docker cục bộ:**
+```powershell
+# 1. Build Docker image
+docker build -t electronics-chain-store:1.0 .
+
+# 2. Khởi chạy container
+docker run -p 8080:8080 -e SPRING_PROFILES_ACTIVE=prod electronics-chain-store:1.0
+```
+
+**Triển khai trên nền tảng đám mây Render (Cloud PaaS):**
+1. Tạo **Web Service** mới trên [Render.com](https://render.com) liên kết với Repository GitHub `https://github.com/24110257ak/LTW-Do-an-cuoi-ki.git`.
+2. Chọn nhánh triển khai chính: `dev` (hoặc `main` làm mốc fallback).
+3. Runtime: **Docker** (Render sẽ tự động nhận diện `Dockerfile` đa tầng ở thư mục gốc).
+4. Cấu hình biến môi trường kết nối Database SQL Server và Cloudinary CDN.
+
 ---
 
 ## 📁 7. CHECKLIST HỒ SƠ BÁO CÁO CUỐI KỲ (HẠN CHÓT 31/10/2026)
@@ -288,7 +307,7 @@ java -jar target/electronics-chain-store-1.0.0-SNAPSHOT.jar
 - [x] Hoàn thành toàn bộ Source Code chức năng trên các nhánh Git Flow chuẩn.
 - [x] File script `database.sql` đầy đủ 27 bảng, quan hệ khóa ngoại và dữ liệu mẫu phong phú.
 - [x] Cấu hình Terminal OTP Mode tiện lợi cho việc kiểm thử và chấm điểm đồ án.
-- [ ] File tài liệu báo cáo `.docx` đầy đủ hình kiến trúc, sơ đồ hoạt động, giải thích code, ảnh UI, hướng dẫn cài đặt và bảng tổng hợp Prompt AI.
+- [x] File tài liệu báo cáo `.docx` đầy đủ hình kiến trúc, sơ đồ hoạt động, giải thích code, ảnh UI, hướng dẫn cài đặt và bảng tổng hợp Prompt AI.
 - [ ] Video demo chức năng có xuất hiện mặt 3 thành viên giới thiệu và thuyết minh.
 - [ ] Upload đầy đủ vào thư mục Google Drive mang tên `24`.
 - [ ] Tạo sheet mang tên `24` trên bảng điểm chung của lớp và tự chấm điểm theo quy định.
