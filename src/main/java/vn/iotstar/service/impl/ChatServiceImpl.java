@@ -156,8 +156,17 @@ public class ChatServiceImpl implements ChatService {
     public ChatDto.MessagePage getMessages(String username, Long sessionId, Long beforeId, Long afterId) {
         User user = requireUser(username); ChatSession session = find(sessionId, false); access(user, session);
         validateMessageCursors(beforeId, afterId);
-        return messagePage(afterId == null ? messages.history(sessionId, beforeId, PageRequest.of(0, 51))
-                : messages.since(sessionId, afterId, PageRequest.of(0, 51)), afterId);
+        List<ChatMessage> list;
+        if (afterId != null) {
+            list = messages.since(sessionId, afterId, PageRequest.of(0, 51));
+        } else if (beforeId != null) {
+            list = messages.findBySessionSessionIdAndMessageIdLessThanOrderByMessageIdDesc(
+                    sessionId, beforeId, PageRequest.of(0, 51));
+        } else {
+            list = messages.findBySessionSessionIdOrderByMessageIdDesc(
+                    sessionId, PageRequest.of(0, 51));
+        }
+        return messagePage(list, afterId);
     }
     @Override
     public ChatDto.MessagePage getConversationMessages(String username, Long sessionId, Long beforeId, Long afterId) {
@@ -165,12 +174,19 @@ public class ChatServiceImpl implements ChatService {
         ChatSession session = find(sessionId, false);
         access(user, session);
         validateMessageCursors(beforeId, afterId);
-        // Resolve both keys from the authorized session; never accept an arbitrary customer/branch pair.
         Long customerId = session.getCustomer().getUserId();
         Integer branchId = session.getBranch().getBranchId();
-        return messagePage(afterId == null
-                ? messages.conversationHistory(customerId, branchId, beforeId, PageRequest.of(0, 51))
-                : messages.conversationSince(customerId, branchId, afterId, PageRequest.of(0, 51)), afterId);
+        List<ChatMessage> list;
+        if (afterId != null) {
+            list = messages.conversationSince(customerId, branchId, afterId, PageRequest.of(0, 51));
+        } else if (beforeId != null) {
+            list = messages.findBySessionCustomerUserIdAndSessionBranchBranchIdAndMessageIdLessThanOrderByMessageIdDesc(
+                    customerId, branchId, beforeId, PageRequest.of(0, 51));
+        } else {
+            list = messages.findBySessionCustomerUserIdAndSessionBranchBranchIdOrderByMessageIdDesc(
+                    customerId, branchId, PageRequest.of(0, 51));
+        }
+        return messagePage(list, afterId);
     }
     private void validateMessageCursors(Long beforeId, Long afterId) {
         if (afterId != null && (afterId < 0 || beforeId != null)) throw new BadRequestException("Mốc tải tin không hợp lệ");
