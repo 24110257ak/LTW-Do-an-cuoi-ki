@@ -26,6 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@org.springframework.test.context.ActiveProfiles("test")
 @Transactional
 public class SystemFixesIntegrationTest {
 
@@ -38,7 +39,13 @@ public class SystemFixesIntegrationTest {
             Role role = roleRepository.findByRoleName("ADMIN")
                     .orElseGet(() -> roleRepository.save(Role.builder().roleName("ADMIN").build()));
             userRepository.save(User.builder().username("admin").email("admin-system-test@example.test")
-                    .password("test").fullName("System test admin").role(role).isActive(true).build());
+                    .phone("0900000001").password("test").fullName("System test admin").role(role).isActive(true).build());
+        }
+        if (!userRepository.existsByUsername("shipper1")) {
+            Role role = roleRepository.findByRoleName("SHIPPER")
+                    .orElseGet(() -> roleRepository.save(Role.builder().roleName("SHIPPER").build()));
+            userRepository.save(User.builder().username("shipper1").email("shipper1-system-test@example.test")
+                    .phone("0900000002").password("test").fullName("System test shipper").role(role).isActive(true).build());
         }
     }
 
