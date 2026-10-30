@@ -56,6 +56,9 @@ public class StockTransfer {
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "returned_at")
+    private LocalDateTime returnedAt;
+
     @Column(name = "updated_at", nullable = false)
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();

@@ -143,11 +143,24 @@ public class AdminTransferController {
                     ? userRepository.findByUsername(authentication.getName()).orElse(null)
                     : null;
             stockTransferService.cancelTransfer(id, actor, reason);
-            redirectAttributes.addFlashAttribute("successMessage", "Hủy phiếu điều chuyển thành công (nếu đã trừ kho nguồn thì đã được hoàn lại)!");
+            redirectAttributes.addFlashAttribute("successMessage", "Đã xử lý yêu cầu hủy. Nếu hàng đang trên đường, phiếu chuyển sang Chuyển hoàn; kho nguồn chỉ tăng sau khi xác nhận thực nhận.");
         } catch (Exception e) {
             log.error("Lỗi khi hủy phiếu điều chuyển #{}: {}", id, e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
+        return "redirect:/admin/transfers";
+    }
+
+    @PostMapping("/{id}/receive-return")
+    public String receiveReturn(@PathVariable("id") Long id, @RequestParam Map<String, String> fields,
+                                Authentication auth, RedirectAttributes redirect) {
+        try {
+            Map<Long, Integer> received = new HashMap<>();
+            fields.forEach((key, value) -> { if (key.startsWith("qty_")) received.put(Long.valueOf(key.substring(4)), Integer.valueOf(value)); });
+            User actor = auth == null ? null : userRepository.findByUsername(auth.getName()).orElse(null);
+            stockTransferService.confirmReturnedTransfer(id, received, actor, fields.get("note"));
+            redirect.addFlashAttribute("successMessage", "Đã ghi nhận hàng hoàn thực tế vào kho nguồn");
+        } catch (Exception ex) { redirect.addFlashAttribute("errorMessage", ex.getMessage()); }
         return "redirect:/admin/transfers";
     }
 }

@@ -8,6 +8,7 @@ import vn.iotstar.entity.BranchInventory;
 import java.util.List;
 
 public interface FinancialReportService {
+    List<vn.iotstar.dto.response.CompletedDayDto> getCompletedDays(java.time.LocalDate from, java.time.LocalDate to);
     /**
      * Báo cáo tổng hợp tài chính toàn chuỗi: Doanh thu, Giá vốn (COGS), Lợi nhuận gộp, COD
      */

@@ -14,15 +14,19 @@ import java.util.Optional;
 @Repository
 public interface BranchInventoryRepository extends JpaRepository<BranchInventory, Long> {
     List<BranchInventory> findByBranchBranchId(Integer branchId);
+
     List<BranchInventory> findByVariantVariantId(Long variantId);
+
     Optional<BranchInventory> findByBranchBranchIdAndVariantVariantId(Integer branchId, Long variantId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT bi FROM BranchInventory bi WHERE bi.branch.branchId = :branchId AND bi.variant.variantId = :variantId")
-    Optional<BranchInventory> findByBranchAndVariantForUpdate(@Param("branchId") Integer branchId, @Param("variantId") Long variantId);
+    Optional<BranchInventory> findByBranchAndVariantForUpdate(@Param("branchId") Integer branchId,
+            @Param("variantId") Long variantId);
 
     @Query("SELECT bi FROM BranchInventory bi WHERE bi.variant.product.productId = :productId AND bi.branch.branchId = :branchId")
-    List<BranchInventory> findByProductAndBranch(@Param("productId") Long productId, @Param("branchId") Integer branchId);
+    List<BranchInventory> findByProductAndBranch(@Param("productId") Long productId,
+            @Param("branchId") Integer branchId);
 
     @Query("SELECT bi FROM BranchInventory bi WHERE bi.variant.product.productId = :productId AND bi.quantity > 0")
     List<BranchInventory> findAvailableBranchesForProduct(@Param("productId") Long productId);
@@ -34,6 +38,9 @@ public interface BranchInventoryRepository extends JpaRepository<BranchInventory
     List<BranchInventory> findLowStockAlerts();
 
     List<BranchInventory> findByBranchBranchIdAndQuantityLessThanEqual(Integer branchId, Integer threshold);
+
     List<BranchInventory> findByQuantityLessThanEqual(Integer threshold);
-    List<BranchInventory> findByVariantVariantIdAndQuantityGreaterThanOrderByQuantityDesc(Long variantId, Integer threshold);
+
+    List<BranchInventory> findByVariantVariantIdAndQuantityGreaterThanOrderByQuantityDesc(Long variantId,
+            Integer threshold);
 }

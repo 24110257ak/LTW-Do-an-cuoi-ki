@@ -47,7 +47,7 @@
                                     <th>ID</th>
                                     <th>Tên ngành hàng</th>
                                     <th>Đường dẫn (Slug)</th>
-                                    <th>Biểu tượng (Icon)</th>
+                                    <th>Ảnh / Biểu tượng</th>
                                     <th>Thứ tự hiển thị</th>
                                     <th>Trạng thái</th>
                                     <th class="text-end">Hành động</th>
@@ -66,7 +66,10 @@
                                         <code class="text-primary" th:text="${cat.slug}">dien-thoai</code>
                                     </td>
                                     <td>
-                                        <i th:classappend="${cat.imageUrl != null ? cat.imageUrl : 'bi bi-folder'}" class="fs-5 text-secondary"></i>
+                                        <img th:if="${!#strings.isEmpty(cat.imageUrl) and !#strings.startsWith(cat.imageUrl, 'bi ')}"
+                                             th:src="${cat.imageUrl}" th:alt="${cat.categoryName}" width="40" height="40" class="object-fit-contain">
+                                        <i th:if="${#strings.isEmpty(cat.imageUrl) or #strings.startsWith(cat.imageUrl, 'bi ')}"
+                                           th:classappend="${#strings.isEmpty(cat.imageUrl) ? 'bi bi-folder' : cat.imageUrl}" class="fs-5 text-secondary"></i>
                                     </td>
                                     <td th:text="${cat.displayOrder}">1</td>
                                     <td>
@@ -113,8 +116,8 @@
                         <input type="text" th:field="*{slug}" class="form-control" placeholder="thiet-bi-deo-thong-minh">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Icon Bootstrap (Tùy chọn)</label>
-                        <input type="text" th:field="*{imageUrl}" class="form-control" placeholder="bi bi-smartwatch">
+                        <label class="form-label fw-semibold">Đường dẫn ảnh hoặc icon Bootstrap (Tùy chọn)</label>
+                        <input type="text" th:field="*{imageUrl}" class="form-control" placeholder="/uploads/categories/dien-thoai.png hoặc bi bi-phone">
                     </div>
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Thứ tự hiển thị</label>

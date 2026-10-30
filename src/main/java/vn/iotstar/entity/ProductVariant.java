@@ -35,14 +35,17 @@ public class ProductVariant {
     private String ram;
 
     /** Giá vốn nhập hàng (COGS - Cost of Goods Sold) */
-    @Column(name = "cost_price", nullable = false)
+    @Column(name = "cost_price", nullable = false, precision = 18, scale = 0)
     @Builder.Default
     private BigDecimal costPrice = BigDecimal.ZERO;
 
-    @Column(name = "price", nullable = false)
+    @Column(name="cost_price_confirmed", nullable=false)
+    @Builder.Default private Boolean costPriceConfirmed=false;
+
+    @Column(name = "price", nullable = false, precision = 18, scale = 0)
     private BigDecimal price;
 
-    @Column(name = "promo_price")
+    @Column(name = "promo_price", precision = 18, scale = 0)
     private BigDecimal promoPrice;
 
     @Column(name = "sku", length = 100, nullable = false, unique = true)

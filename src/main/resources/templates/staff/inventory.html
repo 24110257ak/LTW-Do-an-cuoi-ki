@@ -103,39 +103,6 @@
     </div>
 </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        // 1. Lấy tên user đang đăng nhập (ví dụ: staff_thuduc)
-        const userNameElement = document.querySelector('.dropdown-toggle strong');
-        if (!userNameElement) return;
-        const userName = userNameElement.innerText.toLowerCase();
-
-        // 2. Tìm cái form chọn chi nhánh
-        const branchSelect = document.querySelector('select[name="branchId"]');
-        if (!branchSelect) return;
-
-        // 3. Mapping: Tên user -> ID chi nhánh tương ứng
-        let targetBranchId = "1"; // Mặc định Quận 1
-        if (userName.includes('quan3')) {
-            targetBranchId = "2";
-        } else if (userName.includes('thuduc')) {
-            targetBranchId = "3";
-        } else if (userName.includes('govap')) {
-            targetBranchId = "4";
-        }
-
-        // 4. Ép thẻ select chọn đúng ID và vô hiệu hóa không cho click nữa
-        branchSelect.value = targetBranchId;
-        branchSelect.disabled = true; // Khóa mờ
-        
-        // Cập nhật lại UI text cho đúng
-        const currentBranchLabel = document.querySelector('.text-dark.strong, .d-block + strong');
-        if(currentBranchLabel && branchSelect.options[branchSelect.selectedIndex]){
-            currentBranchLabel.innerText = branchSelect.options[branchSelect.selectedIndex].text;
-        }
-    });
-</script>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

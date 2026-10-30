@@ -18,6 +18,7 @@
         <div th:replace="~{fragments/admin-sidebar :: topbar}"></div>
 
         <div class="container-fluid p-4">
+<div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
             <!-- Alert message -->
             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}">Thành công</span>
@@ -74,7 +75,8 @@
                                     <label class="form-label fw-semibold">Ảnh màu sắc (Cloudinary)</label>
                                     <input type="file" name="variantImageFile" class="form-control" accept="image/*">
                                 </div>
-                                <button type="submit" class="btn btn-primary w-100 fw-bold">
+                                <div class="mb-3"><label class="form-label">Giá vốn VND</label><input type="number" name="declaredCost" min="0" step="1" class="form-control"><small>Để trống là chưa khai báo, khác với giá vốn đã xác nhận bằng 0.</small><label class="d-block small"><input type="checkbox" name="confirmZeroCost" value="true"> Tôi đã kiểm tra giá vốn bằng 0</label><input name="costReason" maxlength="500" class="form-control mt-2" placeholder="Ghi chú giá vốn ban đầu"></div>
+<button type="submit" class="btn btn-primary w-100 fw-bold">
                                     <i class="bi bi-plus-lg me-1"></i> Lưu biến thể
                                 </button>
                             </form>
@@ -97,13 +99,13 @@
                                             <th>Màu & Bộ nhớ</th>
                                             <th>Giá niêm yết</th>
                                             <th>Giá khuyến mãi</th>
-                                            <th>Trạng thái</th>
+                                            <th>Giá vốn</th><th>Trạng thái</th>
                                             <th class="text-end">Hành động</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr th:if="${variants == null || variants.isEmpty()}">
-                                            <td colspan="6" class="text-center py-5 text-muted">Sản phẩm này chưa có biến thể nào. Vui lòng thêm biến thể ở form bên trái.</td>
+                                            <td colspan="7" class="text-center py-5 text-muted">Sản phẩm này chưa có biến thể nào. Vui lòng thêm biến thể ở form bên trái.</td>
                                         </tr>
                                         <tr th:each="v : ${variants}">
                                             <td>
@@ -119,6 +121,9 @@
                                             <td>
                                                 <strong class="text-danger" th:if="${v.promoPrice != null && v.promoPrice > 0}" th:text="${#numbers.formatDecimal(v.promoPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">33,490,000 đ</strong>
                                                 <span th:unless="${v.promoPrice != null && v.promoPrice > 0}" class="text-muted small">Không áp dụng</span>
+                                            </td>
+                                            <td><strong th:if="${v.costPriceConfirmed}" th:text="${#numbers.formatDecimal(v.costPrice,0,'COMMA',0,'POINT')}+' đ'"></strong><span th:unless="${v.costPriceConfirmed}" class="badge bg-warning text-dark">Chưa khai báo</span>
+                                                <details class="mt-2"><summary class="small">Cập nhật giá vốn</summary><form th:action="@{/admin/products/{p}/variants/{v}/cost-price(p=${product.productId},v=${v.variantId})}" method="post"><input type="number" name="costPrice" min="0" step="1" required class="form-control form-control-sm" th:value="${v.costPrice}"><label class="small"><input type="checkbox" name="confirmZeroCost" value="true"> Xác nhận giá vốn 0</label><input name="reason" maxlength="500" required placeholder="Lý do thay đổi" class="form-control form-control-sm mb-1"><button class="btn btn-sm btn-outline-primary">Lưu giá vốn</button></form></details>
                                             </td>
                                             <td>
                                                 <span th:if="${v.isActive}" class="badge bg-success">Đang bật</span>
@@ -139,7 +144,7 @@
                     </div>
                 </div>
             </div>
-
+            <details class="card p-3 mt-4"><summary>50 thay đổi giá vốn gần nhất</summary><div class="table-responsive"><table class="table table-sm"><thead><tr><th>SKU</th><th>Trước</th><th>Sau</th><th>Người sửa</th><th>Thời gian</th><th>Lý do</th></tr></thead><tbody><tr th:each="a:${costAudits}"><td th:text="${a.variant.sku}"></td><td th:text="${a.previouslyConfirmed ? a.oldCost : 'Chưa khai báo'}"></td><td th:text="${a.newCost}"></td><td th:text="${a.actor.username}"></td><td th:text="${#temporals.format(a.changedAt,'dd/MM/yyyy HH:mm')}"></td><td th:text="${a.reason}"></td></tr></tbody></table></div></details>
         </div>
     </div>
 </div>

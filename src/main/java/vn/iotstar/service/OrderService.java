@@ -13,9 +13,28 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderService {
+    List<OrderStatus> allowedNextStatuses(Order order);
+    List<Order> getReviewOrders();
+    Order refundSimulatedOrder(Long id,String reason);
+    Order claimOrder(Long orderId);
+    List<Order> getClaimableOrders();
+    Order confirmDelivery(Long orderId, BigDecimal collectedAmount, String recipient, String note);
+    Order inspectReturn(Long orderId, vn.iotstar.dto.request.ReturnInspectionForm form);
+    List<vn.iotstar.entity.DeliveryAttempt> getDeliveryAttempts(Long orderId);
+    vn.iotstar.entity.OrderReturnReceipt getReturnReceipt(Long orderId);
+    void processExpiredHold(Long orderId);
+    void remindHold(Long orderId);
+    void recordNoShow(Long orderId);
+    void setPickupDeadline(Long orderId, int hours);
+    void requestCancellation(Long orderId, String reason);
     Order placeOrder(Long userId, CheckoutRequest request);
     Page<Order> getOrdersByUser(Long userId, Pageable pageable);
-    Page<Order> getOrdersByUserAndStatus(Long userId, OrderStatus status, Pageable pageable);
+    Page<Order> getOrdersByUser(Long userId, OrderStatus status, Pageable pageable);
+    /** Customer history tabs group delivery/return progress without changing stored statuses. */
+    Page<Order> getCustomerOrderHistory(Long userId, OrderStatus tab, Pageable pageable);
+    default Page<Order> getOrdersByUserAndStatus(Long userId, OrderStatus status, Pageable pageable) {
+        return getOrdersByUser(userId, status, pageable);
+    }
     Optional<Order> getOrderByCode(String orderCode);
     Optional<Order> getOrderById(Long orderId);
     void cancelOrder(Long userId, Long orderId, String reason);
@@ -31,6 +50,7 @@ public interface OrderService {
     BigDecimal getTotalRevenue();
     BigDecimal getBranchRevenue(Integer branchId);
     long countOrdersByStatus(OrderStatus status);
+    java.util.Map<OrderStatus, Long> getOrderStatusCounts(java.time.LocalDateTime start, java.time.LocalDateTime end);
     long countTotalOrders();
     long countBranchOrders(Integer branchId);
     long countBranchOrdersByStatus(Integer branchId, OrderStatus status);

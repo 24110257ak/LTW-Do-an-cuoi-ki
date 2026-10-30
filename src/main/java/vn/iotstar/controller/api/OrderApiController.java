@@ -34,6 +34,7 @@ import java.util.List;
 public class OrderApiController {
 
     private final OrderService orderService;
+    private final vn.iotstar.service.PaymentSimulationService simulator;
 
     @PostMapping("/checkout")
     @Operation(summary = "Tạo đơn hàng mới (Checkout)", description = "Áp dụng định tuyến thông minh (Smart Routing), tính giá vốn COGS và chống đặt trùng")
@@ -104,12 +105,14 @@ public class OrderApiController {
     @PreAuthorize("hasAnyRole('SHIPPER', 'ADMIN', 'STAFF')")
     @Operation(summary = "Shipper xác nhận giao hàng & thu tiền COD", description = "Cập nhật đơn hàng thành DELIVERED, tự động đánh dấu codCollected = true nếu là COD")
     public ResponseEntity<ApiResponse<Order>> shipperDeliver(
+            @RequestParam java.math.BigDecimal collectedAmount,
+            @RequestParam String recipient,
             @AuthenticationPrincipal User currentUser,
             @PathVariable Long orderId,
             @RequestParam(required = false, defaultValue = "Giao hàng thành công") String note
     ) {
         Long shipperId = currentUser != null ? currentUser.getUserId() : null;
-        Order delivered = orderService.shipperConfirmDelivered(orderId, shipperId, note);
+        Order delivered = orderService.confirmDelivery(orderId, collectedAmount, recipient, note);
         return ResponseEntity.ok(ApiResponse.ok("Shipper xác nhận giao hàng và thu COD thành công", delivered));
     }
 
@@ -132,5 +135,22 @@ public class OrderApiController {
     public ResponseEntity<ApiResponse<List<Order>>> getPendingCodOrders() {
         List<Order> orders = orderService.getPendingCodReconciliationOrders();
         return ResponseEntity.ok(ApiResponse.ok("Lấy danh sách đơn chờ đối soát COD thành công", orders));
+    }
+
+    @GetMapping("/{orderCode}/payment-simulation")
+    public ResponseEntity<ApiResponse<vn.iotstar.dto.response.PaymentSimulationDto>> paymentSimulation(
+            @AuthenticationPrincipal User user, @PathVariable String orderCode) {
+        if (user == null) throw new BadRequestException("Vui lòng đăng nhập");
+        var payment = simulator.view(user.getUserId(),orderCode);
+        return ResponseEntity.ok(ApiResponse.ok("VNPay mô phỏng - không thu tiền thật",vn.iotstar.dto.response.PaymentSimulationDto.from(payment)));
+    }
+
+    @PostMapping("/{orderCode}/payment-simulation")
+    public ResponseEntity<ApiResponse<vn.iotstar.dto.response.PaymentSimulationDto>> simulatePayment(
+            @AuthenticationPrincipal User user, @PathVariable String orderCode,
+            @RequestParam vn.iotstar.service.PaymentSimulationService.Outcome outcome) {
+        if (user == null) throw new BadRequestException("Vui lòng đăng nhập");
+        var payment = simulator.settle(user.getUserId(),orderCode,outcome);
+        return ResponseEntity.ok(ApiResponse.ok("VNPay mô phỏng - không thu tiền thật",vn.iotstar.dto.response.PaymentSimulationDto.from(payment)));
     }
 }

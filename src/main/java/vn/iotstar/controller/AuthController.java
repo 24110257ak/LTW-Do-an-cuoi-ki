@@ -98,7 +98,7 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/resend-otp")
+    @PostMapping("/resend-otp")
     public String resendOtp(@RequestParam String email, RedirectAttributes redirectAttributes) {
         try {
             userService.resendOtp(email);

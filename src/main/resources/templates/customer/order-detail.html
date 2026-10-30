@@ -7,6 +7,16 @@
 <div th:replace="~{fragments/header :: header-nav}"></div>
 
 <div class="container my-4">
+    <div th:if="${order.paymentSimulated}" class="alert alert-warning">
+        <strong>VNPay mô phỏng — không thu tiền thật.</strong>
+        <span th:text="${order.paymentStatus.name() == 'REFUNDED' ? 'Đã hoàn tiền mô phỏng.' : (order.paymentStatus.name() == 'PAID' ? 'Đã thanh toán mô phỏng.' : (order.status.name() == 'CANCELLED' ? 'Đơn đã hủy.' : 'Chưa thanh toán mô phỏng.'))}"></span>
+        <a th:href="@{/checkout/vnpay-sim/{code}(code=${order.orderCode})}" class="btn btn-sm btn-outline-primary ms-2" th:if="${order.user.userId == #authentication.principal.userId}">Xem phiên thanh toán</a>
+    </div>
+<div th:if="${order.holdExpiresAt != null}" class="alert alert-info small">Hạn giữ hàng hoặc hẹn nhận: <strong th:text="${#temporals.format(order.holdExpiresAt,'dd/MM/yyyy HH:mm')}"></strong><span th:if="${order.holdReminderSentAt != null}"> · Đã có thông báo nhắc nhận hàng.</span></div>
+<div th:if="${order.manualReviewRequired}" class="alert alert-warning small">Chi nhánh cần xử lý yêu cầu hoặc quá hẹn. Khoản đã thanh toán chưa được tự hoàn tiền.</div>
+<form th:if="${order.status.name()=='READY_FOR_PICKUP' and order.cancellationRequestedAt==null}" th:action="@{/orders/{id}/request-cancellation(id=${order.orderId})}" method="post" class="mb-3"><label class="small">Không thể đến nhận hoặc muốn yêu cầu hủy</label><input name="reason" required maxlength="500" placeholder="Lý do cần hỗ trợ" class="form-control form-control-sm"><button class="btn btn-outline-secondary btn-sm mt-1">Gửi yêu cầu đến chi nhánh</button></form>
+<p th:if="${order.cancellationRequestedAt!=null}" class="small text-muted">Đã gửi yêu cầu hỗ trợ. Chi nhánh sẽ liên hệ xử lý.</p>
+    <div th:if="${order.paymentRefund != null}" class="alert alert-info small">Chứng từ hoàn tiền mô phỏng: <strong th:text="${order.paymentRefund.reference}"></strong> · <span th:text="${order.paymentRefund.amount}"></span> VND · <span th:text="${#temporals.format(order.paymentRefund.refundedAt,'dd/MM/yyyy HH:mm')}"></span>. Không có chuyển tiền ngân hàng.</div>
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
@@ -75,6 +85,10 @@
             <!-- Tóm tắt thanh toán -->
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
                 <h6 class="fw-bold mb-3"><i class="fa-solid fa-receipt text-success me-2"></i>Chi Tiết Thanh Toán</h6>
+                <div class="small border-bottom pb-3 mb-3">
+                    <div class="text-secondary mb-1">Phương thức thanh toán:</div>
+                    <strong class="text-dark" th:text="${order.paymentMethod == null ? 'Chưa xác định' : (order.paymentMethod.name() == 'COD' ? 'Thanh toán khi nhận hàng (COD)' : (order.paymentSimulated == true ? 'VNPay mô phỏng' : 'VNPay'))}">Thanh toán khi nhận hàng (COD)</strong>
+                </div>
                 <div class="d-flex justify-content-between small text-secondary mb-2">
                     <span>Tạm tính:</span>
                     <span class="text-dark fw-bold" th:text="${#numbers.formatDecimal(order.subtotal, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</span>

@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface CartService {
+    vn.iotstar.dto.response.CartLimitDto getLimits(Long userId, Long variantId);
     Cart getOrCreateCart(Long userId);
     List<CartItem> getCartItems(Long userId);
     CartItem addToCart(Long userId, Long variantId, int quantity);

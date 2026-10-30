@@ -219,6 +219,10 @@ public class FinancialAndLogisticsTest {
         assertEquals(0, BigDecimal.valueOf(28000000).compareTo(item.getCostPrice()));
         assertEquals(0, BigDecimal.valueOf(14000000).compareTo(item.getLineProfit()));
 
+        assertEquals(0, financialReportService.getFinancialOverview().getTotalRevenue().signum());
+        startShipping(order);
+        orderService.confirmDelivery(order.getOrderId(),order.getTotalAmount(),"Người nhận","Delivered");
+
         // Báo cáo tài chính tổng quan
         FinancialSummaryDto summary = financialReportService.getFinancialOverview();
         assertNotNull(summary);
@@ -242,8 +246,9 @@ public class FinancialAndLogisticsTest {
         assertFalse(order.getCodCollected());
         assertFalse(order.getCodReconciled());
 
+        startShipping(order);
         // Shipper giao hàng thành công và thu tiền mặt
-        Order deliveredOrder = orderService.shipperConfirmDelivered(order.getOrderId(), null, "Khách đã trả đủ tiền mặt");
+        Order deliveredOrder = orderService.confirmDelivery(order.getOrderId(),order.getTotalAmount(),"Người nhận","Khách đã trả đủ tiền mặt");
         assertTrue(deliveredOrder.getCodCollected());
         assertEquals(PaymentStatus.PAID, deliveredOrder.getPaymentStatus());
         assertFalse(deliveredOrder.getCodReconciled());
@@ -277,6 +282,7 @@ public class FinancialAndLogisticsTest {
                 .orElseThrow().getQuantity();
         assertEquals(initialStockQ1 - 1, stockAfterOrder);
 
+        startShipping(order);
         // Shipper báo giao thất bại (khách đi vắng) -> Không được tăng tồn kho vật lý!
         Order failedOrder = orderService.reportDeliveryFailed(order.getOrderId(), "Khách đi công tác chưa nhận được");
         assertEquals(OrderStatus.DELIVERY_FAILED, failedOrder.getStatus());
@@ -285,8 +291,9 @@ public class FinancialAndLogisticsTest {
                 .orElseThrow().getQuantity();
         assertEquals(stockAfterOrder, stockAfterFailed, "Hàng còn trên xe shipper, không được tự ý hoàn kho");
 
+        move(order,OrderStatus.RETURNING);
         // Hàng quay về chi nhánh và thủ kho kiểm tra nhập lại kho
-        Order returnedOrder = orderService.confirmReturnedToWarehouse(order.getOrderId(), accountant.getUserId(), "Hộp nguyên seal");
+        Order returnedOrder = orderService.inspectReturn(order.getOrderId(),allGood(order));
         assertEquals(OrderStatus.RETURNED, returnedOrder.getStatus());
 
         int stockAfterReturn = inventoryRepository.findByBranchBranchIdAndVariantVariantId(branchQ1.getBranchId(), laptopVariant.getVariantId())
@@ -312,5 +319,18 @@ public class FinancialAndLogisticsTest {
         assertNotNull(suggestion);
         assertEquals(branchQ1.getBranchId(), suggestion.getSourceBranchId(), "Nguồn chuyển phải là kho Quận 1 có dôi dư hàng");
         assertTrue(suggestion.getSuggestedQuantity() > 0);
+    }
+
+    private void move(Order order, OrderStatus next) {
+        accountant.setBranch(branchQ1);
+        org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(
+            new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(accountant,"",accountant.getAuthorities()));
+        orderService.updateOrderStatus(order.getOrderId(),next,null);
+    }
+    private void startShipping(Order order) { move(order,OrderStatus.CONFIRMED); move(order,OrderStatus.SHIPPING); }
+    @org.junit.jupiter.api.AfterEach void clearOperator(){org.springframework.security.core.context.SecurityContextHolder.clearContext();}
+    private vn.iotstar.dto.request.ReturnInspectionForm allGood(Order order) {
+        var form=new vn.iotstar.dto.request.ReturnInspectionForm();
+        for(var item:order.getOrderItems()){var line=new vn.iotstar.dto.request.ReturnInspectionForm.Line();line.setOrderItemId(item.getOrderItemId());line.setGood(item.getQuantity());line.setDamaged(0);line.setMissing(0);form.getLines().add(line);}return form;
     }
 }

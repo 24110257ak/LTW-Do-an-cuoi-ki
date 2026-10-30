@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header-head}"></head>
+<body>
+<div th:replace="~{fragments/header :: header-nav}"></div>
+<main class="container my-4">
+    <div class="col-lg-8 col-xl-7 mx-auto">
+        <nav aria-label="breadcrumb"><ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/profile} + '#saved-addresses'">Sổ địa chỉ</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${editingAddressId == null ? 'Thêm địa chỉ' : 'Sửa địa chỉ'}"></li>
+        </ol></nav>
+        <section class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+            <h4 class="fw-bold mb-2" th:text="${editingAddressId == null ? 'Thêm địa chỉ nhận hàng' : 'Sửa thông tin địa chỉ'}"></h4>
+            <p class="small text-muted mb-4">Thông tin người nhận được dùng khi bạn chọn địa chỉ tại bước thanh toán.</p>
+            <form method="post" th:object="${addressForm}"
+                  th:action="${editingAddressId == null} ? @{/profile/address/add} : @{/profile/address/{id}/edit(id=${editingAddressId})}">
+                <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger small" role="alert">Vui lòng kiểm tra các trường được đánh dấu bên dưới.</div>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="receiverName" class="form-label small fw-semibold">Tên người nhận *</label>
+                        <input th:field="*{receiverName}" class="form-control" th:errorclass="is-invalid" maxlength="150" required autocomplete="name">
+                        <div class="invalid-feedback" th:errors="*{receiverName}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="phone" class="form-label small fw-semibold">Số điện thoại *</label>
+                        <input type="tel" th:field="*{phone}" class="form-control" th:errorclass="is-invalid" maxlength="20" required autocomplete="tel">
+                        <div class="invalid-feedback" th:errors="*{phone}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="province" class="form-label small fw-semibold">Tỉnh / Thành phố *</label>
+                        <select th:field="*{province}" class="form-select" th:errorclass="is-invalid" required aria-describedby="addressStatus">
+                            <option value="">-- Chọn Tỉnh/Thành --</option>
+                            <option th:if="${!#strings.isEmpty(addressForm.province)}" th:value="${addressForm.province}" th:text="${addressForm.province}"></option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{province}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="district" class="form-label small fw-semibold">Quận / Huyện *</label>
+                        <select th:field="*{district}" class="form-select" th:errorclass="is-invalid" required aria-describedby="addressStatus">
+                            <option value="">-- Chọn Quận/Huyện --</option>
+                            <option th:if="${!#strings.isEmpty(addressForm.district)}" th:value="${addressForm.district}" th:text="${addressForm.district}"></option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{district}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="ward" class="form-label small fw-semibold">Phường / Xã *</label>
+                        <select th:field="*{ward}" class="form-select" th:errorclass="is-invalid" required aria-describedby="addressStatus">
+                            <option value="">-- Chọn Phường/Xã --</option>
+                            <option th:if="${!#strings.isEmpty(addressForm.ward)}" th:value="${addressForm.ward}" th:text="${addressForm.ward}"></option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{ward}"></div>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="street" class="form-label small fw-semibold">Số nhà, tên đường *</label>
+                        <input th:field="*{street}" class="form-control" th:errorclass="is-invalid" maxlength="255" required autocomplete="street-address">
+                        <div class="invalid-feedback" th:errors="*{street}"></div>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <span id="addressStatus" class="small text-muted" role="status" aria-live="polite"></span>
+                        <button id="retryAddress" type="button" class="btn btn-link btn-sm p-0 ms-2" hidden>Tải lại địa chỉ</button>
+                    </div>
+                    <div class="col-12">
+                        <label for="addressNote" class="form-label small fw-semibold">Ghi chú địa chỉ</label>
+                        <textarea th:field="*{addressNote}" class="form-control" th:errorclass="is-invalid" rows="2" maxlength="255" placeholder="Ví dụ: Nhà riêng, văn phòng, tòa nhà..."></textarea>
+                        <div class="invalid-feedback" th:errors="*{addressNote}"></div>
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input type="checkbox" id="addressDefault" class="form-check-input" th:field="*{isDefault}" th:disabled="${addressWasDefault}">
+                            <label class="form-check-label small" for="addressDefault">Đặt làm địa chỉ mặc định</label>
+                            <input th:if="${addressWasDefault}" type="hidden" name="isDefault" value="true">
+                        </div>
+                        <p class="small text-muted mt-2 mb-0" th:text="${addressWasDefault ? 'Đây là địa chỉ mặc định hiện tại. Để thay đổi, hãy đặt một địa chỉ khác làm mặc định.' : 'Địa chỉ đầu tiên được tự động đặt làm mặc định.'}"></p>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-end gap-2 mt-4">
+                    <a class="btn btn-light rounded-pill px-4" th:href="@{/profile} + '#saved-addresses'">Hủy</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Lưu địa chỉ</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script th:src="@{/js/checkout-address.js(v='20261029-saved-address')}"></script>
+</body>
+</html>

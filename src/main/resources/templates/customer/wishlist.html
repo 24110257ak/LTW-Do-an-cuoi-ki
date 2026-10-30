@@ -42,8 +42,8 @@
 
                     <div class="d-flex gap-2">
                         <a th:href="@{'/products/' + ${wl.product.slug}}" class="btn btn-esc btn-sm flex-grow-1">Xem mua</a>
-                        <form th:action="@{/wishlist/toggle}" method="post">
-                            <input type="hidden" name="productId" th:value="${wl.product.productId}">
+                        <form th:action="@{/wishlist/set}" method="post">
+                            <input type="hidden" name="liked" value="false"><input type="hidden" name="productId" th:value="${wl.product.productId}">
                             <button type="submit" class="btn btn-outline-danger btn-sm" title="Bỏ thích"><i class="fa-solid fa-trash"></i></button>
                         </form>
                     </div>

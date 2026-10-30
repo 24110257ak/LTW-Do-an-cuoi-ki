@@ -38,13 +38,16 @@ public class OrderItem {
             columnDefinition = "nvarchar(200)")
     private String variantInfo;
 
-    @Column(name = "unit_price", nullable = false)
+    @Column(name = "unit_price", nullable = false, precision = 18, scale = 0)
     private BigDecimal unitPrice;
 
     /** Snapshot giá vốn tại thời điểm mua (phục vụ tính lợi nhuận gộp lịch sử) */
-    @Column(name = "cost_price", nullable = false)
+    @Column(name = "cost_price", nullable = false, precision = 18, scale = 0)
     @Builder.Default
     private BigDecimal costPrice = BigDecimal.ZERO;
+
+    @Column(name="cost_price_confirmed", nullable=false)
+    @Builder.Default private Boolean costPriceConfirmed=false;
 
     @Column(name = "quantity", nullable = false)
     @Builder.Default

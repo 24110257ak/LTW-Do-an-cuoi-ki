@@ -92,6 +92,7 @@
                     </div>
 
                     <h5 class="fw-bold text-white mb-1 text-truncate" th:text="${product.productName}">iPhone 16 Pro Max</h5>
+<div th:replace="~{fragments/wishlist-button :: button(${product}, 'home')}"></div>
                     <div class="small text-warning mb-2">
                         <i class="fa-solid fa-star"></i>
                         <span class="text-white-50 ms-1 fw-bold" th:text="${product.avgRating}">5.0</span>
@@ -154,110 +155,45 @@
 
     <!-- 2.5 Dải Banner Chiến Dịch Khuyến Mãi (Marketing Campaign Carousel) -->
     <!-- Đồng bộ thời gian thực với phân hệ Quản trị Admin Banners & Cloudinary CDN -->
-    <div th:if="${banners != null && !banners.isEmpty()}" class="mb-5 pb-2">
-        <!-- Header: Tiêu đề gọn gàng & Duy nhất 1 cụm điều hướng bo tròn chuẩn 3D Rolodex ở góc trên phải -->
+    <div th:if="${banners != null && !banners.isEmpty()}" class="mb-5">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h4 class="fw-bold mb-0 text-dark d-flex align-items-center">
-                <i class="fa-solid fa-gift text-danger me-2"></i>Sự Kiện & Chương Trình Khuyến Mãi
-            </h4>
-            <div class="d-flex align-items-center gap-2" th:if="${#lists.size(banners) > 1}">
-                <button type="button" class="btn promo-nav-circle-btn" id="btnPromoPrevTop" title="Banner trước" aria-label="Trước">
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
-                <button type="button" class="btn promo-nav-circle-btn" id="btnPromoNextTop" title="Banner sau" aria-label="Sau">
-                    <i class="fa-solid fa-chevron-right"></i>
-                </button>
-            </div>
+            <h5 class="fw-bold mb-0 text-dark d-flex align-items-center">
+                <i class="fa-solid fa-bullhorn text-danger me-2"></i>Sự Kiện & Chương Trình Khuyến Mãi
+            </h5>
+            <span class="text-muted small d-none d-md-inline">Ưu đãi độc quyền cập nhật từ Ban Quản trị ESC Store</span>
         </div>
         
-        <style>
-            .promo-banner-container {
-                border-radius: 18px;
-                overflow: hidden !important;
-                position: relative;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-                background-color: #0b1120;
-            }
-            .promo-banner-img {
-                width: 100%;
-                height: auto;
-                aspect-ratio: 1320 / 380;
-                object-fit: contain;
-                display: block;
-                transition: transform 0.35s ease;
-            }
-            .promo-banner-container:hover .promo-banner-img {
-                transform: scale(1.008);
-            }
-            .promo-nav-circle-btn {
-                width: 36px;
-                height: 36px;
-                border-radius: 50% !important;
-                padding: 0;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                background: #0f172a;
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                color: #ffffff;
-                font-size: 0.82rem;
-                transition: all 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
-                cursor: pointer;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-            }
-            .promo-nav-circle-btn:hover {
-                background: #2563eb !important;
-                border-color: #60a5fa !important;
-                color: #ffffff !important;
-                transform: scale(1.1);
-                box-shadow: 0 0 14px rgba(59, 130, 246, 0.8), 0 2px 8px rgba(37, 99, 235, 0.4) !important;
-            }
-            .promo-nav-circle-btn:active {
-                transform: scale(0.92);
-            }
-            .promo-banner-container .carousel-indicators {
-                margin-bottom: 0.75rem;
-                gap: 6px;
-                z-index: 5;
-            }
-            .promo-dot {
-                height: 6px;
-                width: 6px;
-                border-radius: 3px;
-                background: rgba(255, 255, 255, 0.45);
-                border: none;
-                transition: all 0.25s ease;
-                margin: 0 !important;
-                padding: 0;
-            }
-            .promo-dot.active {
-                width: 22px;
-                background: #3b82f6 !important;
-                box-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
-            }
-        </style>
-
-        <div id="promoCampaignCarousel" class="carousel slide promo-banner-container" data-bs-ride="carousel" data-bs-interval="4500">
-            <!-- Carousel Indicators (Dots kiểu 3D Rolodex, căn giữa chuẩn) -->
-            <div class="carousel-indicators" th:if="${#lists.size(banners) > 1}">
+        <div id="promoCampaignCarousel" class="carousel slide shadow-sm rounded-4 overflow-hidden position-relative" data-bs-ride="carousel" data-bs-interval="4500">
+            <!-- Carousel Indicators -->
+            <div class="carousel-indicators mb-2" th:if="${#lists.size(banners) > 1}">
                 <button th:each="bn, iter : ${banners}" type="button"
                         data-bs-target="#promoCampaignCarousel"
                         th:data-bs-slide-to="${iter.index}"
-                        class="promo-dot"
                         th:classappend="${iter.first ? 'active' : ''}"
                         th:attr="aria-current=${iter.first ? 'true' : null}, aria-label='Banner ' + ${iter.count}"></button>
             </div>
 
-            <!-- Carousel Slides: Toàn bộ ảnh hiển thị trọn vẹn 100%, không che chữ, không nút overlay -->
+            <!-- Carousel Slides -->
             <div class="carousel-inner">
                 <div th:each="bn, iter : ${banners}" class="carousel-item" th:classappend="${iter.first ? 'active' : ''}">
                     <a th:href="${bn.linkUrl != null && !bn.linkUrl.isBlank() ? bn.linkUrl : 'javascript:void(0)'}"
                        class="d-block text-decoration-none">
-                        <img th:src="${bn.imageUrl}" class="promo-banner-img"
+                        <img th:src="${bn.imageUrl}" class="d-block w-100 object-fit-cover"
+                             style="max-height: 280px; min-height: 160px;"
                              th:alt="${bn.title != null ? bn.title : 'Khuyến mãi ESC Store'}">
                     </a>
                 </div>
             </div>
+
+            <!-- Controls (chỉ hiện khi có từ 2 banner trở lên) -->
+            <button th:if="${#lists.size(banners) > 1}" class="carousel-control-prev" type="button" data-bs-target="#promoCampaignCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon p-3 bg-dark bg-opacity-50 rounded-circle" aria-hidden="true"></span>
+                <span class="visually-hidden">Trước</span>
+            </button>
+            <button th:if="${#lists.size(banners) > 1}" class="carousel-control-next" type="button" data-bs-target="#promoCampaignCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon p-3 bg-dark bg-opacity-50 rounded-circle" aria-hidden="true"></span>
+                <span class="visually-hidden">Sau</span>
+            </button>
         </div>
     </div>
 
@@ -295,6 +231,7 @@
                         <h6 class="fw-bold mb-2">
                             <a th:href="@{'/products/' + ${product.slug}}" class="text-dark text-decoration-none text-truncate-2" th:text="${product.productName}">Tên sản phẩm</a>
                         </h6>
+<div th:replace="~{fragments/wishlist-button :: button(${product}, 'home')}"></div>
                         <!-- Rating -->
                         <div class="small text-warning mb-2">
                             <i class="fa-solid fa-star"></i>
@@ -341,6 +278,7 @@
                         <h6 class="fw-bold mb-2">
                             <a th:href="@{'/products/' + ${product.slug}}" class="text-dark text-decoration-none" th:text="${product.productName}">Tên sản phẩm</a>
                         </h6>
+<div th:replace="~{fragments/wishlist-button :: button(${product}, 'home')}"></div>
                     </div>
                     <div>
                         <div class="price-current mb-3" th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>
@@ -376,54 +314,5 @@
 
 <!-- Footer Fragment -->
 <div th:replace="~{fragments/footer :: footer}"></div>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const promoCarousel = document.getElementById('promoCampaignCarousel');
-        if (!promoCarousel) return;
-
-        let isPromoWheeling = false;
-
-        function getCarousel() {
-            if (window.bootstrap && bootstrap.Carousel) {
-                return bootstrap.Carousel.getOrCreateInstance(promoCarousel, {
-                    interval: 4500,
-                    ride: 'carousel',
-                    touch: true
-                });
-            }
-            return null;
-        }
-
-        const c = getCarousel();
-
-        function goNext() {
-            if (c) c.next();
-        }
-
-        function goPrev() {
-            if (c) c.prev();
-        }
-
-        // Gán sự kiện cho duy nhất cặp nút tròn ở góc trên bên phải tiêu đề
-        const btnTopPrev = document.getElementById('btnPromoPrevTop');
-        const btnTopNext = document.getElementById('btnPromoNextTop');
-
-        if (btnTopPrev) btnTopPrev.addEventListener('click', (e) => { e.preventDefault(); goPrev(); });
-        if (btnTopNext) btnTopNext.addEventListener('click', (e) => { e.preventDefault(); goNext(); });
-
-        // Tương tác lăn chuột (Mouse Wheel) chuẩn xác y hệt sân khấu 3D Rolodex
-        promoCarousel.addEventListener('wheel', function(e) {
-            e.preventDefault();
-            if (isPromoWheeling) return;
-            isPromoWheeling = true;
-            if (e.deltaY > 0 || e.deltaX > 0) {
-                goNext();
-            } else {
-                goPrev();
-            }
-            setTimeout(() => { isPromoWheeling = false; }, 320);
-        }, { passive: false });
-    });
-</script>
 </body>
 </html>

@@ -17,7 +17,7 @@
     <div class="flex-grow-1 d-flex flex-column" style="min-width: 0;">
         <div th:replace="~{fragments/admin-sidebar :: topbar}"></div>
 
-        <div class="container-fluid p-4">
+        <div class="container-fluid p-4"><div th:if="${!#lists.isEmpty(attentionOrders)}" class="card p-3 mb-4"><h5>Đơn cần liên hệ hoặc xử lý</h5><div th:each="o:${attentionOrders}" class="border-bottom py-2"><a th:href="@{/staff/orders/{id}(id=${o.orderId})}" th:text="${o.orderCode}"></a> · <span th:text="${o.receiverName}"></span><span th:if="${o.noShowAt != null}"> · Khách quá hẹn nhận</span><span th:if="${o.cancellationRequestedAt != null}"> · Yêu cầu hỗ trợ</span></div></div>
             <!-- Header title -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
