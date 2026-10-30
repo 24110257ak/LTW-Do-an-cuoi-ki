@@ -13,11 +13,11 @@
 
 ## 👥 1. THÀNH VIÊN THỰC HIỆN (NHÓM 24)
 
-| STT | Mã sinh viên | Họ và tên | Vai trò | Lớp sinh viên | Tỷ lệ đóng góp |
-| :---: | :---: | :--- | :---: | :---: | :---: |
-| **1** | 24110292 | **Mai Huy Nhật** | **Nhóm trưởng** | 24110CL1A | **33.3%** |
-| **2** | 24110257 | **Trần Vũ Anh Khoa** | Thành viên | 24110CL1A | **33.3%** |
-| **3** | 24110304 | **Đặng Nhật Phúc** | Thành viên | 24110CL1A | **33.3%** |
+| STT | Mã sinh viên | Họ và tên | Vai trò |
+| :---: | :---: | :--- | :---: |
+| **1** | 24110292 | **Mai Huy Nhật** | **Nhóm trưởng** |
+| **2** | 24110257 | **Trần Vũ Anh Khoa** | Thành viên |
+| **3** | 24110304 | **Đặng Nhật Phúc** | Thành viên |
 
 ---
 
