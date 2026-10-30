@@ -24,6 +24,9 @@ IF COL_LENGTH('dbo.orders','no_show_at') IS NULL ALTER TABLE dbo.orders ADD no_s
 IF COL_LENGTH('dbo.orders','cancellation_requested_at') IS NULL ALTER TABLE dbo.orders ADD cancellation_requested_at DATETIME2(6) NULL;
 IF COL_LENGTH('dbo.orders','cancellation_request_reason') IS NULL ALTER TABLE dbo.orders ADD cancellation_request_reason NVARCHAR(500) NULL;
 IF COL_LENGTH('dbo.orders','manual_review_required') IS NULL ALTER TABLE dbo.orders ADD manual_review_required BIT NOT NULL CONSTRAINT df_order_manual_review DEFAULT 0 WITH VALUES;
+IF COL_LENGTH('dbo.orders','payment_simulated') IS NULL ALTER TABLE dbo.orders ADD payment_simulated BIT NOT NULL CONSTRAINT df_order_payment_simulated DEFAULT 0 WITH VALUES;
+IF COL_LENGTH('dbo.orders','stock_released') IS NULL ALTER TABLE dbo.orders ADD stock_released BIT NOT NULL CONSTRAINT df_order_stock_released DEFAULT 0 WITH VALUES;
+IF COL_LENGTH('dbo.orders','coupon_released') IS NULL ALTER TABLE dbo.orders ADD coupon_released BIT NOT NULL CONSTRAINT df_order_coupon_released DEFAULT 0 WITH VALUES;
 IF COL_LENGTH('dbo.orders','actual_collected_amount') IS NULL ALTER TABLE dbo.orders ADD actual_collected_amount NUMERIC(18,0) NULL;
 -- Legacy orders deliberately have no automatic deadline. Set pickup deadlines after contacting the customer.
 IF OBJECT_ID('dbo.otp_rate_limits','U') IS NULL CREATE TABLE dbo.otp_rate_limits (
