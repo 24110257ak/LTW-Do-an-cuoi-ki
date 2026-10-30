@@ -1,0 +1,5 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org"><body>
+<form th:fragment="button(product,place)" th:if="${canUseWishlist}" th:action="@{/wishlist/set}" method="post" class="d-inline-block mt-2">
+  <input type="hidden" name="productId" th:value="${product.productId}"><input type="hidden" name="liked" th:value="${!likedProductIds.contains(product.productId)}"><input type="hidden" name="place" th:value="${place}">
+  <button type="submit" class="btn btn-outline-danger btn-sm" th:attr="aria-pressed=${likedProductIds.contains(product.productId)}" th:title="${likedProductIds.contains(product.productId)?'Bỏ thích':'Lưu sản phẩm yêu thích'}"><i th:class="${likedProductIds.contains(product.productId)?'fa-solid fa-heart':'fa-regular fa-heart'}" aria-hidden="true"></i> <span th:text="${likedProductIds.contains(product.productId)?'Đã thích':'Yêu thích'}"></span></button>
+</form></body></html>

@@ -13,5 +13,7 @@ public interface WishlistRepository extends JpaRepository<Wishlist, Long> {
     boolean existsByUserUserIdAndProductProductId(Long userId, Long productId);
     void deleteByUserUserIdAndProductProductId(Long userId, Long productId);
     Optional<Wishlist> findByUserUserIdAndProductProductId(Long userId, Long productId);
+    @org.springframework.data.jpa.repository.Query("select w.product.productId from Wishlist w where w.user.userId=:id")
+    List<Long> findLikedProductIds(@org.springframework.data.repository.query.Param("id") Long id);
 }
 

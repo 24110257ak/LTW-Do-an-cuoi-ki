@@ -46,7 +46,7 @@
 
                 <div class="text-center small text-secondary">
                     Chưa nhận được mã?
-                    <a th:href="@{/auth/resend-otp(email=*{email})}" class="fw-bold text-primary text-decoration-none">Gửi lại mã OTP</a>
+                    <form th:action="@{/auth/resend-otp}" method="post" class="d-inline"><input type="hidden" name="email" th:value="${verifyOtpRequest.email}"><button type="submit" class="btn btn-link fw-bold text-primary text-decoration-none p-0">Gửi lại mã OTP</button></form><p class="small mt-2">Chờ 60 giây giữa hai lần gửi. Tối đa 5 lần thử; tạm khóa 15 phút khi hết lượt.</p>
                 </div>
             </div>
 

@@ -26,6 +26,7 @@ import java.util.List;
 public class ShipperController {
 
     private final OrderService orderService;
+    private final vn.iotstar.service.ShipperLedgerService ledger;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
 
@@ -65,7 +66,7 @@ public class ShipperController {
             orderPage = orderService.getOrdersByShipper(
                     shipperId,
                     filterStatus,
-                    PageRequest.of(Math.max(0, page), size, Sort.by(Sort.Direction.DESC, "createdAt"))
+                    PageRequest.of(Math.max(0, page), Math.max(1,Math.min(size,100)), Sort.by(Sort.Direction.DESC, "createdAt"))
             );
             countTotal = orderRepository.countByShipperUserId(shipperId);
             countShipping = orderRepository.countByShipperUserIdAndStatus(shipperId, OrderStatus.SHIPPING);
@@ -74,11 +75,12 @@ public class ShipperController {
         }
 
         // Đơn hàng đang SHIPPING chưa có tài xế nhận (sẵn sàng tiếp nhận)
-        List<Order> unassignedOrders = orderRepository.findAll().stream()
-                .filter(o -> o.getStatus() == OrderStatus.SHIPPING && o.getShipper() == null)
-                .limit(5)
-                .toList();
+        List<Order> unassignedOrders = shipperId == null ? List.of() : orderService.getClaimableOrders();
 
+        model.addAttribute("cashLedger", shipperId == null ? null : ledger.currentLedger());
+        java.util.Map<Long,List<vn.iotstar.entity.DeliveryAttempt>> attempts=new java.util.HashMap<>();
+        for(var order:orderPage)attempts.put(order.getOrderId(),orderService.getDeliveryAttempts(order.getOrderId()));
+        model.addAttribute("deliveryAttemptsByOrder",attempts);
         model.addAttribute("orderPage", orderPage);
         model.addAttribute("shipper", shipper);
         model.addAttribute("selectedStatus", statusStr != null ? statusStr.toUpperCase() : "ALL");
@@ -93,14 +95,15 @@ public class ShipperController {
 
     @PostMapping("/orders/{id}/deliver")
     public String confirmDelivered(@PathVariable("id") Long id,
+                                   @RequestParam java.math.BigDecimal collectedAmount,
+                                   @RequestParam String recipient,
                                    @RequestParam(value = "note", required = false) String note,
                                    Authentication authentication,
                                    RedirectAttributes redirectAttributes) {
         try {
             User shipper = getCurrentShipper(authentication);
-            Long shipperId = shipper != null ? shipper.getUserId() : null;
-            orderService.shipperConfirmDelivered(id, shipperId, note);
-            redirectAttributes.addFlashAttribute("successMessage", "Xác nhận giao hàng thành công! Đơn hàng COD đã tự động ghi nhận thu tiền.");
+            orderService.confirmDelivery(id, collectedAmount, recipient, note);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã ghi nhận giao hàng và số tiền thực thu. COD đã thu vẫn cần đối soát nộp quỹ riêng.");
         } catch (Exception e) {
             log.error("Lỗi xác nhận giao hàng: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
@@ -127,10 +130,7 @@ public class ShipperController {
                              Authentication authentication,
                              RedirectAttributes redirectAttributes) {
         try {
-            User shipper = getCurrentShipper(authentication);
-            Order order = orderService.getOrderById(id).orElseThrow();
-            order.setShipper(shipper);
-            orderRepository.save(order);
+            Order order = orderService.claimOrder(id);
             redirectAttributes.addFlashAttribute("successMessage", "Đã tiếp nhận đơn hàng #" + order.getOrderCode() + " thành công!");
         } catch (Exception e) {
             log.error("Lỗi tiếp nhận đơn hàng: {}", e.getMessage());

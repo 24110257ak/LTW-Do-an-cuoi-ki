@@ -124,6 +124,8 @@
                                         <span th:if="${t.status.name() == 'IN_TRANSIT'}" class="badge bg-primary">
                                             <i class="bi bi-truck me-1"></i> Đang vận chuyển
                                         </span>
+                                        <span th:if="${t.status.name() == 'RETURNING'}" class="badge bg-warning text-dark">Đang chuyển hoàn về nguồn</span>
+                                        <span th:if="${t.status.name() == 'RETURNED'}" class="badge bg-secondary">Đã nhận hoàn về nguồn</span>
                                         <span th:if="${t.status.name() == 'COMPLETED'}" class="badge bg-success">
                                             <i class="bi bi-check-all me-1"></i> Đã hoàn tất (Đã nhập)
                                         </span>
@@ -159,11 +161,20 @@
                                                 </button>
                                             </form>
 
+                                            <form th:if="${t.status.name() == 'RETURNING'}" th:action="@{/admin/transfers/{id}/receive-return(id=${t.transferId})}" method="post" class="border rounded p-2 text-start">
+                                                <div class="small fw-bold mb-1">Kiểm đếm hàng hoàn tại kho nguồn</div>
+                                                <label th:each="item : ${t.items}" class="d-block small mb-1">
+                                                    <span th:text="${item.variant.sku}"></span>
+                                                    <input type="number" min="0" th:max="${item.quantity}" th:value="${item.quantity}" th:name="'qty_' + ${item.variant.variantId}" class="form-control form-control-sm" required>
+                                                </label>
+                                                <input name="note" class="form-control form-control-sm mb-1" placeholder="Ghi chú kiểm đếm; bắt buộc nếu thiếu hàng" maxlength="300">
+                                                <button class="btn btn-sm btn-warning" type="submit" onclick="return confirm('Đã kiểm đếm số lượng thực nhận tại kho nguồn?')">Xác nhận nhận hoàn</button>
+                                            </form>
                                             <!-- Hủy phiếu -->
-                                            <form th:if="${t.status.name() != 'COMPLETED' && t.status.name() != 'CANCELLED'}"
+                                            <form th:if="${t.status.name() == 'PENDING' || t.status.name() == 'APPROVED' || t.status.name() == 'IN_TRANSIT'}"
                                                   th:action="@{/admin/transfers/{id}/cancel(id=${t.transferId})}" method="post">
                                                 <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                        onclick="return confirm('Bạn chắc chắn muốn hủy phiếu này? Nếu đã trừ kho nguồn thì hệ thống sẽ tự động hoàn kho lại.')">
+                                                        onclick="return confirm('Yêu cầu hủy phiếu? Hàng đang vận chuyển sẽ chuyển hoàn; chỉ cộng kho sau khi xác nhận nhận lại.')">
                                                     <i class="bi bi-x"></i> Hủy
                                                 </button>
                                             </form>

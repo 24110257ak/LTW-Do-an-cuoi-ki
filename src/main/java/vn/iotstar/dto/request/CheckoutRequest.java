@@ -15,6 +15,10 @@ import vn.iotstar.enums.PaymentMethod;
 public class CheckoutRequest {
 
     private String checkoutToken;
+    private Long buyNowVariantId;
+    @jakarta.validation.constraints.Min(1)
+    @jakarta.validation.constraints.Max(10)
+    private Integer buyNowQuantity;
 
     @NotNull(message = "Vui lòng chọn hình thức nhận hàng")
     private OrderType orderType; // DELIVERY hoặc PICKUP

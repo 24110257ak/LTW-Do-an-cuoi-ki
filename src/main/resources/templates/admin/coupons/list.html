@@ -18,6 +18,7 @@
         <div th:replace="~{fragments/admin-sidebar :: topbar}"></div>
 
         <div class="container-fluid p-4">
+            <div th:if="${errorMessage}" class="alert alert-danger" role="alert" th:text="${errorMessage}"></div>
             <!-- Alert message -->
             <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}">Thành công</span>

@@ -255,6 +255,7 @@
             // Click card logic: Inactive rotates to front; Active navigates to product!
             cards.forEach((card, idx) => {
                 card.addEventListener('click', (e) => {
+                    if (e.target.closest('button,form,input,select,textarea')) return;
                     if (idx !== currentIndex) {
                         e.preventDefault();
                         rotateToIndex(idx);

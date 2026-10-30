@@ -54,6 +54,10 @@ public class AdminOrderController {
     public String orderDetail(@PathVariable("id") Long id, Model model) {
         Order order = orderService.getOrderById(id).orElseThrow();
         model.addAttribute("order", order);
+        model.addAttribute("allowedNextStatuses", orderService.allowedNextStatuses(order));
+        model.addAttribute("statusChoices",orderService.allowedNextStatuses(order).stream().filter(s->s!=OrderStatus.DELIVERED && s!=OrderStatus.RETURNED && s!=OrderStatus.DELIVERY_FAILED).toList());
+        model.addAttribute("deliveryAttempts",orderService.getDeliveryAttempts(id));
+        model.addAttribute("returnReceipt",orderService.getReturnReceipt(id));
         return "admin/orders/detail";
     }
 
@@ -64,7 +68,11 @@ public class AdminOrderController {
             @RequestParam(value = "note", required = false) String note,
             RedirectAttributes redirectAttributes) {
 
-        orderService.updateOrderStatus(id, newStatus, note);
+        try { orderService.updateOrderStatus(id, newStatus, note); }
+        catch (vn.iotstar.exception.BadRequestException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage",ex.getMessage());
+            return "redirect:/admin/orders/" + id;
+        }
         redirectAttributes.addFlashAttribute("successMessage", "Cập nhật trạng thái đơn hàng thành công!");
         return "redirect:/admin/orders/" + id;
     }

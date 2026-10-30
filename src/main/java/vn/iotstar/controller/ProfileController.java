@@ -1,13 +1,17 @@
 package vn.iotstar.controller;
 
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.iotstar.entity.*;
+import vn.iotstar.dto.request.UserAddressForm;
 import vn.iotstar.enums.OrderStatus;
 import vn.iotstar.exception.BadRequestException;
 import vn.iotstar.exception.ResourceNotFoundException;
@@ -18,19 +22,21 @@ import vn.iotstar.repository.WishlistRepository;
 import vn.iotstar.service.OrderService;
 import vn.iotstar.service.ReviewService;
 import vn.iotstar.service.UserService;
+import vn.iotstar.service.UserAddressService;
 import vn.iotstar.util.SecurityUtils;
 
 import java.util.Collections;
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 public class ProfileController {
 
     private final UserService userService;
+    private final vn.iotstar.service.WishlistService wishlistService;
     private final OrderService orderService;
     private final ReviewService reviewService;
     private final UserAddressRepository addressRepository;
+    private final UserAddressService addressService;
     private final WishlistRepository wishlistRepository;
     private final ViewedProductRepository viewedProductRepository;
     private final ProductRepository productRepository;
@@ -40,7 +46,8 @@ public class ProfileController {
         User user = SecurityUtils.getCurrentUser().orElse(null);
         if (user == null) return "redirect:/auth/login";
 
-        model.addAttribute("user", user);
+        model.addAttribute("user", userService.findById(user.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Người dùng", "id", user.getUserId())));
         model.addAttribute("addresses", addressRepository.findByUserUserIdOrderByIsDefaultDescCreatedAtDesc(user.getUserId()));
         return "customer/profile";
     }
@@ -63,43 +70,75 @@ public class ProfileController {
         return "redirect:/profile";
     }
 
-    @PostMapping("/profile/address/add")
-    public String addAddress(
-            @RequestParam String receiverName,
-            @RequestParam String phone,
-            @RequestParam String province,
-            @RequestParam String district,
-            @RequestParam String ward,
-            @RequestParam String street,
-            @RequestParam(required = false) String addressNote,
-            @RequestParam(required = false, defaultValue = "false") boolean isDefault,
-            RedirectAttributes redirectAttributes
-    ) {
+    @GetMapping("/profile/address/new")
+    public String newAddress(Model model) {
         User user = SecurityUtils.getCurrentUser().orElse(null);
         if (user == null) return "redirect:/auth/login";
+        User current = userService.findById(user.getUserId())
+                .orElseThrow(() -> new ResourceNotFoundException("Người dùng", "id", user.getUserId()));
+        var form = new UserAddressForm();
+        form.setReceiverName(current.getFullName());
+        form.setPhone(current.getPhone());
+        model.addAttribute("addressForm", form);
+        return addressFormPage(model, null, false);
+    }
 
-        if (isDefault) {
-            // Hủy mặc định các địa chỉ cũ
-            List<UserAddress> addresses = addressRepository.findByUserUserIdOrderByIsDefaultDescCreatedAtDesc(user.getUserId());
-            addresses.forEach(a -> a.setIsDefault(false));
-            addressRepository.saveAll(addresses);
-        }
+    @GetMapping("/profile/address/{addressId}/edit")
+    public String editAddress(@PathVariable Long addressId, Model model) {
+        User user = SecurityUtils.getCurrentUser().orElse(null);
+        if (user == null) return "redirect:/auth/login";
+        var address = addressService.getOwnedAddress(user.getUserId(), addressId);
+        model.addAttribute("addressForm", UserAddressForm.from(address));
+        return addressFormPage(model, addressId, Boolean.TRUE.equals(address.getIsDefault()));
+    }
 
-        UserAddress address = UserAddress.builder()
-                .user(user)
-                .receiverName(receiverName)
-                .phone(phone)
-                .province(province)
-                .district(district)
-                .ward(ward)
-                .street(street)
-                .addressNote(addressNote)
-                .isDefault(isDefault)
-                .build();
-        addressRepository.save(address);
+    @PostMapping("/profile/address/add")
+    public String addAddress(@Valid @ModelAttribute("addressForm") UserAddressForm form, BindingResult errors,
+                             Model model, RedirectAttributes redirect) {
+        User user = SecurityUtils.getCurrentUser().orElse(null);
+        if (user == null) return "redirect:/auth/login";
+        if (errors.hasErrors()) return addressFormPage(model, null, false);
+        addressService.add(user.getUserId(), form);
+        redirect.addFlashAttribute("successMessage", "Đã thêm địa chỉ giao hàng mới!");
+        return "redirect:/profile#saved-addresses";
+    }
 
-        redirectAttributes.addFlashAttribute("successMessage", "Đã thêm địa chỉ giao hàng mới!");
-        return "redirect:/profile";
+    @PostMapping("/profile/address/{addressId}/edit")
+    public String saveAddress(@PathVariable Long addressId,
+                              @Valid @ModelAttribute("addressForm") UserAddressForm form, BindingResult errors,
+                              Model model, RedirectAttributes redirect) {
+        User user = SecurityUtils.getCurrentUser().orElse(null);
+        if (user == null) return "redirect:/auth/login";
+        var address = addressService.getOwnedAddress(user.getUserId(), addressId);
+        if (errors.hasErrors()) return addressFormPage(model, addressId, Boolean.TRUE.equals(address.getIsDefault()));
+        addressService.update(user.getUserId(), addressId, form);
+        redirect.addFlashAttribute("successMessage", "Đã cập nhật thông tin địa chỉ!");
+        return "redirect:/profile#saved-addresses";
+    }
+
+    @PostMapping("/profile/address/{addressId}/default")
+    public String defaultAddress(@PathVariable Long addressId, RedirectAttributes redirect) {
+        User user = SecurityUtils.getCurrentUser().orElse(null);
+        if (user == null) return "redirect:/auth/login";
+        addressService.makeDefault(user.getUserId(), addressId);
+        redirect.addFlashAttribute("successMessage", "Đã đặt địa chỉ nhận hàng mặc định!");
+        return "redirect:/profile#saved-addresses";
+    }
+
+    @PostMapping("/profile/address/delete")
+    public String deleteAddress(@RequestParam Long addressId, RedirectAttributes redirect) {
+        User user = SecurityUtils.getCurrentUser().orElse(null);
+        if (user == null) return "redirect:/auth/login";
+        addressService.delete(user.getUserId(), addressId);
+        redirect.addFlashAttribute("successMessage", "Đã xóa địa chỉ. Nếu còn địa chỉ khác, hệ thống luôn giữ một địa chỉ mặc định.");
+        return "redirect:/profile#saved-addresses";
+    }
+
+    private String addressFormPage(Model model, Long addressId, boolean isDefault) {
+        model.addAttribute("pageTitle", addressId == null ? "Thêm địa chỉ" : "Sửa địa chỉ");
+        model.addAttribute("editingAddressId", addressId);
+        model.addAttribute("addressWasDefault", isDefault);
+        return "customer/address-form";
     }
 
     @GetMapping("/orders")
@@ -112,8 +151,17 @@ public class ProfileController {
         User user = SecurityUtils.getCurrentUser().orElse(null);
         if (user == null) return "redirect:/auth/login";
 
-        org.springframework.data.domain.PageRequest pageRequest = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
-        Page<Order> orderPage = (status != null) ? orderService.getOrdersByUserAndStatus(user.getUserId(), status, pageRequest) : orderService.getOrdersByUser(user.getUserId(), pageRequest);
+        // Old direct links to intermediate statuses select their customer-facing tab.
+        if (status != null) {
+            status = switch (status) {
+                case DELIVERY_FAILED -> OrderStatus.SHIPPING;
+                case RETURNING, RETURNED -> OrderStatus.RETURNED_REFUND;
+                default -> status;
+            };
+        }
+        Page<Order> orderPage = orderService.getCustomerOrderHistory(user.getUserId(), status,
+                PageRequest.of(Math.max(0, page), Math.max(1, Math.min(size, 100)),
+                        Sort.by(Sort.Direction.DESC, "createdAt", "orderId")));
         model.addAttribute("orderPage", orderPage);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("orderStatuses", OrderStatus.values());
@@ -187,16 +235,17 @@ public class ProfileController {
         User user = SecurityUtils.getCurrentUser().orElse(null);
         if (user == null) return "redirect:/auth/login";
 
-        if (wishlistRepository.existsByUserUserIdAndProductProductId(user.getUserId(), productId)) {
-            wishlistRepository.deleteByUserUserIdAndProductProductId(user.getUserId(), productId);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã xóa sản phẩm khỏi danh sách yêu thích!");
-        } else {
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm", "id", productId));
-            Wishlist wl = Wishlist.builder().user(user).product(product).build();
-            wishlistRepository.save(wl);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã lưu sản phẩm vào danh sách yêu thích!");
-        }
+        wishlistService.setLiked(productId, !wishlistService.likedIds().contains(productId));
+        return "redirect:/wishlist";
+    }
+    @PostMapping("/wishlist/set")
+    public String setWishlist(@RequestParam Long productId,@RequestParam boolean liked,@RequestParam(defaultValue="wishlist")String place,RedirectAttributes redirect) {
+        User user=SecurityUtils.getCurrentUser().orElse(null);if(user==null)return "redirect:/auth/login";
+        try {wishlistService.setLiked(productId,liked);redirect.addFlashAttribute("successMessage",liked?"Đã lưu sản phẩm yêu thích":"Đã bỏ thích sản phẩm");}
+        catch(BadRequestException ex){redirect.addFlashAttribute("errorMessage",ex.getMessage());}
+        if("home".equals(place))return "redirect:/";
+        if("list".equals(place))return "redirect:/products";
+        if("detail".equals(place))return "redirect:/products/"+productRepository.findById(productId).orElseThrow().getSlug();
         return "redirect:/wishlist";
     }
 }

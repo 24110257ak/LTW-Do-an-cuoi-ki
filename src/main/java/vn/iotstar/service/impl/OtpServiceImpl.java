@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 public class OtpServiceImpl implements OtpService {
 
     private final OtpTokenRepository otpTokenRepository;
+    private final vn.iotstar.service.OtpRateLimitService rateLimits;
     private final UserRepository userRepository;
     private final ObjectProvider<JavaMailSender> mailSenderProvider;
 
@@ -36,7 +37,9 @@ public class OtpServiceImpl implements OtpService {
 
     public OtpServiceImpl(OtpTokenRepository otpTokenRepository,
                           UserRepository userRepository,
-                          ObjectProvider<JavaMailSender> mailSenderProvider) {
+                          ObjectProvider<JavaMailSender> mailSenderProvider,
+                          vn.iotstar.service.OtpRateLimitService rateLimits) {
+        this.rateLimits = rateLimits;
         this.otpTokenRepository = otpTokenRepository;
         this.userRepository = userRepository;
         this.mailSenderProvider = mailSenderProvider;
@@ -45,6 +48,8 @@ public class OtpServiceImpl implements OtpService {
     @Override
     @Transactional
     public String generateAndSendOtp(String email, OtpPurpose purpose) {
+        email = rateLimits.normalize(email);
+        rateLimits.beforeSend(email, purpose);
         // 1. Vô hiệu hóa các OTP cũ của email này với cùng mục đích
         otpTokenRepository.invalidateOldTokens(email, purpose);
 
@@ -124,21 +129,24 @@ public class OtpServiceImpl implements OtpService {
     @Override
     @Transactional
     public boolean verifyOtp(String email, String otpCode, OtpPurpose purpose) {
+        email = rateLimits.normalize(email);
+        rateLimits.beforeVerification(email, purpose);
         OtpToken token = otpTokenRepository.findTopByEmailAndPurposeAndIsUsedFalseOrderByCreatedAtDesc(email, purpose)
                 .orElseThrow(() -> new BadRequestException("Không tìm thấy mã OTP hợp lệ hoặc mã đã hết hạn!"));
 
-        if (token.getExpiredAt().isBefore(LocalDateTime.now())) {
+        if (!LocalDateTime.now().isBefore(token.getExpiredAt())) {
             token.setIsUsed(true);
             otpTokenRepository.save(token);
             throw new BadRequestException("Mã OTP đã hết hiệu lực. Vui lòng yêu cầu mã mới!");
         }
 
-        if (!token.getOtpCode().equals(otpCode.trim())) {
+        if (otpCode == null || !token.getOtpCode().equals(otpCode.trim())) {
             throw new BadRequestException("Mã OTP không chính xác. Vui lòng kiểm tra lại!");
         }
 
         token.setIsUsed(true);
         otpTokenRepository.save(token);
+        rateLimits.successfulVerification(email, purpose);
         return true;
     }
 }

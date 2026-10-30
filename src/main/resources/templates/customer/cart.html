@@ -76,14 +76,15 @@
                                             <i class="fa-solid fa-minus fa-2xs"></i>
                                         </button>
                                         <input type="number" name="quantity" class="form-control form-control-sm stepper-input text-center fw-bold border-0 bg-transparent"
-                                               th:value="${item.quantity}" min="1" max="10" readonly style="width: 44px; font-size: 0.95rem;">
+                                               th:value="${item.quantity}" min="1" th:max="${item.quantity + remainingByProduct[item.variant.product.productId]}" readonly style="width: 44px; font-size: 0.95rem;">
                                         <button type="button" class="btn btn-stepper btn-plus" style="width: 28px; height: 28px;"
-                                                th:disabled="${item.quantity >= 10}"
-                                                onclick="let inp = this.parentElement.querySelector('input'); let v = parseInt(inp.value)||1; if(v < 10){ inp.value = v + 1; this.closest('form').submit(); }">
+                                                th:disabled="${remainingByProduct[item.variant.product.productId] == 0}"
+                                                onclick="let inp = this.parentElement.querySelector('input'); let v = parseInt(inp.value)||1; if(v < Number(inp.max)){ inp.value = v + 1; this.closest('form').submit(); }">
                                             <i class="fa-solid fa-plus fa-2xs"></i>
                                         </button>
                                     </div>
                                 </form>
+                                <small class="text-muted d-block mt-1" th:text="'Giỏ có ' + ${quantityByProduct[item.variant.product.productId]} + '/10 sản phẩm này; thêm tối đa ' + ${remainingByProduct[item.variant.product.productId]}"></small>
                             </td>
                             <td class="text-end fw-bold text-danger"
                                 th:text="${#numbers.formatDecimal(item.variant.getEffectivePrice() * item.quantity, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</td>

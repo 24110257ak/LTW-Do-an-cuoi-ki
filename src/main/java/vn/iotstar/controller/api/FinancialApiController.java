@@ -58,4 +58,12 @@ public class FinancialApiController {
         List<TransferSuggestionDto> suggestions = financialReportService.generateTransferSuggestions();
         return ResponseEntity.ok(ApiResponse.ok("Sinh đề xuất điều chuyển kho thông minh thành công", suggestions));
     }
+
+    @GetMapping("/daily")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<vn.iotstar.dto.response.CompletedDayDto>>> daily(
+            @org.springframework.web.bind.annotation.RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate from,
+            @org.springframework.web.bind.annotation.RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate to) {
+        return ResponseEntity.ok(ApiResponse.ok("Doanh thu hàng hóa theo ngày hoàn tất",financialReportService.getCompletedDays(from,to)));
+    }
 }

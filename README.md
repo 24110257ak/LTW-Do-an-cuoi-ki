@@ -248,6 +248,12 @@ main (Phiên bản phát hành chính thức, mốc Fallback an toàn, sẵn sà
 2. Mở file `database.sql` và nhấn **Execute (F5)** (hoặc chạy bằng lệnh `sqlcmd`).
 3. Script sẽ tự động tạo database `electronics_store_chain` cùng toàn bộ 27 bảng và nạp đầy đủ dữ liệu mẫu (10 tài khoản, 4 chi nhánh, 12 sản phẩm công nghệ, 31 biến thể, tồn kho chi nhánh, coupons).
 
+**Cập nhật mapping tiền ngày 30/10/2026:** 16 trường trong 6 Entity đã khai báo `precision = 18, scale = 0` để khớp các cột `DECIMAL(18,0)` trong SQL, tránh Hibernate tự yêu cầu đổi thành `NUMERIC(38,2)` rồi bị ràng buộc `DEFAULT` chặn. Điểm đánh giá vẫn dùng `(3,2)`. Xem phạm vi sửa, cách kiểm tra database và hướng dẫn chạy lại tại [mục 16 của tài liệu thay đổi](docs/THAY_DOI_NGHIEP_VU_20261030.md#16-đồng-bộ-độ-chính-xác-các-cột-tiền-với-sql-server). Nếu dùng JAR, cần đóng gói lại để nhận mapping mới; nếu database từng được Hibernate đổi kiểu, kiểm tra kiểu cột và phần thập phân trước khi chạy với `ddl-auto=update`.
+
+**Sửa biểu đồ trạng thái dashboard admin:** tách chú giải khỏi canvas, cấp riêng vùng vẽ, bổ sung màu riêng cho đủ 10 trạng thái và vòng xám/thông báo khi kỳ được chọn chưa có đơn. Chú giải hiển thị số đơn, tỷ lệ và hỗ trợ ẩn/hiện từng trạng thái; giữ bộ lọc tháng và tooltip %. Chi tiết tại [mục 17 của tài liệu thay đổi](docs/THAY_DOI_NGHIEP_VU_20261030.md#17-sửa-biểu-đồ-trạng-thái-đơn-hàng-trên-dashboard-admin).
+
+**Tab trạng thái lịch sử đơn hàng khách hàng (`/orders`):** giữ nhóm nút và nhãn ban đầu; bấm `>>` chỉ để xem **Sẵn sàng nhận tại cửa hàng**, `<<` quay lại. Tab **Đang giao** gồm đơn đang giao/giao thất bại; **Trả hàng/Hoàn tiền** gồm đơn đang hoàn/đã nhận hoàn/đã hoàn tiền. Mỗi đơn vẫn hiện trạng thái xử lý thực tế. Các nhóm lọc và phân trang theo đúng khách đang đăng nhập. Xem [mục 18 của tài liệu thay đổi](docs/THAY_DOI_NGHIEP_VU_20261030.md#18-khôi-phục-các-tab-gốc-trong-lịch-sử-đơn-hàng-khách-hàng).
+
 ### Bước 3: Cấu hình `application.properties`
 Chỉnh sửa file cấu hình tại `src/main/resources/application.properties` nếu có thay đổi thông số cục bộ:
 ```properties

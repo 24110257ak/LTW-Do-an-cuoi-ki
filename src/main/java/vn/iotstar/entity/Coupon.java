@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "coupons")
+@org.hibernate.annotations.Check(constraints = "discount_value > 0 AND discount_type IN ('PERCENT','AMOUNT') AND (discount_type <> 'PERCENT' OR discount_value <= 100) AND min_order_amt >= 0 AND (max_discount IS NULL OR max_discount > 0) AND valid_from < valid_until AND usage_limit > 0 AND used_count >= 0 AND used_count <= usage_limit AND TRIM(coupon_code) <> ''")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor
 @Builder
 public class Coupon {
@@ -30,14 +31,14 @@ public class Coupon {
     @Builder.Default
     private DiscountType discountType = DiscountType.PERCENT;
 
-    @Column(name = "discount_value", nullable = false)
+    @Column(name = "discount_value", nullable = false, precision = 18, scale = 0)
     private BigDecimal discountValue;
 
-    @Column(name = "min_order_amt", nullable = false)
+    @Column(name = "min_order_amt", nullable = false, precision = 18, scale = 0)
     @Builder.Default
     private BigDecimal minOrderAmt = BigDecimal.ZERO;
 
-    @Column(name = "max_discount")
+    @Column(name = "max_discount", precision = 18, scale = 0)
     private BigDecimal maxDiscount;
 
     @Column(name = "usage_limit", nullable = false)

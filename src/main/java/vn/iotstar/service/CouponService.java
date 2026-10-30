@@ -9,6 +9,8 @@ import java.util.Optional;
 public interface CouponService {
     Optional<Coupon> findByCode(String code);
     Coupon validateCoupon(String code, BigDecimal orderAmount, Integer branchId);
+    Coupon reserveCoupon(String code, BigDecimal orderAmount, Integer branchId);
+    void releaseCoupon(Integer couponId);
     BigDecimal calculateDiscount(Coupon coupon, BigDecimal orderAmount);
 
     // Admin methods

@@ -48,11 +48,11 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label small fw-semibold">Họ và tên *</label>
-                        <input type="text" name="fullName" class="form-control" th:value="${user.fullName}" required>
+                        <input type="text" name="fullName" class="form-control" th:value="${user.fullName}" maxlength="150" required>
                     </div>
                     <div class="mb-4">
                         <label class="form-label small fw-semibold">Số điện thoại:</label>
-                        <input type="tel" name="phone" class="form-control" th:value="${user.phone}">
+                        <input type="tel" name="phone" class="form-control" th:value="${user.phone}" maxlength="20">
                     </div>
                     <button type="submit" class="btn btn-primary rounded-pill w-100 py-2 fw-bold">
                         <i class="fa-solid fa-floppy-disk me-1"></i> Lưu thay đổi
@@ -62,13 +62,13 @@
         </div>
 
         <!-- Col 2: Sổ địa chỉ nhận hàng đa điểm (Yêu cầu đề bài) -->
-        <div class="col-lg-7">
+        <div class="col-lg-7" id="saved-addresses">
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+                <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-4">
                     <h5 class="fw-bold mb-0"><i class="fa-solid fa-map-location-dot text-primary me-2"></i>Sổ Địa Chỉ Giao Hàng</h5>
-                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                    <a th:href="@{/profile/address/new}" class="btn btn-outline-primary btn-sm rounded-pill">
                         <i class="fa-solid fa-plus me-1"></i> Thêm địa chỉ mới
-                    </button>
+                    </a>
                 </div>
 
                 <div th:if="${addresses != null && !addresses.isEmpty()}" class="d-flex flex-column gap-3">
@@ -84,6 +84,15 @@
                             <i class="fa-solid fa-location-dot me-1 text-danger"></i>
                             <span th:text="${addr.street + ', ' + addr.ward + ', ' + addr.district + ', ' + addr.province}">Địa chỉ</span>
                         </p>
+                        <p th:if="${!#strings.isEmpty(addr.addressNote)}" class="small text-muted mt-2 mb-0" th:text="${addr.addressNote}"></p>
+                        <div class="d-flex flex-wrap gap-2 mt-3">
+                            <a class="btn btn-outline-primary btn-sm" th:href="@{/profile/address/{id}/edit(id=${addr.addressId})}">Sửa thông tin</a>
+                            <form th:if="${!addr.isDefault}" th:action="@{/profile/address/{id}/default(id=${addr.addressId})}" method="post" class="m-0">
+                                <button type="submit" class="btn btn-outline-secondary btn-sm">Đặt mặc định</button>
+                            </form>
+                            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteAddressModal"
+                                    th:attr="data-address-id=${addr.addressId},data-receiver-name=${addr.receiverName},data-address-default=${addr.isDefault}">Xóa</button>
+                        </div>
                     </div>
                 </div>
 
@@ -91,53 +100,29 @@
                     <i class="fa-solid fa-location-dot fs-2 mb-2"></i>
                     <div>Bạn chưa lưu địa chỉ nhận hàng nào. Hãy thêm địa chỉ để thanh toán nhanh hơn!</div>
                 </div>
+                <p class="small text-muted mt-3 mb-0">Thay đổi sổ địa chỉ không làm thay đổi thông tin trên các đơn hàng đã đặt.</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Thêm địa chỉ mới -->
-<div class="modal fade" id="addAddressModal" tabindex="-1">
-    <div class="modal-dialog">
+<!-- Chỉ xóa sau khi người dùng xác nhận; form POST giữ CSRF của phiên đăng nhập. -->
+<div class="modal fade" id="deleteAddressModal" tabindex="-1" aria-labelledby="deleteAddressTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0">
-            <form th:action="@{/profile/address/add}" method="post">
+            <form th:action="@{/profile/address/delete}" method="post" id="deleteAddressForm">
+                <input type="hidden" name="addressId" id="deleteAddressId">
                 <div class="modal-header">
-                    <h6 class="modal-title fw-bold">Thêm Địa Chỉ Nhận Hàng Mới</h6>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <h5 class="modal-title fw-bold" id="deleteAddressTitle">Xóa địa chỉ đã lưu?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Tên người nhận *</label>
-                        <input type="text" name="receiverName" class="form-control" required placeholder="Nguyễn Văn A">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Số điện thoại *</label>
-                        <input type="tel" name="phone" class="form-control" required placeholder="0901234567">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Tỉnh / Thành phố *</label>
-                        <input type="text" name="province" class="form-control" value="TP. Hồ Chí Minh" required>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Quận / Huyện *</label>
-                        <input type="text" name="district" class="form-control" required placeholder="Quận 1">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Phường / Xã *</label>
-                        <input type="text" name="ward" class="form-control" required placeholder="Phường Bến Nghé">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label small fw-semibold">Địa chỉ chi tiết (Số nhà, tên đường) *</label>
-                        <input type="text" name="street" class="form-control" required placeholder="12 Lê Lợi">
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" name="isDefault" value="true" id="checkDefault">
-                        <label class="form-check-label small" for="checkDefault">Đặt làm địa chỉ nhận hàng mặc định</label>
-                    </div>
+                    <p id="deleteAddressMessage">Địa chỉ này sẽ bị xóa khỏi sổ địa chỉ.</p>
+                    <p id="deleteDefaultWarning" class="small text-muted mb-0" hidden>Nếu còn địa chỉ khác, hệ thống sẽ chọn một địa chỉ làm mặc định thay thế.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Hủy</button>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Lưu địa chỉ</button>
+                    <button type="submit" class="btn btn-danger rounded-pill" id="confirmDeleteAddress" disabled>Xóa địa chỉ</button>
                 </div>
             </form>
         </div>
@@ -145,5 +130,6 @@
 </div>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
+<script th:src="@{/js/profile-addresses.js(v='20261029-address-book')}"></script>
 </body>
 </html>

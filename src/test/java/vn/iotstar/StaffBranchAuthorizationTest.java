@@ -123,7 +123,7 @@ class StaffBranchAuthorizationTest {
     @Test
     void staffCannotUseCodOrDeliveryApiToModifyAnotherBranch() throws Exception {
         for (String action : new String[]{"reconcile-cod", "shipper-deliver"}) {
-            mvc.perform(put("/api/orders/" + other.getOrderId() + "/" + action).with(user(staff)))
+            mvc.perform(put("/api/orders/" + other.getOrderId() + "/" + action).with(user(staff)).param("collectedAmount","0").param("recipient","Người nhận"))
                     .andExpect(status().isForbidden());
         }
         assertEquals(OrderStatus.NEW, other.getStatus());

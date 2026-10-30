@@ -21,11 +21,17 @@ import java.util.List;
 public class AdminProductController {
 
     private final ProductService productService;
+    private final ProductCostService productCosts;
     private final CategoryService categoryService;
     private final BrandService brandService;
     private final BranchService branchService;
     private final CloudinaryService cloudinaryService;
     private final InventoryService inventoryService;
+
+    @InitBinder({"product","newVariant"})
+    public void protectCostBinding(org.springframework.web.bind.WebDataBinder binder) {
+        binder.setDisallowedFields("variants*","images*","costPrice*","product.*");
+    }
 
     @GetMapping
     public String listProducts(
@@ -120,6 +126,7 @@ public class AdminProductController {
         model.addAttribute("variants", variants);
         model.addAttribute("branches", branches);
         model.addAttribute("newVariant", new ProductVariant());
+        model.addAttribute("costAudits",productCosts.history(id));
 
         return "admin/products/variants";
     }
@@ -128,6 +135,9 @@ public class AdminProductController {
     public String saveVariant(
             @PathVariable("id") Long productId,
             @ModelAttribute("newVariant") ProductVariant variant,
+            @RequestParam(required=false) BigDecimal declaredCost,
+            @RequestParam(defaultValue="false") boolean confirmZeroCost,
+            @RequestParam(required=false) String costReason,
             @RequestParam(value = "variantImageFile", required = false) MultipartFile variantImageFile,
             RedirectAttributes redirectAttributes) {
 
@@ -148,7 +158,9 @@ public class AdminProductController {
             variant.setIsActive(true);
         }
 
-        ProductVariant savedVariant = productService.saveVariant(variant);
+        ProductVariant savedVariant;
+        try {savedVariant = productCosts.saveVariant(productId,variant,declaredCost,confirmZeroCost,costReason);}
+        catch(vn.iotstar.exception.BadRequestException ex){redirectAttributes.addFlashAttribute("errorMessage",ex.getMessage());return "redirect:/admin/products/"+productId+"/variants";}
 
         // Khởi tạo inventory 0 cho tất cả chi nhánh nếu là variant mới
         List<Branch> branches = branchService.getAllActiveBranches();
@@ -171,5 +183,12 @@ public class AdminProductController {
         productService.deleteVariant(variantId);
         redirectAttributes.addFlashAttribute("successMessage", "Đã xóa biến thể!");
         return "redirect:/admin/products/" + productId + "/variants";
+    }
+    @PostMapping("/{productId}/variants/{variantId}/cost-price")
+    public String updateCost(@PathVariable Long productId,@PathVariable Long variantId,@RequestParam BigDecimal costPrice,
+        @RequestParam(defaultValue="false") boolean confirmZeroCost,@RequestParam String reason,RedirectAttributes redirect) {
+        try{productCosts.update(productId,variantId,costPrice,confirmZeroCost,reason);redirect.addFlashAttribute("successMessage","Đã cập nhật và ghi nhật ký giá vốn; đơn cũ giữ nguyên giá vốn đã chụp");}
+        catch(vn.iotstar.exception.BadRequestException ex){redirect.addFlashAttribute("errorMessage",ex.getMessage());}
+        return "redirect:/admin/products/"+productId+"/variants";
     }
 }

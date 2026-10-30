@@ -21,6 +21,7 @@ public class StockTransferServiceImpl implements StockTransferService {
     private final StockTransferItemRepository transferItemRepository;
     private final BranchRepository branchRepository;
     private final ProductVariantRepository variantRepository;
+    private final ProductRepository productRepository;
     private final InventoryService inventoryService;
 
     @Override
@@ -110,8 +111,10 @@ public class StockTransferServiceImpl implements StockTransferService {
     @Override
     @Transactional
     public void approveTransfer(Long transferId, User actor) {
-        StockTransfer transfer = getTransferById(transferId);
+        StockTransfer transfer = transferRepository.findForUpdate(transferId)
+                .orElseThrow(() -> new ResourceNotFoundException("Phiếu chuyển kho", "id", transferId));
 
+        if (transfer.getStatus() == TransferStatus.APPROVED) return;
         if (transfer.getStatus() != TransferStatus.PENDING) {
             throw new IllegalStateException("Chỉ phiếu ở trạng thái 'Chờ duyệt' mới có thể duyệt");
         }
@@ -120,6 +123,8 @@ public class StockTransferServiceImpl implements StockTransferService {
         List<StockTransferItem> sortedItems = transfer.getItems().stream()
                 .sorted(Comparator.comparing(item -> item.getVariant().getVariantId()))
                 .toList();
+
+        lockProducts(transfer);
 
         // Khóa và trừ tồn kho tại chi nhánh nguồn
         for (StockTransferItem item : sortedItems) {
@@ -142,8 +147,10 @@ public class StockTransferServiceImpl implements StockTransferService {
     @Override
     @Transactional
     public void shipTransfer(Long transferId, User actor) {
-        StockTransfer transfer = getTransferById(transferId);
+        StockTransfer transfer = transferRepository.findForUpdate(transferId)
+                .orElseThrow(() -> new ResourceNotFoundException("Phiếu chuyển kho", "id", transferId));
 
+        if (transfer.getStatus() == TransferStatus.IN_TRANSIT) return;
         if (transfer.getStatus() != TransferStatus.APPROVED) {
             throw new IllegalStateException("Phiếu chuyển kho chưa được duyệt xuất kho");
         }
@@ -155,9 +162,11 @@ public class StockTransferServiceImpl implements StockTransferService {
     @Override
     @Transactional
     public void completeTransfer(Long transferId, User actor) {
-        StockTransfer transfer = getTransferById(transferId);
+        StockTransfer transfer = transferRepository.findForUpdate(transferId)
+                .orElseThrow(() -> new ResourceNotFoundException("Phiếu chuyển kho", "id", transferId));
 
-        if (transfer.getStatus() != TransferStatus.IN_TRANSIT && transfer.getStatus() != TransferStatus.APPROVED) {
+        if (transfer.getStatus() == TransferStatus.COMPLETED) return;
+        if (transfer.getStatus() != TransferStatus.IN_TRANSIT) {
             throw new IllegalStateException("Hàng chưa xuất hoặc phiếu đã kết thúc");
         }
 
@@ -165,6 +174,8 @@ public class StockTransferServiceImpl implements StockTransferService {
         List<StockTransferItem> sortedItems = transfer.getItems().stream()
                 .sorted(Comparator.comparing(item -> item.getVariant().getVariantId()))
                 .toList();
+
+        lockProducts(transfer);
 
         // Cộng tồn kho tại chi nhánh đích
         for (StockTransferItem item : sortedItems) {
@@ -186,17 +197,21 @@ public class StockTransferServiceImpl implements StockTransferService {
     @Override
     @Transactional
     public void cancelTransfer(Long transferId, User actor, String reason) {
-        StockTransfer transfer = getTransferById(transferId);
+        StockTransfer transfer = transferRepository.findForUpdate(transferId)
+                .orElseThrow(() -> new ResourceNotFoundException("Phiếu chuyển kho", "id", transferId));
 
-        if (transfer.getStatus() == TransferStatus.COMPLETED || transfer.getStatus() == TransferStatus.CANCELLED) {
+        if (Set.of(TransferStatus.CANCELLED, TransferStatus.RETURNING, TransferStatus.RETURNED).contains(transfer.getStatus())) return;
+        if (transfer.getStatus() == TransferStatus.COMPLETED) {
             throw new IllegalStateException("Không thể hủy phiếu đã hoàn tất hoặc đã bị hủy");
         }
 
-        // Nếu phiếu đã duyệt hoặc đang giao (đã trừ kho nguồn), cần hoàn trả lại kho nguồn
-        if (transfer.getStatus() == TransferStatus.APPROVED || transfer.getStatus() == TransferStatus.IN_TRANSIT) {
+        // Hàng chưa rời kho mới được cộng lại ngay; hàng trên xe phải xác nhận nhận hoàn.
+        if (transfer.getStatus() == TransferStatus.APPROVED) {
             List<StockTransferItem> sortedItems = transfer.getItems().stream()
                     .sorted(Comparator.comparing(item -> item.getVariant().getVariantId()))
                     .toList();
+
+            lockProducts(transfer);
 
             for (StockTransferItem item : sortedItems) {
                 inventoryService.adjustStock(
@@ -211,11 +226,46 @@ public class StockTransferServiceImpl implements StockTransferService {
             }
         }
 
-        transfer.setStatus(TransferStatus.CANCELLED);
+        transfer.setStatus(transfer.getStatus() == TransferStatus.IN_TRANSIT ? TransferStatus.RETURNING : TransferStatus.CANCELLED);
         if (reason != null && !reason.isBlank()) {
             transfer.setNote(transfer.getNote() != null ? transfer.getNote() + " | Lý do hủy: " + reason : "Lý do hủy: " + reason);
         }
         transferRepository.save(transfer);
+    }
+
+    @Override
+    @Transactional
+    public void confirmReturnedTransfer(Long transferId, Map<Long, Integer> received, User actor, String note) {
+        StockTransfer transfer = transferRepository.findForUpdate(transferId)
+                .orElseThrow(() -> new ResourceNotFoundException("Phiếu chuyển kho", "id", transferId));
+        if (transfer.getStatus() == TransferStatus.RETURNED) return;
+        if (transfer.getStatus() != TransferStatus.RETURNING || transfer.getReturnedAt() != null)
+            throw new IllegalStateException("Chỉ được nhận hoàn phiếu đang chuyển hoàn về kho nguồn");
+        var items = transfer.getItems().stream().sorted(Comparator.comparing(i -> i.getVariant().getVariantId())).toList();
+        if (received == null || received.size() != items.size()) throw new IllegalArgumentException("Phải kiểm đếm tất cả mặt hàng trong phiếu");
+        for (var item : items) {
+            Integer qty = received.get(item.getVariant().getVariantId());
+            if (qty == null || qty < 0 || qty > item.getQuantity()) throw new IllegalArgumentException("Số lượng thực nhận không hợp lệ");
+            if (qty < item.getQuantity() && (note == null || note.isBlank()))
+                throw new IllegalArgumentException("Cần ghi chú chênh lệch khi số lượng nhận hoàn thiếu");
+        }
+        lockProducts(transfer);
+
+        for (var item : items) {
+            int qty = received.get(item.getVariant().getVariantId());
+            if (qty > 0) inventoryService.adjustStock(transfer.getSourceBranch().getBranchId(), item.getVariant().getVariantId(), qty,
+                    StockMovementType.TRANSFER_IN, actor, transfer.getTransferCode(), "Nhận hoàn thực tế " + qty + "/" + item.getQuantity() + ": " + (note == null ? "" : note));
+            item.setReturnedQuantity(qty);
+        }
+        transfer.setReturnedAt(LocalDateTime.now());
+        transfer.setStatus(TransferStatus.RETURNED);
+        if (note != null && !note.isBlank()) transfer.setNote((transfer.getNote() == null ? "" : transfer.getNote() + " | ") + "Nhận hoàn: " + note);
+        transferRepository.save(transfer);
+    }
+
+    private void lockProducts(StockTransfer transfer) {
+        transfer.getItems().stream().map(i -> i.getVariant().getProduct().getProductId()).distinct().sorted()
+                .forEach(id -> productRepository.findForCheckout(id).orElseThrow());
     }
 }
 

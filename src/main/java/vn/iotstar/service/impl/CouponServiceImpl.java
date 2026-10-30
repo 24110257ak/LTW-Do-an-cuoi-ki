@@ -21,6 +21,7 @@ import java.util.Optional;
 public class CouponServiceImpl implements CouponService {
 
     private final CouponRepository couponRepository;
+    private final jakarta.persistence.EntityManager entityManager;
 
     @Override
     public Optional<Coupon> findByCode(String code) {
@@ -29,20 +30,21 @@ public class CouponServiceImpl implements CouponService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Coupon validateCoupon(String code, BigDecimal orderAmount, Integer branchId) {
-        if (code == null || code.isBlank()) {
-            throw new BadRequestException("Vui lòng nhập mã giảm giá!");
-        }
-
-        Coupon coupon = couponRepository.findByCouponCode(code.trim().toUpperCase())
+        Coupon coupon = couponRepository.findByCouponCode(normalize(code))
                 .orElseThrow(() -> new BadRequestException("Mã giảm giá không tồn tại!"));
+        return validate(coupon, orderAmount, branchId);
+    }
 
+    private Coupon validate(Coupon coupon, BigDecimal orderAmount, Integer branchId) {
+        vn.iotstar.service.CouponRules.validate(coupon);
         if (!Boolean.TRUE.equals(coupon.getIsActive())) {
             throw new BadRequestException("Mã giảm giá hiện đang bị tạm khóa!");
         }
 
         LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(coupon.getValidFrom()) || now.isAfter(coupon.getValidUntil())) {
+        if (now.isBefore(coupon.getValidFrom()) || !now.isBefore(coupon.getValidUntil())) {
             throw new BadRequestException("Mã giảm giá chưa đến đợt áp dụng hoặc đã hết hạn!");
         }
 
@@ -54,11 +56,37 @@ public class CouponServiceImpl implements CouponService {
             throw new BadRequestException(String.format("Đơn hàng phải tối thiểu %,.0f VNĐ để áp dụng mã này!", coupon.getMinOrderAmt()));
         }
 
-        if (coupon.getBranch() != null && branchId != null && !coupon.getBranch().getBranchId().equals(branchId)) {
+        if (coupon.getBranch() != null && !coupon.getBranch().getBranchId().equals(branchId)) {
             throw new BadRequestException(String.format("Mã giảm giá chỉ áp dụng cho chi nhánh: %s!", coupon.getBranch().getBranchName()));
         }
 
         return coupon;
+    }
+
+    private String normalize(String code) {
+        if (code == null || code.isBlank()) throw new BadRequestException("Vui lòng nhập mã giảm giá");
+        return code.strip().toUpperCase(java.util.Locale.ROOT);
+    }
+
+    @Override
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.MANDATORY)
+    public Coupon reserveCoupon(String code, BigDecimal amount, Integer branchId) {
+        Coupon coupon = couponRepository.findByCodeForUpdate(normalize(code))
+                .orElseThrow(() -> new BadRequestException("Mã giảm giá không tồn tại"));
+        entityManager.refresh(coupon);
+        validate(coupon, amount, branchId);
+        coupon.setUsedCount(coupon.getUsedCount() + 1);
+        return couponRepository.save(coupon);
+    }
+
+    @Override
+    @Transactional(propagation = org.springframework.transaction.annotation.Propagation.MANDATORY)
+    public void releaseCoupon(Integer id) {
+        Coupon coupon = couponRepository.findForUpdate(id).orElseThrow(() -> new BadRequestException("Mã giảm giá không còn tồn tại"));
+        entityManager.refresh(coupon);
+        if (coupon.getUsedCount() <= 0) throw new BadRequestException("Bộ đếm coupon không khớp; cần đối soát trước khi trả lượt");
+        coupon.setUsedCount(coupon.getUsedCount() - 1);
+        couponRepository.save(coupon);
     }
 
     @Override
@@ -67,6 +95,7 @@ public class CouponServiceImpl implements CouponService {
             return BigDecimal.ZERO;
         }
 
+        vn.iotstar.service.CouponRules.validate(coupon);
         BigDecimal discount = BigDecimal.ZERO;
         if (coupon.getDiscountType() == DiscountType.PERCENT) {
             discount = orderAmount.multiply(coupon.getDiscountValue())
@@ -76,6 +105,7 @@ public class CouponServiceImpl implements CouponService {
             }
         } else if (coupon.getDiscountType() == DiscountType.AMOUNT) {
             discount = coupon.getDiscountValue();
+            if (coupon.getMaxDiscount() != null) discount = discount.min(coupon.getMaxDiscount());
         }
 
         return discount.min(orderAmount);
@@ -94,16 +124,22 @@ public class CouponServiceImpl implements CouponService {
     @Override
     @Transactional
     public Coupon saveCoupon(Coupon coupon) {
-        if (coupon.getCouponCode() != null) {
-            coupon.setCouponCode(coupon.getCouponCode().trim().toUpperCase());
-        }
+        coupon.setCouponCode(normalize(coupon.getCouponCode()));
+        Coupon existing = coupon.getCouponId() == null ? null : couponRepository.findForUpdate(coupon.getCouponId())
+                .orElseThrow(() -> new ResourceNotFoundException("Coupon", "id", coupon.getCouponId()));
+        coupon.setUsedCount(existing == null ? 0 : existing.getUsedCount());
+        if (existing != null) coupon.setCreatedAt(existing.getCreatedAt());
+        couponRepository.findByCouponCode(coupon.getCouponCode()).ifPresent(other -> {
+            if (!other.getCouponId().equals(coupon.getCouponId())) throw new BadRequestException("Mã giảm giá đã tồn tại");
+        });
+        vn.iotstar.service.CouponRules.validate(coupon);
         return couponRepository.save(coupon);
     }
 
     @Override
     @Transactional
     public void toggleCouponStatus(Integer id) {
-        Coupon coupon = couponRepository.findById(id)
+        Coupon coupon = couponRepository.findForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Mã giảm giá", "id", id));
         coupon.setIsActive(coupon.getIsActive() == null || !coupon.getIsActive());
         couponRepository.save(coupon);
