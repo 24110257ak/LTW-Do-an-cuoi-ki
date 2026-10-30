@@ -26,6 +26,7 @@ public class InventoryServiceImpl implements InventoryService {
     private final BranchInventoryRepository inventoryRepository;
     private final BranchRepository branchRepository;
     private final ProductVariantRepository variantRepository;
+    private final vn.iotstar.repository.ProductRepository productRepository;
     private final StockLogRepository stockLogRepository;
 
     @Override
@@ -44,8 +45,9 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     public void updateStock(Integer branchId, Long variantId, Integer newQuantity) {
         branchService.checkBranchAccess(branchId);
+        lockProduct(variantId);
         BranchInventory inventory = inventoryRepository
-                .findByBranchBranchIdAndVariantVariantId(branchId, variantId)
+                .findByBranchAndVariantForUpdate(branchId, variantId)
                 .orElseGet(() -> {
                     Branch branch = branchRepository.findById(branchId)
                             .orElseThrow(() -> new ResourceNotFoundException("Chi nhánh", "id", branchId));
@@ -114,6 +116,8 @@ public class InventoryServiceImpl implements InventoryService {
         if (delta == 0) {
             throw new IllegalArgumentException("Số lượng biến động không được bằng 0");
         }
+
+        lockProduct(variantId);
 
         // Lấy và khóa dòng tồn kho bằng PESSIMISTIC_WRITE để chống race condition
         BranchInventory inventory = inventoryRepository
@@ -215,5 +219,12 @@ public class InventoryServiceImpl implements InventoryService {
             return stockLogRepository.findByMovementType(movementType, pageable);
         }
         return stockLogRepository.findAll(pageable);
+    }
+
+    private void lockProduct(Long variantId) {
+        var variant = variantRepository.findById(variantId)
+                .orElseThrow(() -> new ResourceNotFoundException("Biến thể", "id", variantId));
+        // Match checkout lock order before touching stock/FK audit rows.
+        productRepository.findForCheckout(variant.getProduct().getProductId()).orElseThrow();
     }
 }

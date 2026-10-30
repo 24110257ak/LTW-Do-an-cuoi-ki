@@ -26,48 +26,39 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <!-- Tiêu đề & Status Tabs (6 trạng thái chuẩn) -->
-    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+    <!-- Giữ nhóm tab gốc; nút >> chuyển sang các trạng thái bổ sung. -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4"
+         th:with="extraSelected=${selectedStatus != null and selectedStatus.name() == 'READY_FOR_PICKUP'}">
         <h4 class="fw-bold mb-4"><i class="fa-solid fa-box-open text-primary me-2"></i>Quản Lý Đơn Hàng</h4>
 
-        <!-- 6 Trạng thái tabs -->
+        <div class="d-flex align-items-stretch gap-2" id="customerOrderStatusTabs">
+        <div id="orderStatusBasic" class="flex-grow-1" style="min-width: 0;" th:hidden="${extraSelected}">
         <ul class="nav nav-pills nav-fill bg-light p-1 rounded-4 gap-1 small fw-semibold">
             <li class="nav-item">
-                <a class="nav-link rounded-4" th:classappend="${selectedStatus == null ? 'active' : ''}" th:href="@{/orders}">
+                <a class="nav-link rounded-4" th:classappend="${selectedStatus == null ? 'active' : ''}" th:href="@{/orders(page=0,size=${orderPage.size})}">
                     Tất cả
                 </a>
             </li>
+            <li class="nav-item"><a class="nav-link rounded-4" th:classappend="${selectedStatus != null and selectedStatus.name() == 'NEW' ? 'active' : ''}" th:href="@{/orders(status='NEW',page=0,size=${orderPage.size})}">Đơn mới</a></li>
+            <li class="nav-item"><a class="nav-link rounded-4" th:classappend="${selectedStatus != null and selectedStatus.name() == 'CONFIRMED' ? 'active' : ''}" th:href="@{/orders(status='CONFIRMED',page=0,size=${orderPage.size})}">Đã xác nhận</a></li>
+            <li class="nav-item"><a class="nav-link rounded-4" th:classappend="${selectedStatus != null and selectedStatus.name() == 'SHIPPING' ? 'active' : ''}" th:href="@{/orders(status='SHIPPING',page=0,size=${orderPage.size})}">Đang giao</a></li>
+            <li class="nav-item"><a class="nav-link rounded-4" th:classappend="${selectedStatus != null and selectedStatus.name() == 'DELIVERED' ? 'active' : ''}" th:href="@{/orders(status='DELIVERED',page=0,size=${orderPage.size})}">Đã giao</a></li>
+            <li class="nav-item"><a class="nav-link rounded-4" th:classappend="${selectedStatus != null and selectedStatus.name() == 'CANCELLED' ? 'active' : ''}" th:href="@{/orders(status='CANCELLED',page=0,size=${orderPage.size})}">Đã hủy</a></li>
+            <li class="nav-item"><a class="nav-link rounded-4" th:classappend="${selectedStatus != null and selectedStatus.name() == 'RETURNED_REFUND' ? 'active' : ''}" th:href="@{/orders(status='RETURNED_REFUND',page=0,size=${orderPage.size})}">Trả hàng/Hoàn tiền</a></li>
+        </ul>
+        </div>
+        <div id="orderStatusExtra" class="flex-grow-1" style="min-width: 0;" th:hidden="${!extraSelected}">
+        <ul class="nav nav-pills nav-fill bg-light p-1 rounded-4 gap-1 small fw-semibold">
             <li class="nav-item">
-                <a class="nav-link rounded-4" th:classappend="${selectedStatus != null && selectedStatus.name() == 'NEW' ? 'active' : ''}" th:href="@{/orders(status='NEW')}">
-                    Đơn mới
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link rounded-4" th:classappend="${selectedStatus != null && selectedStatus.name() == 'CONFIRMED' ? 'active' : ''}" th:href="@{/orders(status='CONFIRMED')}">
-                    Đã xác nhận
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link rounded-4" th:classappend="${selectedStatus != null && selectedStatus.name() == 'SHIPPING' ? 'active' : ''}" th:href="@{/orders(status='SHIPPING')}">
-                    Đang giao
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link rounded-4" th:classappend="${selectedStatus != null && selectedStatus.name() == 'DELIVERED' ? 'active' : ''}" th:href="@{/orders(status='DELIVERED')}">
-                    Đã giao
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link rounded-4" th:classappend="${selectedStatus != null && selectedStatus.name() == 'CANCELLED' ? 'active' : ''}" th:href="@{/orders(status='CANCELLED')}">
-                    Đã hủy
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link rounded-4" th:classappend="${selectedStatus != null && selectedStatus.name() == 'RETURNED_REFUND' ? 'active' : ''}" th:href="@{/orders(status='RETURNED_REFUND')}">
-                    Trả hàng/Hoàn tiền
-                </a>
+                <a class="nav-link rounded-4" th:classappend="${extraSelected ? 'active' : ''}"
+                   th:href="@{/orders(status='READY_FOR_PICKUP',page=0,size=${orderPage.size})}">Sẵn sàng nhận tại cửa hàng</a>
             </li>
         </ul>
+        </div>
+        <button id="orderStatusTabsToggle" type="button" class="btn btn-outline-primary rounded-4 flex-shrink-0"
+                aria-controls="orderStatusBasic orderStatusExtra" th:attr="aria-label=${extraSelected ? 'Quay lại các trạng thái ban đầu' : 'Xem thêm trạng thái'}"
+                th:title="${extraSelected ? 'Quay lại các trạng thái ban đầu' : 'Xem thêm trạng thái'}" th:text="${extraSelected ? '<<' : '>>'}">&gt;&gt;</button>
+        </div>
     </div>
 
     <!-- Danh sách đơn hàng -->
@@ -80,6 +71,7 @@
                 </div>
                 <div>
                     <!-- Status badge -->
+                    <span th:if="${order.status.name() == 'READY_FOR_PICKUP' || order.status.name() == 'DELIVERY_FAILED' || order.status.name() == 'RETURNING' || order.status.name() == 'RETURNED'}" class="badge bg-secondary" th:text="${order.status.displayName}"></span>
                     <span th:if="${order.status.name() == 'NEW'}" class="badge bg-primary">Đơn hàng mới</span>
                     <span th:if="${order.status.name() == 'CONFIRMED'}" class="badge bg-info text-dark">Đã xác nhận</span>
                     <span th:if="${order.status.name() == 'SHIPPING'}" class="badge bg-warning text-dark">Đang giao hàng</span>
@@ -147,12 +139,22 @@
                 </div>
             </div>
 
+<div th:if="${order.holdExpiresAt != null}" class="alert alert-info small">Hạn giữ hàng hoặc hẹn nhận: <strong th:text="${#temporals.format(order.holdExpiresAt,'dd/MM/yyyy HH:mm')}"></strong><span th:if="${order.holdReminderSentAt != null}"> · Đã có thông báo nhắc nhận hàng.</span></div>
+<div th:if="${order.manualReviewRequired}" class="alert alert-warning small">Chi nhánh cần xử lý yêu cầu hoặc quá hẹn. Khoản đã thanh toán chưa được tự hoàn tiền.</div>
+<form th:if="${order.status.name()=='READY_FOR_PICKUP' and order.cancellationRequestedAt==null}" th:action="@{/orders/{id}/request-cancellation(id=${order.orderId})}" method="post" class="mb-3"><label class="small">Không thể đến nhận hoặc muốn yêu cầu hủy</label><input name="reason" required maxlength="500" placeholder="Lý do cần hỗ trợ" class="form-control form-control-sm"><button class="btn btn-outline-secondary btn-sm mt-1">Gửi yêu cầu đến chi nhánh</button></form>
+<p th:if="${order.cancellationRequestedAt!=null}" class="small text-muted">Đã gửi yêu cầu hỗ trợ. Chi nhánh sẽ liên hệ xử lý.</p>
             <!-- Footer đơn hàng -->
-            <div class="d-flex flex-wrap justify-content-between align-items-center">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                 <div>
-                    <span class="small text-muted me-2">Hình thức:</span>
-                    <span class="small fw-semibold" th:if="${order.orderType.name() == 'PICKUP'}">Nhận tại cửa hàng</span>
-                    <span class="small fw-semibold" th:unless="${order.orderType.name() == 'PICKUP'}">Giao hàng tận nơi</span>
+                    <div class="mb-1">
+                        <span class="small text-muted me-2">Hình thức nhận hàng:</span>
+                        <span class="small fw-semibold" th:if="${order.orderType.name() == 'PICKUP'}">Nhận tại cửa hàng</span>
+                        <span class="small fw-semibold" th:unless="${order.orderType.name() == 'PICKUP'}">Giao hàng tận nơi</span>
+                    </div>
+                    <div class="small">
+                        <span class="text-muted me-2">Phương thức thanh toán:</span>
+                        <strong class="text-dark" th:text="${order.paymentMethod == null ? 'Chưa xác định' : (order.paymentMethod.name() == 'COD' ? 'Thanh toán khi nhận hàng (COD)' : (order.paymentSimulated == true ? 'VNPay mô phỏng' : 'VNPay'))}">Thanh toán khi nhận hàng (COD)</strong>
+                    </div>
                 </div>
                 <div class="d-flex align-items-center gap-3">
                     <div>
@@ -161,7 +163,7 @@
                     </div>
 
                     <!-- Nút Hủy đơn nếu còn ở trạng thái NEW hoặc CONFIRMED -->
-                    <form th:if="${order.status.name() == 'NEW' || order.status.name() == 'CONFIRMED'}"
+                    <form th:if="${(order.status.name() == 'NEW' || order.status.name() == 'CONFIRMED') and !(order.paymentMethod.name() == 'VNPAY' and order.paymentStatus.name() == 'PAID')}"
                           th:action="@{'/orders/' + ${order.orderId} + '/cancel'}" method="post"
                           onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');">
                         <input type="hidden" name="reason" value="Khách hàng tự hủy trên website">
@@ -172,22 +174,26 @@
                 </div>
             </div>
         </div>
-
-        <!-- Pagination -->
-        <div th:if="${orderPage.totalPages > 1}" class="d-flex justify-content-center my-4">
-            <ul class="pagination pagination-sm shadow-sm">
-                <li class="page-item" th:classappend="${orderPage.first ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{/orders(status=${selectedStatus != null ? selectedStatus.name() : null}, page=${orderPage.number - 1})}">Trước</a>
-                </li>
-                <li class="page-item disabled">
-                    <span class="page-link" th:text="'Trang ' + (${orderPage.number} + 1) + ' / ' + ${orderPage.totalPages}">Trang 1 / 1</span>
-                </li>
-                <li class="page-item" th:classappend="${orderPage.last ? 'disabled' : ''}">
-                    <a class="page-link" th:href="@{/orders(status=${selectedStatus != null ? selectedStatus.name() : null}, page=${orderPage.number + 1})}">Sau</a>
-                </li>
-            </ul>
-        </div>
     </div>
+
+    <!-- Giữ trạng thái và kích thước trang khi chuyển trang. Tổng trang lấy từ truy vấn đã lọc. -->
+    <nav th:if="${orderPage.totalPages > 1}" aria-label="Phân trang đơn hàng" class="my-4">
+        <ul class="pagination justify-content-center align-items-center">
+            <li class="page-item" th:classappend="${orderPage.first ? 'disabled' : ''}">
+                <span th:if="${orderPage.first}" class="page-link" aria-disabled="true">Trước</span>
+                <a th:unless="${orderPage.first}" class="page-link" rel="prev"
+                   th:href="@{/orders(status=${selectedStatus},page=${orderPage.number - 1},size=${orderPage.size})}">Trước</a>
+            </li>
+            <li class="page-item disabled">
+                <span class="page-link" th:text="'Trang ' + (${orderPage.number + 1}) + ' / ' + ${orderPage.totalPages}">Trang 1 / 1</span>
+            </li>
+            <li class="page-item" th:classappend="${orderPage.last ? 'disabled' : ''}">
+                <span th:if="${orderPage.last}" class="page-link" aria-disabled="true">Sau</span>
+                <a th:unless="${orderPage.last}" class="page-link" rel="next"
+                   th:href="@{/orders(status=${selectedStatus},page=${orderPage.number + 1},size=${orderPage.size})}">Sau</a>
+            </li>
+        </ul>
+    </nav>
 
     <!-- Rỗng -->
     <div th:unless="${orderPage != null && orderPage.totalElements > 0}" class="text-center py-5 bg-white rounded-4 shadow-sm">
@@ -198,5 +204,6 @@
 </div>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
+<script th:src="@{/js/customer-order-tabs.js}"></script>
 </body>
 </html>

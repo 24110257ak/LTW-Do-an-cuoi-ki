@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header-head}"><title>VNPay mô phỏng - ESC</title></head>
+<body>
+<div th:replace="~{fragments/header :: header-nav}"></div>
+<main class="container my-5" style="max-width: 780px;">
+    <div class="card border-0 shadow rounded-4 overflow-hidden">
+        <div class="p-4">
+            <span class="badge bg-warning text-dark mb-2">CHẾ ĐỘ MÔ PHỎNG</span>
+            <h2 class="fw-bold mb-1">VNPay <span class="fw-normal fs-5">· Thanh toán thử nghiệm</span></h2>
+            <p class="mb-0">Không kết nối ngân hàng và không thu tiền thật.</p>
+        </div>
+        <div class="card-body p-4">
+            <div class="alert" role="status" th:classappend="${payment.status.name() == 'SUCCESS' ? 'alert-success' : (payment.status.name() == 'PENDING' ? 'alert-info' : 'alert-warning')}">
+                <strong th:text="${payment.status.displayName}">Chờ thanh toán mô phỏng</strong>
+                <div th:if="${payment.status.name() == 'SUCCESS'}" class="small mt-1">Đã ghi nhận thanh toán mô phỏng. Đơn hàng chờ cửa hàng xác nhận; chưa phải đã giao hàng.</div>
+                <div th:if="${payment.status.name() != 'PENDING' && payment.status.name() != 'SUCCESS' && payment.status.name() != 'REFUNDED'}" class="small mt-1">Đơn đã hủy; hàng giữ chỗ và lượt coupon được giải phóng một lần.</div>
+                <div th:if="${payment.status.name()=='REFUNDED'}" class="small">Đã ghi nhận hoàn tiền mô phỏng theo chứng từ admin. Không chuyển tiền ngân hàng.</div>
+            </div>
+            <dl class="row mb-4">
+                <dt class="col-sm-4">Mã đơn hàng</dt><dd class="col-sm-8 fw-bold" th:text="${order.orderCode}"></dd>
+                <dt class="col-sm-4">Mã tham chiếu</dt><dd class="col-sm-8 text-break font-monospace small" th:text="${payment.reference}"></dd>
+                <dt class="col-sm-4">Số tiền mô phỏng</dt><dd class="col-sm-8 fs-3 fw-bold text-danger" th:text="${#numbers.formatDecimal(payment.amount,0,'COMMA',0,'POINT')} + ' đ'"></dd>
+                <dt class="col-sm-4">Thời hạn giữ hàng</dt><dd class="col-sm-8" th:text="${#temporals.format(payment.expiresAt,'dd/MM/yyyy HH:mm:ss')}"></dd>
+                <dt class="col-sm-4" th:if="${payment.settledAt != null}">Thời điểm ghi nhận</dt><dd class="col-sm-8" th:if="${payment.settledAt != null}" th:text="${#temporals.format(payment.settledAt,'dd/MM/yyyy HH:mm:ss')}"></dd>
+            </dl>
+            <form th:if="${payment.status.name() == 'PENDING'}" th:action="@{/checkout/vnpay-sim/{code}(code=${order.orderCode})}" method="post">
+                <p class="small text-secondary">Chọn kết quả để trải nghiệm quy trình thanh toán. Không nhập thông tin thẻ hay tài khoản ngân hàng.</p>
+                <div class="d-grid gap-2">
+                    <button name="outcome" value="SUCCESS" class="btn btn-success btn-lg" type="submit">Mô phỏng thanh toán thành công</button>
+                    <button name="outcome" value="FAILED" class="btn btn-outline-danger" type="submit">Mô phỏng thanh toán thất bại</button>
+                    <button name="outcome" value="CANCELLED" class="btn btn-outline-secondary" type="submit">Hủy thanh toán và đơn hàng</button>
+                </div>
+            </form>
+            <div class="mt-4 d-flex flex-wrap gap-2">
+                <a th:href="@{/orders}" class="btn btn-primary">Xem đơn hàng của tôi</a>
+                <a th:href="@{/products}" class="btn btn-outline-secondary">Tiếp tục mua sắm</a>
+            </div>
+        </div>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

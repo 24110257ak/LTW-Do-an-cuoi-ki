@@ -50,7 +50,11 @@ public class FinancialReportServiceImpl implements FinancialReportService {
                 .grossProfitMarginPercent(marginPercent)
                 .pendingCodAmount(pendingCod != null ? pendingCod : BigDecimal.ZERO)
                 .reconciledCodAmount(reconciledCod != null ? reconciledCod : BigDecimal.ZERO)
+                .processingOrderValue(orderRepository.sumProcessingOrderValue())
+                .confirmedPaymentAmount(orderRepository.sumConfirmedPayments())
+                .simulatedPaymentAmount(orderRepository.sumSimulatedPayments())
                 .totalOrdersCount(totalOrders)
+                .unconfirmedCostOrderCount(orderRepository.countDeliveredWithUnconfirmedCost())
                 .build();
     }
 
@@ -155,5 +159,19 @@ public class FinancialReportServiceImpl implements FinancialReportService {
         }
 
         return suggestions;
+    }
+
+    @Override
+    public List<vn.iotstar.dto.response.CompletedDayDto> getCompletedDays(java.time.LocalDate from, java.time.LocalDate to) {
+        if (from == null || to == null || from.isAfter(to) || java.time.temporal.ChronoUnit.DAYS.between(from, to) > 366)
+            throw new vn.iotstar.exception.BadRequestException("Khoảng báo cáo phải từ 1 đến 367 ngày");
+        java.util.Map<java.time.LocalDate, BigDecimal[]> days = new java.util.TreeMap<>();
+        for (var date=from; !date.isAfter(to); date=date.plusDays(1)) days.put(date,new BigDecimal[]{BigDecimal.ZERO,BigDecimal.ZERO});
+        for (var order : orderRepository.findCompletedBetween(from.atStartOfDay(),to.plusDays(1).atStartOfDay())) {
+            var totals=days.get(order.getCompletedAt().toLocalDate());
+            totals[0]=totals[0].add(order.getSubtotal().subtract(order.getDiscountAmount()));
+            totals[1]=totals[1].add(order.getTotalCost());
+        }
+        return days.entrySet().stream().map(e -> new vn.iotstar.dto.response.CompletedDayDto(e.getKey(),e.getValue()[0],e.getValue()[1],e.getValue()[0].subtract(e.getValue()[1]))).toList();
     }
 }

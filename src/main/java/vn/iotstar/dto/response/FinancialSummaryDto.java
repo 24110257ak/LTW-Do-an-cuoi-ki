@@ -22,5 +22,9 @@ public class FinancialSummaryDto implements Serializable {
     private Double grossProfitMarginPercent; // Tỷ suất lợi nhuận gộp (%)
     private BigDecimal pendingCodAmount;     // Tiền COD shipper đã thu nhưng chưa đối soát vào quỹ
     private BigDecimal reconciledCodAmount;  // Tiền COD đã đối soát thành công
+    private BigDecimal processingOrderValue;
+    private BigDecimal confirmedPaymentAmount;
+    private BigDecimal simulatedPaymentAmount;
     private Long totalOrdersCount;
+    private Long unconfirmedCostOrderCount;
 }

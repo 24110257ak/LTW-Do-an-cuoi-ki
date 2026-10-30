@@ -73,6 +73,7 @@ public class StaffController {
         model.addAttribute("outOfStockCount", inventoryService.countOutOfStock(branchId));
         model.addAttribute("recentOrders", orderService.getRecentBranchOrders(branchId));
 
+        model.addAttribute("attentionOrders",orderService.getReviewOrders());
         return "staff/dashboard";
     }
 
@@ -110,6 +111,10 @@ public class StaffController {
         Order order = orderService.getOrderById(id).orElseThrow();
 
         model.addAttribute("order", order);
+        model.addAttribute("allowedNextStatuses", orderService.allowedNextStatuses(order));
+        model.addAttribute("statusChoices",orderService.allowedNextStatuses(order).stream().filter(s->s!=OrderStatus.DELIVERED && s!=OrderStatus.RETURNED && s!=OrderStatus.DELIVERY_FAILED).toList());
+        model.addAttribute("deliveryAttempts",orderService.getDeliveryAttempts(id));
+        model.addAttribute("returnReceipt",orderService.getReturnReceipt(id));
         model.addAttribute("currentBranch", branchService.getBranchById(branchId).orElse(null));
         model.addAttribute("branches", branchService.isCurrentAdmin() ? branchService.getAllActiveBranches() : List.of());
         return "staff/order-detail";

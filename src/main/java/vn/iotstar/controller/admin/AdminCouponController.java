@@ -27,18 +27,20 @@ public class AdminCouponController {
         model.addAttribute("coupons", couponService.getAllCoupons());
         model.addAttribute("branches", branchService.getAllActiveBranches());
         model.addAttribute("discountTypes", DiscountType.values());
-        model.addAttribute("newCoupon", new Coupon());
+        model.addAttribute("newCoupon", new vn.iotstar.dto.request.CouponForm());
         return "admin/coupons/list";
     }
 
     @PostMapping("/save")
     public String saveCoupon(
-            @ModelAttribute("newCoupon") Coupon coupon,
+            @ModelAttribute("newCoupon") vn.iotstar.dto.request.CouponForm form,
             @RequestParam(value = "branchId", required = false) Integer branchId,
             RedirectAttributes redirectAttributes) {
 
+        Coupon coupon = form.toEntity();
         if (branchId != null && branchId > 0) {
-            Branch branch = branchService.getBranchById(branchId).orElse(null);
+            Branch branch = branchService.getBranchById(branchId).filter(b -> Boolean.TRUE.equals(b.getIsActive()))
+                    .orElseThrow(() -> new vn.iotstar.exception.BadRequestException("Chi nhánh không hợp lệ"));
             coupon.setBranch(branch);
         } else {
             coupon.setBranch(null); // Toàn chuỗi
@@ -63,7 +65,12 @@ public class AdminCouponController {
             coupon.setIsActive(true);
         }
 
-        couponService.saveCoupon(coupon);
+        try {
+            couponService.saveCoupon(coupon);
+        } catch (vn.iotstar.exception.BadRequestException ex) {
+            redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+            return "redirect:/admin/coupons";
+        }
         redirectAttributes.addFlashAttribute("successMessage", "Lưu mã giảm giá thành công!");
         return "redirect:/admin/coupons";
     }

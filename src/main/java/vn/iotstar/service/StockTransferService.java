@@ -26,6 +26,8 @@ public interface StockTransferService {
 
     void completeTransfer(Long transferId, User actor);
 
+    void confirmReturnedTransfer(Long transferId, Map<Long, Integer> received, User actor, String note);
+
     void cancelTransfer(Long transferId, User actor, String reason);
 }
 

@@ -6,6 +6,7 @@ import lombok.*;
 
 @Entity
 @Table(name = "stock_transfer_items")
+@org.hibernate.annotations.Check(constraints = "returned_quantity >= 0 AND returned_quantity <= quantity")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,5 +30,8 @@ public class StockTransferItem {
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
+    @Column(name = "returned_quantity", nullable = false)
+    @Builder.Default
+    private Integer returnedQuantity = 0;
 }
 

@@ -45,7 +45,7 @@ public class Product {
     @Column(name = "thumbnail_url", length = 500)
     private String thumbnailUrl;
 
-    @Column(name = "base_price", nullable = false)
+    @Column(name = "base_price", nullable = false, precision = 18, scale = 0)
     @Builder.Default
     private BigDecimal basePrice = BigDecimal.ZERO;
 

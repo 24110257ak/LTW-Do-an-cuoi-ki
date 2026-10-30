@@ -19,6 +19,7 @@ import vn.iotstar.service.*;
 public class ProductController {
 
     private final ProductService productService;
+    private final CartService cartService;
     private final CategoryService categoryService;
     private final BrandService brandService;
     private final BranchService branchService;
@@ -69,7 +70,15 @@ public class ProductController {
                 .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm", "slug", slug));
 
         model.addAttribute("product", product);
-        model.addAttribute("variants", productService.getVariantsByProductId(product.getProductId()));
+        var currentUser = vn.iotstar.util.SecurityUtils.getCurrentUser();
+        long inCart = currentUser.map(u -> cartService.getCartItems(u.getUserId()).stream()
+                .filter(i -> i.getVariant().getProduct().getProductId().equals(product.getProductId()))
+                .mapToLong(vn.iotstar.entity.CartItem::getQuantity).sum()).orElse(0L);
+        model.addAttribute("inCartQuantity",inCart);
+        model.addAttribute("maxAdditionalQuantity",PurchaseLimits.remaining(inCart));
+        model.addAttribute("purchaseLimit",PurchaseLimits.MAX_PER_PRODUCT);
+        model.addAttribute("signedIn",currentUser.isPresent());
+        model.addAttribute("variants", productService.getVariantsByProductId(product.getProductId()).stream().filter(v -> Boolean.TRUE.equals(v.getIsActive())).toList());
         model.addAttribute("images", productService.getImagesByProductId(product.getProductId()));
         model.addAttribute("branchStock", productService.getAvailableBranchesForProduct(product.getProductId()));
         model.addAttribute("reviews", reviewService.getReviewsByProduct(product.getProductId(), PageRequest.of(0, 10)));

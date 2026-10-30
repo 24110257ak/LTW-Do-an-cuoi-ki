@@ -20,7 +20,7 @@ public class DeliveryProvider {
             columnDefinition = "nvarchar(150) not null")
     private String providerName;
 
-    @Column(name = "base_fee", nullable = false)
+    @Column(name = "base_fee", nullable = false, precision = 18, scale = 0)
     @Builder.Default
     private BigDecimal baseFee = BigDecimal.ZERO;
 

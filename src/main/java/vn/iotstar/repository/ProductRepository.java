@@ -13,6 +13,10 @@ import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select e from Product e where e.productId = :id")
+    Optional<Product> findForCheckout(@org.springframework.data.repository.query.Param("id") Long id);
+
     Optional<Product> findBySlug(String slug);
     Page<Product> findAllByIsActiveTrue(Pageable pageable);
     Page<Product> findByCategoryCategoryIdAndIsActiveTrue(Integer categoryId, Pageable pageable);

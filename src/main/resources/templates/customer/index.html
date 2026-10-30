@@ -92,6 +92,7 @@
                     </div>
 
                     <h5 class="fw-bold text-white mb-1 text-truncate" th:text="${product.productName}">iPhone 16 Pro Max</h5>
+<div th:replace="~{fragments/wishlist-button :: button(${product}, 'home')}"></div>
                     <div class="small text-warning mb-2">
                         <i class="fa-solid fa-star"></i>
                         <span class="text-white-50 ms-1 fw-bold" th:text="${product.avgRating}">5.0</span>
@@ -295,6 +296,7 @@
                         <h6 class="fw-bold mb-2">
                             <a th:href="@{'/products/' + ${product.slug}}" class="text-dark text-decoration-none text-truncate-2" th:text="${product.productName}">Tên sản phẩm</a>
                         </h6>
+<div th:replace="~{fragments/wishlist-button :: button(${product}, 'home')}"></div>
                         <!-- Rating -->
                         <div class="small text-warning mb-2">
                             <i class="fa-solid fa-star"></i>
@@ -341,6 +343,7 @@
                         <h6 class="fw-bold mb-2">
                             <a th:href="@{'/products/' + ${product.slug}}" class="text-dark text-decoration-none" th:text="${product.productName}">Tên sản phẩm</a>
                         </h6>
+<div th:replace="~{fragments/wishlist-button :: button(${product}, 'home')}"></div>
                     </div>
                     <div>
                         <div class="price-current mb-3" th:text="${#numbers.formatDecimal(product.basePrice, 0, 'COMMA', 0, 'POINT')} + ' đ'">0 đ</div>

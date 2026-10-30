@@ -27,7 +27,8 @@ public class Order {
     @Column(name = "order_code", length = 30, nullable = false, unique = true)
     private String orderCode;
 
-    @Column(name = "checkout_token", length = 64, unique = true)
+    // SQL migration enforces a filtered unique index so legacy NULL tokens remain valid.
+    @Column(name = "checkout_token", length = 64)
     private String checkoutToken;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -59,7 +60,7 @@ public class Order {
     @JoinColumn(name = "provider_id")
     private DeliveryProvider provider;
 
-    @Column(name = "shipping_fee", nullable = false)
+    @Column(name = "shipping_fee", nullable = false, precision = 18, scale = 0)
     @Builder.Default
     private BigDecimal shippingFee = BigDecimal.ZERO;
 
@@ -69,25 +70,25 @@ public class Order {
     private Branch pickupBranch;
 
     // --- Tài chính & Quản trị Lợi nhuận (P&L) ---
-    @Column(name = "subtotal", nullable = false)
+    @Column(name = "subtotal", nullable = false, precision = 18, scale = 0)
     @Builder.Default
     private BigDecimal subtotal = BigDecimal.ZERO;
 
-    @Column(name = "discount_amount", nullable = false)
+    @Column(name = "discount_amount", nullable = false, precision = 18, scale = 0)
     @Builder.Default
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
-    @Column(name = "total_amount", nullable = false)
+    @Column(name = "total_amount", nullable = false, precision = 18, scale = 0)
     @Builder.Default
     private BigDecimal totalAmount = BigDecimal.ZERO;
 
     /** Tổng giá vốn của đơn hàng (COGS) */
-    @Column(name = "total_cost", nullable = false)
+    @Column(name = "total_cost", nullable = false, precision = 18, scale = 0)
     @Builder.Default
     private BigDecimal totalCost = BigDecimal.ZERO;
 
     /** Lợi nhuận gộp của đơn hàng (Gross Profit = Subtotal - Discount - TotalCost) */
-    @Column(name = "gross_profit", nullable = false)
+    @Column(name = "gross_profit", nullable = false, precision = 18, scale = 0)
     @Builder.Default
     private BigDecimal grossProfit = BigDecimal.ZERO;
 
@@ -105,6 +106,15 @@ public class Order {
     @Column(name = "payment_status", length = 20, nullable = false)
     @Builder.Default
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+
+    @Column(name = "payment_simulated", nullable = false)
+    @Builder.Default
+    private Boolean paymentSimulated = false;
+
+    @Transient
+    public String getPaymentSimulationUrl() {
+        return Boolean.TRUE.equals(paymentSimulated) && paymentMethod == PaymentMethod.VNPAY ? "/checkout/vnpay-sim/" + orderCode : null;
+    }
 
     @Column(name = "vnpay_txn_ref", length = 100)
     private String vnpayTxnRef;
@@ -146,12 +156,36 @@ public class Order {
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Column(name = "completed_at")
+    private LocalDateTime completedAt;
+
+    @Column(name = "stock_released", nullable = false)
+    @Builder.Default
+    private Boolean stockReleased = false;
+
+    @Column(name = "coupon_released", nullable = false)
+    @Builder.Default
+    private Boolean couponReleased = false;
+
+    @Column(name="hold_expires_at") private LocalDateTime holdExpiresAt;
+    @Column(name="hold_reminder_sent_at") private LocalDateTime holdReminderSentAt;
+    @Column(name="no_show_at") private LocalDateTime noShowAt;
+    @Column(name="cancellation_requested_at") private LocalDateTime cancellationRequestedAt;
+    @Column(name="cancellation_request_reason",length=500,columnDefinition="nvarchar(500)") private String cancellationRequestReason;
+    @Column(name="manual_review_required",nullable=false) @Builder.Default private Boolean manualReviewRequired=false;
+    @Column(name="actual_collected_amount",precision=18,scale=0) private BigDecimal actualCollectedAmount;
+
     @Column(name = "updated_at", nullable = false)
     @Builder.Default
     private LocalDateTime updatedAt = LocalDateTime.now();
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderItem> orderItems;
+
+    @OneToOne(mappedBy="order",fetch=FetchType.LAZY)
+    @com.fasterxml.jackson.annotation.JsonIgnore private PaymentRefund paymentRefund;
+
+    @Transient public boolean getHasUnconfirmedCost() {return orderItems!=null && orderItems.stream().anyMatch(i->!Boolean.TRUE.equals(i.getCostPriceConfirmed()));}
 
     @PreUpdate
     public void preUpdate() { this.updatedAt = LocalDateTime.now(); }

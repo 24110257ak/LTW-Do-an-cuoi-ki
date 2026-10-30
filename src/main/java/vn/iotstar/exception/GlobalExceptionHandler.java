@@ -47,6 +47,13 @@ public class GlobalExceptionHandler {
         return "error/404";
     }
 
+    @ExceptionHandler(OtpRateLimitException.class)
+    public Object handleOtpLimit(OtpRateLimitException ex,HttpServletRequest request,HttpServletResponse response,Model model) {
+        response.setStatus(429);
+        if(isApiRequest(request))return ResponseEntity.status(429).body(Map.of("status",429,"message",ex.getMessage(),"path",request.getRequestURI()));
+        model.addAttribute("status",429);model.addAttribute("error","Tạm giới hạn OTP");model.addAttribute("message",ex.getMessage());return "error/400";
+    }
+
     @ExceptionHandler(BadRequestException.class)
     public Object handleBadRequest(BadRequestException ex, HttpServletRequest request, HttpServletResponse response, Model model) {
         log.warn("BadRequestException: {}", ex.getMessage());
@@ -100,6 +107,17 @@ public class GlobalExceptionHandler {
         }
         model.addAttribute("message", ex.getMessage());
         return "error/403";
+    }
+
+    @ExceptionHandler({org.springframework.web.bind.MissingServletRequestParameterException.class,org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,org.springframework.validation.BindException.class})
+    public Object invalidInput(Exception ex,HttpServletRequest request,HttpServletResponse response,Model model) {
+        response.setStatus(400);if(isApiRequest(request))return ResponseEntity.badRequest().body(Map.of("status",400,"message","Thiếu trường hoặc sai kiểu dữ liệu"));
+        model.addAttribute("status",400);model.addAttribute("error","Dữ liệu không hợp lệ");model.addAttribute("message","Vui lòng nhập đủ trường và đúng kiểu dữ liệu.");return "error/400";
+    }
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+    public Object invalidMethod(Exception ex,HttpServletRequest request,HttpServletResponse response,Model model) {
+        response.setStatus(405);if(isApiRequest(request))return ResponseEntity.status(405).body(Map.of("status",405,"message","Phương thức HTTP không hỗ trợ"));
+        model.addAttribute("status",405);model.addAttribute("error","Phương thức không hỗ trợ");model.addAttribute("message","Gửi lại OTP cần dùng nút POST trên form.");return "error/400";
     }
 
     @ExceptionHandler(Exception.class)

@@ -7,6 +7,7 @@
 <div th:replace="~{fragments/header :: header-nav}"></div>
 
 <div class="container my-4">
+    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
@@ -60,7 +61,7 @@
                 </div>
 
                 <!-- Form Thêm vào giỏ hàng -->
-                <form th:action="@{/cart/add}" method="post" id="addToCartForm">
+                <form th:action="@{/cart/add}" method="post" id="addToCartForm" th:data-max-quantity="${purchaseLimit}" th:data-in-cart="${inCartQuantity}" th:data-signed-in="${signedIn}" th:data-limit-url="@{/cart/limits}">
                     <!-- Chọn Phiên bản / Biến thể (Màu sắc, Dung lượng) -->
                     <div class="mb-4" th:if="${variants != null && !variants.isEmpty()}">
                         <label class="form-label fw-bold small text-muted text-uppercase mb-2">Chọn phiên bản / màu sắc:</label>
@@ -94,7 +95,7 @@
                                 <i class="fa-solid fa-plus"></i>
                             </button>
                         </div>
-                        <span class="text-muted small" id="stockLimitHint"><i class="fa-solid fa-shield me-1 text-primary"></i>Tối đa 10 máy/đơn</span>
+                        <span class="text-muted small" id="stockLimitHint" aria-live="polite" th:text="'Giỏ đã có ' + ${inCartQuantity} + ' sản phẩm này; có thể thêm tối đa ' + ${maxAdditionalQuantity} + ' (giới hạn 10, cộng các phiên bản).'"></span>
                     </div>
 
                     <!-- Nút mua hàng & Yêu thích -->
@@ -102,9 +103,13 @@
                         <button type="submit" class="btn btn-danger btn-lg flex-grow-1 fw-bold py-3 rounded-pill shadow btn-hover-lift" id="btnAddToCart">
                             <i class="fa-solid fa-cart-plus me-2"></i> THÊM VÀO GIỎ HÀNG
                         </button>
+                        <button type="submit" th:formaction="@{/checkout/buy-now}" class="btn btn-primary btn-lg flex-grow-1 fw-bold py-3 rounded-pill" id="btnBuyNow">
+                            <i class="fa-solid fa-bolt me-2"></i> MUA NGAY
+                        </button>
                     </div>
                 </form>
 
+                <div th:replace="~{fragments/wishlist-button :: button(${product}, 'detail')}"></div>
                 <!-- Kiểm tra Tồn kho tại Hệ thống 4 Chi nhánh chuỗi (Nghiệp vụ cốt lõi) -->
                 <div class="border rounded-3 p-3 bg-light">
                     <h6 class="fw-bold text-dark mb-2 d-flex align-items-center">
@@ -262,39 +267,8 @@
         box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
     }
 </style>
+<script th:src="@{/js/product-purchase.js}"></script>
 <script>
-    // 1. Quantity Stepper Logic
-    const inputQty = document.getElementById('inputQuantity');
-    const btnMinus = document.getElementById('btnQtyMinus');
-    const btnPlus = document.getElementById('btnQtyPlus');
-
-    function updateStepperButtons() {
-        if (!inputQty || !btnMinus || !btnPlus) return;
-        const val = parseInt(inputQty.value) || 1;
-        btnMinus.disabled = (val <= 1);
-        btnPlus.disabled = (val >= 10);
-    }
-
-    if (btnMinus && btnPlus && inputQty) {
-        btnMinus.addEventListener('click', function() {
-            let val = parseInt(inputQty.value) || 1;
-            if (val > 1) {
-                inputQty.value = val - 1;
-                updateStepperButtons();
-            }
-        });
-
-        btnPlus.addEventListener('click', function() {
-            let val = parseInt(inputQty.value) || 1;
-            if (val < 10) {
-                inputQty.value = val + 1;
-                updateStepperButtons();
-            }
-        });
-
-        updateStepperButtons();
-    }
-
     // 2. Live Update Price with Flash Animation & Dynamic Branch Stock Filter
     const displayPriceEl = document.getElementById('displayPrice');
 
@@ -328,6 +302,7 @@
     // Run branch stock filter on initial load for currently checked variant
     const initialVariant = document.querySelector('.variant-radio:checked');
     if (initialVariant) {
+        if (displayPriceEl) displayPriceEl.innerText = initialVariant.getAttribute('data-price');
         updateBranchStock(initialVariant.value);
     }
 
