@@ -11,13 +11,13 @@
 
 ---
 
-## 👥 1. THÀNH VIÊN THỰC HIỆN & PHÂN CÔNG NHIỆM VỤ (NHÓM 24)
+## 👥 1. THÀNH VIÊN THỰC HIỆN (NHÓM 24)
 
-| STT | Mã sinh viên | Họ và tên | Vai trò | Phân công Phân hệ & Chức năng đảm nhận | Tỷ lệ đóng góp |
-| :---: | :---: | :--- | :---: | :--- | :---: |
-| **1** | 24110292 | **Mai Huy Nhật** | **Nhóm trưởng** | **Phân hệ Nhân viên quầy & Tài xế giao vận (Staff/Vendor & Shipper):** Quản lý đơn hàng chi nhánh quầy, Thuật toán Smart Order Routing tự động định tuyến kho, Điều chuyển kho liên chi nhánh với khóa bi quan PESSIMISTIC_WRITE chống âm kho, WebSocket Livechat realtime tư vấn khách hàng, Cổng Shipper Mobile Portal giao diện di động, gọi khách 1-chạm, đối soát thu tiền mặt COD. | **33.3%** |
-| **2** | 24110257 | **Trần Vũ Anh Khoa** | Thành viên | **Phân hệ Khách hàng & Khách vãng lai (Guest & Customer):** Giao diện Storefront, Sân khấu xoay 3D Rolodex, Dải Banner tiếp thị (1320x380), Tìm kiếm & Bộ lọc sản phẩm đa thuộc tính, Chi tiết sản phẩm tra cứu tồn kho 4 chi nhánh, Đăng ký tài khoản xác thực OTP (Terminal mode & Cooldown 60s), Giỏ hàng lưu DB, Mua ngay (Buy Now), Sổ địa chỉ hành chính 3 cấp, Lịch sử đơn hàng đa trạng thái & Đánh giá/bình luận sản phẩm. | **33.3%** |
-| **3** | 24110304 | **Đặng Nhật Phúc** | Thành viên | **Phân hệ Quản trị viên trụ sở chính (Admin HQ):** Admin Dashboard phân tích tài chính P&L (Doanh thu thuần, Giá vốn COGS, Lợi nhuận gộp), Biểu đồ Chart.js 10 trạng thái đơn hàng (tách rời Legend, lọc theo tháng), Quản trị sản phẩm & biến thể SKU, Quản trị danh mục & thương hiệu, Quản lý chương trình khuyến mãi Coupon & Banner tiếp thị, và Bộ 256 bài Automated Tests toàn diện. | **33.3%** |
+| STT | Mã sinh viên | Họ và tên | Vai trò | Lớp sinh viên | Tỷ lệ đóng góp |
+| :---: | :---: | :--- | :---: | :---: | :---: |
+| **1** | 24110292 | **Mai Huy Nhật** | **Nhóm trưởng** | 24110CL1A | **33.3%** |
+| **2** | 24110257 | **Trần Vũ Anh Khoa** | Thành viên | 24110CL1A | **33.3%** |
+| **3** | 24110304 | **Đặng Nhật Phúc** | Thành viên | 24110CL1A | **33.3%** |
 
 ---
 
